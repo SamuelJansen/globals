@@ -7,12 +7,11 @@ This library allows global access to different python api classes and functions
 ```
 C:\Users\my_user\path\path\path\all_my_git_projects
 ```
-Globas project, don't actually needs to be included in this directory. It doesn't even need to be cloned at all.
-
-Unless you wanna use this library the proper way. Bu it can be done later if it's actually needed
-
 ![Directory with all mai guit projects](https://i.pinimg.com/originals/67/ec/2c/67ec2c13bc7ee72a06eb737eac3dc8bb.png)
 
+"Globas" project, don't actually needs to be included in this directory. It doesn't even need to be cloned at all.
+
+Unless you wanna use this library the proper way. Bu it can be done later if it's actually needed
 
 - on the directory you wanna launch the "main api" (the one that will consume other projects classes and funtions), 
 you put the PathMannanger.py file following this path tree:
