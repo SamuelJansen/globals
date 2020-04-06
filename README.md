@@ -19,8 +19,8 @@ C:\Users\my_user\path\path\path\all_my_git_projects\my_launcher_api\api\src\doma
 
 - put the following code right on top of the __main__ class of your api
 ```
-from api.src.domain.control import PathMannanger
-PathMannanger.PathMannanger(mode = 'WRONG_WAY_TO_MAKE_IT_WORKS',printStatus = True)
+from domain.control import PathMannanger
+PathMannanger.PathMannanger(mode = 'WRONG_WAY_TO_MAKE_IT_WORKS')
 ```
 ![Chess api main file](https://i.pinimg.com/originals/b0/8f/f7/b08ff711e5a04ee88ec9eb65d6a04a28.png)
 
