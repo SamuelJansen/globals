@@ -21,7 +21,8 @@ class PathMannanger:
     GLOBALS_NAME = 'Globals'
     API_LIST = [
         GLOBALS_NAME,
-        'Application'
+        'Application',
+        'Chess'
     ]
 
     CHARACTERE_FILTER = [
@@ -76,7 +77,7 @@ class PathMannanger:
             self.globalsApiName = PathMannanger.GLOBALS_NAME
             self.localGlobalsApiFilePath = f'{PathMannanger.LOCAL_GLOBALS_API_PATH}{PathMannanger.__name__}.{PathMannanger.PYTHON_EXTENSION}'
             self.globalsApiPath = f'{self.getApiPath(self.globalsApiName)}{self.localGlobalsApiFilePath}'
-            self.apisPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-2].split(self.backSlash)[:-2])}{self.backSlash}'
+            self.apisPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-1].split(self.backSlash)[:-2])}{self.backSlash}'
 
             if self.printStatus :
                 print(f'''                PathMannanger = {self}
@@ -99,7 +100,7 @@ class PathMannanger:
             self.baseApiPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-2].split(self.backSlash)[:-1])}{self.backSlash}'
             self.apisPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-2].split(self.backSlash)[:-2])}{self.backSlash}'
 
-            self.modulesNodeTree = self.getPathTreeFromPath(self.apisPath)
+            self.apisNodeTree = self.getPathTreeFromPath(self.apisPath)
             self.makePathTreeVisible(self.apisPath)
 
             if self.printStatus :
@@ -109,7 +110,7 @@ class PathMannanger:
                 PathMannanger.baseApiPath =                 {self.baseApiPath}
                 PathMannanger.localGlobalsApiFilePath =     {self.localGlobalsApiFilePath}
                 PathMannanger.apisPath =                    {self.apisPath}\n''')
-                print(f'{self.modulesNodeTree}\n')
+                print(f'{self.apisNodeTree}\n')
 
     def getApiPath(self,apiName):
         return f'{self.localPath}{self.apisRoot}{apiName}{self.backSlash}{self.baseApiPath}'
@@ -128,11 +129,11 @@ class PathMannanger:
         self.makeApisAvaliable()
 
     def makeApisAvaliable(self) :
-        self.modulesNodeTree = []
+        self.apisNodeTree = []
         for apiName in PathMannanger.API_LIST :
-            self.modulesNodeTree.append(self.makePathTreeVisible(self.getApiPath(apiName)))
+            self.apisNodeTree.append(self.makePathTreeVisible(self.getApiPath(apiName)))
         if self.printStatus :
-            print(f'PathMannanger.modulesNodeTree = {self.modulesNodeTree}\n')
+            print(f'PathMannanger.apisNodeTree = {self.apisNodeTree}\n')
 
     def makePathTreeVisible(self,path):
         node = {}
