@@ -33,6 +33,6 @@ Yes, its really that simple. 🌈✨🎇
 ![be hapy](https://i.pinimg.com/originals/9a/73/d0/9a73d02d6552502c748e436edacf1994.png)
 
 
-# Aboute the proper way to use this library
+# About the proper way to use this library
 I'll be implementing more funcionalities in order to make it extendable and more compatible to python framewors in general.
 If you want more information or just want to contribute a litle bit, please hit me up.
