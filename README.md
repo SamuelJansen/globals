@@ -11,14 +11,14 @@ C:\Users\my_user\path\path\path\all_my_git_projects
 
 "Globas" project, don't actually needs to be included in this directory. It doesn't even need to be cloned at all.
 
-Unless you wanna use this library the proper way. Bu it can be done later if it's actually needed
+Unless you wanna use this library the proper way. But it can be done later if it's actually needed.
 
 - on the directory you wanna launch the "main api" (the one that will consume other projects classes and funtions), 
 you put the PathMannanger.py file following this path tree:
 ```
 C:\Users\my_user\path\path\path\all_my_git_projects\my_launcher_api\api\src\domain\control\PathMannanger.py
 ```
-Don't forget to put your main class in src directory
+Don't forget to put your main class in src directory.
 
 ![PathMannanger.py file](https://i.pinimg.com/originals/d1/a3/3e/d1a33efcc8880eefadec49f503352429.png)
 
