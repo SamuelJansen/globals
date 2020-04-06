@@ -15,6 +15,7 @@ you put the PathMannanger.py file following this path tree:
 - put the following code right on top of the __main__ class of your api
 
 `from api.src.domain.control import PathMannanger
+
     pathMannanger = PathMannanger.PathMannanger(
         mode = 'WRONG_WAY_TO_MAKE_IT_WORKS',
         printStatus = True
