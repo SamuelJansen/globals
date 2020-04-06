@@ -15,9 +15,11 @@ you put the PathMannanger.py file following this path tree:
 ```
 C:\Users\my_user\path\path\path\all_my_git_projects\my_launcher_api\api\src\domain\control\PathMannanger.py
 ```
+Don't forget to put your main class in src directory
+
 ![PathMannanger.py file](https://i.pinimg.com/originals/d1/a3/3e/d1a33efcc8880eefadec49f503352429.png)
 
-- put the following code right on top of the __main__ class of your api
+- put the following code right on top of the __main__ class of your api.
 ```
 from domain.control import PathMannanger
 PathMannanger.PathMannanger(mode = 'WRONG_WAY_TO_MAKE_IT_WORKS')
