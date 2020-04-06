@@ -17,7 +17,12 @@ C:\Users\my_user\path\path\path\all_my_git_projects\my_launcher_api\api\src\doma
 - put the following code right on top of the __main__ class of your api
 ```
 from api.src.domain.control import PathMannanger
-pathMannanger = PathMannanger.PathMannanger(mode = 'WRONG_WAY_TO_MAKE_IT_WORKS',printStatus = True)
+PathMannanger.PathMannanger(mode = 'WRONG_WAY_TO_MAKE_IT_WORKS',printStatus = True)
 ```
 
 - be happy
+
+
+# Aboute the proper way to use this library
+I'll be implementing more funcionalities in order to make it extendable and more compatible to python framewors in general.
+If you want more information or just want to contribute a litle bit, please hit me up.
