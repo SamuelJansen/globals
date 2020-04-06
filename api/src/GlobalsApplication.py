@@ -1,19 +1,10 @@
 from domain.control import PathMannanger
-pathMannanger = PathMannanger.PathMannanger()
+pathMannanger = PathMannanger.PathMannanger(
+    mode = 'WRONG_WAY_TO_MAKE_IT_WORKS',
+    printStatus = True
+)
+# pathMannanger = PathMannanger.PathMannanger(printStatus = True)
 
 print('Glopals api')
-
-print(
-f'''pathMannanger = {pathMannanger}
-pathMannanger.currentPath =                 {pathMannanger.currentPath}
-pathMannanger.localPath =                   {pathMannanger.localPath}
-pathMannanger.baseApiPath =                 {pathMannanger.baseApiPath}
-pathMannanger.apiPath =                     {pathMannanger.apiPath}
-pathMannanger.apiName =                     {pathMannanger.apiName}
-pathMannanger.apisRoot =                    {pathMannanger.apisRoot}
-pathMannanger.apiNames =                    {pathMannanger.apiNames}
-pathMannanger.localGlobalsApiPath =         {pathMannanger.localGlobalsApiPath}
-pathMannanger.globalsApiName =              {pathMannanger.globalsApiName}
-pathMannanger.globalsApiPath =              {pathMannanger.globalsApiPath}''')
 
 import Application
