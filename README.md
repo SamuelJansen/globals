@@ -30,7 +30,7 @@ Don't forget to put your main class in src directory.
 from domain.control import PathMannanger
 PathMannanger.PathMannanger(mode = 'WRONG_WAY_TO_MAKE_IT_WORKS')
 ```
-![Chess api main file](https://i.pinimg.com/originals/85/69/13/856913a6ab812d67a54e1b9e0feeb6dd.png)
+![Chess api main file](https://i.pinimg.com/originals/71/f1/49/71f149457654ee03091b93e6982429ba.png)
 
 ## Be happy. 
 Now, you don'd even need to specify the path of classes you are importing.
