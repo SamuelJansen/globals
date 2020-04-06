@@ -28,7 +28,8 @@ Don't forget to put your main class in src directory.
   Put the following code right on top of the __main__ class of your api.
 ```
 from domain.control import PathMannanger
-PathMannanger.PathMannanger(mode = 'WRONG_WAY_TO_MAKE_IT_WORKS')
+if __name__ == '__main__' :
+    PathMannanger.PathMannanger(mode = 'WRONG_WAY_TO_MAKE_IT_WORKS')
 ```
 ![Chess api main file](https://i.pinimg.com/originals/71/f1/49/71f149457654ee03091b93e6982429ba.png)
 
