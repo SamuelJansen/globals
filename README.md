@@ -42,7 +42,7 @@ if __name__ == '__main__' :
 
 <p align="center"><img alt="Chess api main file" src="https://i.pinimg.com/originals/71/f1/49/71f149457654ee03091b93e6982429ba.png" /></p>
 
-## Be happy. 
+## Be happy
 
 Now, you don'd even need to specify the path of classes you are importing.
 
