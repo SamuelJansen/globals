@@ -8,8 +8,8 @@ This library allows global access to different python api classes and functions
 ```
 C:\Users\my_user\path\path\path\all_my_git_projects
 ```
-#+ATTR_HTML: :style margin-left: auto; margin-right: auto;
-[https://i.pinimg.com/originals/67/ec/2c/67ec2c13bc7ee72a06eb737eac3dc8bb.png]
+:style margin-left: auto; margin-right: auto;
+![All projects directory](https://i.pinimg.com/originals/67/ec/2c/67ec2c13bc7ee72a06eb737eac3dc8bb.png)
 
 
 
