@@ -8,11 +8,8 @@ This library allows global access to different python api classes and functions
 ```
 C:\Users\my_user\path\path\path\all_my_git_projects
 ```
-<p align="center"><img src="https://i.pinimg.com/originals/67/ec/2c/67ec2c13bc7ee72a06eb737eac3dc8bb.png" /></p>
-:style margin-left: auto; margin-right: auto;
-![All projects directory]()
 
-
+<p align="center"><img alt="All projects directory" src="https://i.pinimg.com/originals/67/ec/2c/67ec2c13bc7ee72a06eb737eac3dc8bb.png" /></p>
 
 "Globas" project, don't actually needs to be included in this directory. It doesn't even need to be cloned at all.
 
@@ -26,8 +23,7 @@ C:\Users\my_user\path\path\path\all_my_git_projects\my_launcher_api\api\src\doma
 ```
 Don't forget to put your main class in src directory.
 
-<div style="display:block;text-align:center">
-  ![PathMannanger.py file](https://i.pinimg.com/originals/d1/a3/3e/d1a33efcc8880eefadec49f503352429.png)
+<p align="center"><img alt="PathMannanger.py file" src="https://i.pinimg.com/originals/d1/a3/3e/d1a33efcc8880eefadec49f503352429.png" /></p>
 </div>
 
 ## On the "main" file of your main api
@@ -38,8 +34,7 @@ if __name__ == '__main__' :
     PathMannanger.PathMannanger(mode = 'WRONG_WAY_TO_MAKE_IT_WORKS')
 ```
 
-<div style="display:block;text-align:center">
-  ![Chess api main file](https://i.pinimg.com/originals/71/f1/49/71f149457654ee03091b93e6982429ba.png)
+<p align="center"><img alt="Chess api main file" src="https://i.pinimg.com/originals/71/f1/49/71f149457654ee03091b93e6982429ba.png" /></p>
 </div>
 
 ## Be happy. 
@@ -47,8 +42,7 @@ Now, you don'd even need to specify the path of classes you are importing.
 
 Yes, its really that simple. 🌈✨🎇
 
-<div style="display:block;text-align:center">
-  ![be hapy](https://i.pinimg.com/originals/9a/73/d0/9a73d02d6552502c748e436edacf1994.png)
+<p align="center"><img alt="be hapy" src="https://i.pinimg.com/originals/9a/73/d0/9a73d02d6552502c748e436edacf1994.png" /></p>
 </div>
 
 # About the proper way to use this library
