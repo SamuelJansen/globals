@@ -7,7 +7,7 @@ This library allows global access to different python api classes and functions
 ```
 C:\Users\my_user\path\path\path\all_my_git_projects
 ```
-![Directory with all mai guit projects](https://i.pinimg.com/originals/67/ec/2c/67ec2c13bc7ee72a06eb737eac3dc8bb.png)
+![Directory with all mai guit projects](https://i.pinimg.com/originals/85/69/13/856913a6ab812d67a54e1b9e0feeb6dd.png)
 
 
 - on the directory you wanna launch the "main api" (the one that will consume other projects classes and funtions), 
