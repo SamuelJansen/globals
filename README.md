@@ -17,7 +17,7 @@ C:\Users\my_user\path\path\path\all_my_git_projects
 
 Unless you wanna use this library the proper way. But it can be done later if it's actually needed.
 
-## Your "main" api
+## Put PathMannanger.py in your "main" api
 
 On the directory you wanna launch the "main api" (the one that will consume other projects classes and funtions), 
 you put the PathMannanger.py file following this path tree:
@@ -30,7 +30,7 @@ Don't forget to put your main class in src directory.
 
 <p align="center"><img alt="PathMannanger.py file" src="https://i.pinimg.com/originals/d1/a3/3e/d1a33efcc8880eefadec49f503352429.png" /></p>
 
-## On the "main" file of your main api
+## Put this code in the "main" file of your main api
 
 Put the following code right on top of the __main__ class of your api.
 
