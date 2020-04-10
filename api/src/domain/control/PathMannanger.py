@@ -1,8 +1,6 @@
 import os, sys
 from pathlib import Path
 clear = lambda: os.system('cls')
-clear() # or simply os.system('cls')
-# from domain.control import PathMannanger
 
 print('PathMannanger library imported')
 
@@ -11,7 +9,7 @@ class PathMannanger:
     BASE_API_PATH = 'api\\src\\'
     LOCAL_GLOBALS_API_PATH = 'domain\\control\\'
 
-    EXTENSION = 'ht'
+    EXTENSION = 'gbl'
     PYTHON_EXTENSION = 'py'
 
     ENCODING = 'utf-8'
@@ -22,7 +20,10 @@ class PathMannanger:
     API_LIST = [
         GLOBALS_NAME,
         'Application',
-        'Chess'
+        'Chess',
+        'Courses',
+        'CourseDesktop',
+        'CourseEditor'
     ]
 
     CHARACTERE_FILTER = [
@@ -33,7 +34,9 @@ class PathMannanger:
         '.git',
         '__pycache__',
         '__init__',
-        '__main__'
+        '__main__',
+        'image',
+        'audio'
     ]
 
     ### There are 'places' where backslash is not much wellcome
@@ -49,12 +52,14 @@ class PathMannanger:
         printStatus = False
     ):
 
+        clear() # or simply os.system('cls')
+
         self.mode = mode
         self.backSlash = PathMannanger.BACK_SLASH
 
         self.charactereFilterList = PathMannanger.CHARACTERE_FILTER
         self.nodeIgnoreList = PathMannanger.NODE_IGNORE_LIST
-        self.configurationFileExtension = PathMannanger.EXTENSION
+        self.extension = PathMannanger.EXTENSION
 
         self.currentPath = f'{str(Path(__file__).parent.absolute())}{self.backSlash}'
         self.localPath = f'{str(Path.home())}{self.backSlash}'
@@ -152,7 +157,7 @@ class PathMannanger:
 
     def nodeIsValidByFilter(self,node):
         for charactere in self.charactereFilterList :
-            if not len(node.split()) == 1 :
+            if not len(node.split(charactere)) == 1 :
                 return False
         return True
 
@@ -166,3 +171,6 @@ class PathMannanger:
                     node[nodeSon] = self.getPathTreeFromPath(nodeSonPath)
                 except : pass
         return node
+
+    def getExtension(self):
+        return self.extension

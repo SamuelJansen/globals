@@ -1,0 +1,21 @@
+.\courses-env\Scripts\activate
+cd C:\Users\aula35\Projects\Globals\api\src
+GlobalsApplication.py
+
+################################################################################
+
+.\courses-env\Scripts\activate
+cd C:\Users\Samuel Jansen\Projects\Globals\api\src
+GlobalsApplication.py
+
+pip install virtualenv
+virtualenv --system-site-packages -p python3 ./venv
+.\venv\Scripts\activate
+pip install --upgrade pip
+pip list
+deactivate
+
+requeriments
+pip install numpy
+pip install pygame
+pip install virtualenv
