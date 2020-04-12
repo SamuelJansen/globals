@@ -1,6 +1,7 @@
 import os, sys
-from pathlib import Path
-clear = lambda: os.system('cls')
+
+try : from domain.control.DependencyDownloader import *
+except : pass
 
 print('PathMannanger library imported')
 
@@ -54,7 +55,13 @@ class PathMannanger:
         printStatus = False
     ):
 
-        clear() # or simply os.system('cls')
+        try : self.dependencyDownloader = DependencyDownloader()
+        except : pass
+
+        from pathlib import Path
+        clear = lambda: os.system('cls')
+
+        # clear() # or simply os.system('cls')
 
         self.mode = mode
         self.backSlash = PathMannanger.BACK_SLASH
@@ -102,6 +109,9 @@ class PathMannanger:
                 {self.__class__.__name__}.apisPath =                    {self.apisPath}
                 {self.__class__.__name__}.extension =                   {self.extension}\n''')
 
+                print('SettingsTree:')
+                self.printTree(self.settingTree)
+
                 extension = self.accessTree(f'{self.apiName}.extension',self.settingTree)
                 print(f'extension = {extension}')
                 try : extension = self.accessTree(f'{self.apiName}.extension',self.settingTree)
@@ -135,16 +145,39 @@ class PathMannanger:
         return f'{self.localPath}{self.apisRoot}{apiName}{self.backSlash}{self.baseApiPath}'
 
     def update(self) :
-        pathMannangerScript = []
-        with open(self.globalsApiPath,PathMannanger.READ,encoding = PathMannanger.ENCODING) as pathMannangerFile :
-            for line in pathMannangerFile :
-                pathMannangerScript.append(line)
+        try :
+            pathMannangerScript = []
+            with open(self.globalsApiPath,PathMannanger.READ,encoding = PathMannanger.ENCODING) as pathMannangerFile :
+                for line in pathMannangerFile :
+                    pathMannangerScript.append(line)
+            for apiName in self.apiNames :
+                updatingApiPath =f'{self.getApiPath(apiName)}{self.localGlobalsApiFilePath}'
+                if apiName != self.globalsApiName :
+                    with open(updatingApiPath,PathMannanger.OVERRIDE,encoding = PathMannanger.ENCODING) as pathMannangerFile :
+                        pathMannangerFile.write(''.join(pathMannangerScript))
+        except :
+            if self.printStatus :
+                print(f'''Globas api wans't found in your directory. {self.__class__.__name__} may not work properly in some edge cases''')
 
-        for apiName in self.apiNames :
-            updatingApiPath =f'{self.getApiPath(apiName)}{self.localGlobalsApiFilePath}'
-            if apiName != self.globalsApiName :
-                with open(updatingApiPath,PathMannanger.OVERRIDE,encoding = PathMannanger.ENCODING) as pathMannangerFile :
-                    pathMannangerFile.write(''.join(pathMannangerScript))
+        try :
+            self.localGlobalsLibraryDownloaderFilePath = f'{PathMannanger.LOCAL_GLOBALS_API_PATH}{DependencyDownloader.__name__}.{PathMannanger.PYTHON_EXTENSION}'
+            self.globalsLibraryDownloaderPath = f'{self.getApiPath(self.globalsApiName)}{self.localGlobalsLibraryDownloaderFilePath}'
+
+            dependencyDownloaderScript = []
+            with open(self.globalsLibraryDownloaderPath,PathMannanger.READ,encoding = PathMannanger.ENCODING) as dependencyDownloaderFile :
+                for line in dependencyDownloaderFile :
+                    dependencyDownloaderScript.append(line)
+            for apiName in self.apiNames :
+                updatingApiPath =f'{self.getApiPath(apiName)}{self.localGlobalsLibraryDownloaderFilePath}'
+                if apiName != self.globalsApiName :
+                    with open(updatingApiPath,PathMannanger.OVERRIDE,encoding = PathMannanger.ENCODING) as dependencyDownloaderFile :
+                        dependencyDownloaderFile.write(''.join(dependencyDownloaderScript))
+        except :
+            try : dependencyDownloaderClassName = DependencyDownloader.__class__.__name__
+            except : dependencyDownloaderClassName = 'DependencyDownloader 2020/04/12'
+            if self.printStatus :
+                print(f'''Globas api wans't found in your directory. {DependencyDownloader.__class__.__name__} may not work properly in some edge cases''')
+
         self.makeApisAvaliable()
 
     def makeApisAvaliable(self) :
@@ -154,7 +187,7 @@ class PathMannanger:
             apiTree = {apiName:apiTree}
             self.apisTree.append(apiTree)
         if self.printStatus :
-            print(f'{self.__class__.__name__}.apisTree:')
+            print(f'{self.__class__.__name__}.apisTree')
             for apiTree in self.apisTree :
                 print()
                 self.printTree(apiTree)
@@ -199,10 +232,10 @@ class PathMannanger:
         with open(path,'r',encoding='utf-8') as settingsFile :
             allSettingLines = settingsFile.readlines()
         for line, settingLine in enumerate(allSettingLines) :
-            depth = getDepth(settingLine)
-            setingKeyLine = getAttributeKey(settingLine)
+            depth = self.getDepth(settingLine)
+            setingKeyLine = self.getAttributeKey(settingLine)
             if settingKey == setingKeyLine :
-                settingValue = getAttibuteValue(settingLine)
+                settingValue = self.getAttibuteValue(settingLine)
                 if self.printStatus :
                     print(f'''key : value --> {settingKey} : {settingValue}''')
                 return settingValue
@@ -220,7 +253,7 @@ class PathMannanger:
         settingTree = {}
         for line, settingLine in enumerate(allSettingLines) :
             # print(f'\nbegin of line {line}')
-            currentDepth = getDepth(settingLine)
+            currentDepth = self.getDepth(settingLine)
             # print(f'currentDepth = {currentDepth}')
 
             if not settingLine == PathMannanger.NEW_LINE :
@@ -281,9 +314,6 @@ class PathMannanger:
             # print(f'    getSettingTree(): settingTree = {settingTree}')
             # print(f'end of line {line}\n')
 
-        if self.printStatus :
-            print(f'{self.__class__.__name__}.settingTree: = {settingTree}')
-            self.printTree(settingTree)
         return settingTree
 
     def printTree(self,tree):
@@ -321,9 +351,9 @@ class PathMannanger:
             return self.accessTree(nextNodeKey,tree[nodeKeyList[0]])
 
     def getAttributeKeyValue(self,settingLine):
-        settinKey = getAttributeKey(settingLine)
+        settinKey = self.getAttributeKey(settingLine)
         # print(f'    getAttributeKeyValue(): settinKey = {settinKey}')
-        settingValue = getAttibuteValue(settingLine)
+        settingValue = self.getAttibuteValue(settingLine)
         # print(f'    getAttributeKeyValue(): settingValue = {settingValue}')
         return settinKey,settingValue
 
@@ -340,96 +370,96 @@ class PathMannanger:
         # print(f'    updateSettingTreeAndReturnNodeKey(): nodeKey = {nodeKey}')
         return nodeKey
 
-def getDepth(settingLine):
-    depthNotFount = True
-    depth = 0
-    while not settingLine[depth] == PathMannanger.NEW_LINE and depthNotFount:
-        if settingLine[depth] == PathMannanger.SPACE:
-            depth += 1
-        else :
-            depthNotFount = False
-    return depth
+    def getDepth(self,settingLine):
+        depthNotFount = True
+        depth = 0
+        while not settingLine[depth] == PathMannanger.NEW_LINE and depthNotFount:
+            if settingLine[depth] == PathMannanger.SPACE:
+                depth += 1
+            else :
+                depthNotFount = False
+        return depth
 
-def getAttributeKey(settingLine):
-    possibleKey = filterString(settingLine)
-    # print(f'      getAttributeKey({possibleKey}) = {possibleKey.strip().split(PathMannanger.HASH_TAG)[0].split(PathMannanger.COLON)[0].strip()}')
-    return settingLine.strip().split(PathMannanger.HASH_TAG)[0].split(PathMannanger.COLON)[0].strip()
+    def getAttributeKey(self,settingLine):
+        possibleKey = self.filterString(settingLine)
+        # print(f'      getAttributeKey({possibleKey}) = {possibleKey.strip().split(PathMannanger.HASH_TAG)[0].split(PathMannanger.COLON)[0].strip()}')
+        return settingLine.strip().split(PathMannanger.HASH_TAG)[0].split(PathMannanger.COLON)[0].strip()
 
-def getAttibuteValue(settingLine):
-    possibleValue = filterString(settingLine)
-    # print(f'''      getAttibuteValue({possibleValue}) = {getValue(':'.join(possibleValue.strip().split(PathMannanger.HASH_TAG)[0].split(PathMannanger.COLON)[1:]).strip())}''')
-    return getValue(PathMannanger.COLON.join(possibleValue.strip().split(PathMannanger.HASH_TAG)[0].split(PathMannanger.COLON)[1:]).strip())
+    def getAttibuteValue(self,settingLine):
+        possibleValue = self.filterString(settingLine)
+        # print(f'''      getAttibuteValue({possibleValue}) = {getValue(':'.join(possibleValue.strip().split(PathMannanger.HASH_TAG)[0].split(PathMannanger.COLON)[1:]).strip())}''')
+        return self.getValue(PathMannanger.COLON.join(possibleValue.strip().split(PathMannanger.HASH_TAG)[0].split(PathMannanger.COLON)[1:]).strip())
 
-def filterString(string) :
-    # print(f'''filterString({string}) = string[-1] = -->{string[-1]}<--, string[-1] == {PathMannanger.NEW_LINE} = {string[-1] == PathMannanger.NEW_LINE}''')
-    if string[-1] == PathMannanger.NEW_LINE :
-        string = string[:-1]
-    string = string.strip()
-    # print(f'filteredString = -->{string}<--')
-    return string
+    def filterString(self,string) :
+        # print(f'''filterString({string}) = string[-1] = -->{string[-1]}<--, string[-1] == {PathMannanger.NEW_LINE} = {string[-1] == PathMannanger.NEW_LINE}''')
+        if string[-1] == PathMannanger.NEW_LINE :
+            string = string[:-1]
+        string = string.strip()
+        # print(f'filteredString = -->{string}<--')
+        return string
 
-def getValue(value) :
-    # print(f'        getValue(): value = {value}')
-    if value :
-        if '[' == value[0] :
-            # print(f'      getValue({value}) = {getList(value)}')
-            return getList(value)
-        elif '(' == value[0] :
-            # print(f'      getValue({value}) = {getTuple(value)}')
-            return getTuple(value)
-        elif '{' == value[0] :
-            # print(f'      getValue({value}) = {getDictionary(value)}')
-            return getDictionary(value)
-        try :
-            # print(f'      getValue({value}) = {int(value)}')
-            return int(value)
-        except :
+    def getValue(self,value) :
+        # print(f'        getValue(): value = {value}')
+        if value :
+            if '[' == value[0] :
+                # print(f'      getValue({value}) = {getList(value)}')
+                return self.getList(value)
+            elif '(' == value[0] :
+                # print(f'      getValue({value}) = {getTuple(value)}')
+                return self.getTuple(value)
+            elif '{' == value[0] :
+                # print(f'      getValue({value}) = {getDictionary(value)}')
+                return self.getDictionary(value)
             try :
-                # print(f'      getValue({value}) = {float(value)}')
-                return float(value)
+                # print(f'      getValue({value}) = {int(value)}')
+                return int(value)
             except :
-                # print(f'      getValue({value}) = {value}')
-                return value
+                try :
+                    # print(f'      getValue({value}) = {float(value)}')
+                    return float(value)
+                except :
+                    # print(f'      getValue({value}) = {value}')
+                    return value
 
-def getList(value):
-    roughtValues = value[1:-1].split(PathMannanger.COMA)
-    values = []
-    for value in roughtValues :
-        values.append(getValue(value))
-    # print(f'      getList({value}) = {values}')
-    return values
+    def getList(self,value):
+        roughtValues = value[1:-1].split(PathMannanger.COMA)
+        values = []
+        for value in roughtValues :
+            values.append(self.getValue(value))
+        # print(f'      getList({value}) = {values}')
+        return values
 
-def getTuple(value):
-    roughtValues = value[1:-1].split(PathMannanger.COMA)
-    values = []
-    for value in roughtValues :
-        values.append(getValue(value))
-    # print(f'        tupleValues = {values}')
-    return tuple(values)
+    def getTuple(self,value):
+        roughtValues = value[1:-1].split(PathMannanger.COMA)
+        values = []
+        for value in roughtValues :
+            values.append(self.getValue(value))
+        # print(f'        tupleValues = {values}')
+        return tuple(values)
 
-def getDictionary(value) :
-    # print(f'         value = {value}')
-    splitedValue = value[1:-1].split(PathMannanger.COLON)
-    # print(f'         splitedValue = {splitedValue}')
+    def getDictionary(self,value) :
+        # print(f'         value = {value}')
+        splitedValue = value[1:-1].split(PathMannanger.COLON)
+        # print(f'         splitedValue = {splitedValue}')
 
-    keyList = []
-    for index in range(len(splitedValue) -1) :
-        keyList.append(splitedValue[index].split(PathMannanger.COMA)[-1].strip())
-    # print(f'         keyList = {keyList}')
+        keyList = []
+        for index in range(len(splitedValue) -1) :
+            keyList.append(splitedValue[index].split(PathMannanger.COMA)[-1].strip())
+        # print(f'         keyList = {keyList}')
 
-    valueList = []
-    valueListSize = len(splitedValue) -1
-    for index in range(valueListSize) :
-        if index == valueListSize -1 :
-            correctValue = splitedValue[index+1].strip()
-        else :
-            correctValue = PathMannanger.COMA.join(splitedValue[index+1].split(PathMannanger.COMA)[:-1]).strip()
-        # print(f'        correctValue = {correctValue}')
-        valueList.append(getValue(correctValue))
-    # print(f'         valueList = {valueList}')
+        valueList = []
+        valueListSize = len(splitedValue) -1
+        for index in range(valueListSize) :
+            if index == valueListSize -1 :
+                correctValue = splitedValue[index+1].strip()
+            else :
+                correctValue = PathMannanger.COMA.join(splitedValue[index+1].split(PathMannanger.COMA)[:-1]).strip()
+            # print(f'        correctValue = {correctValue}')
+            valueList.append(self.getValue(correctValue))
+        # print(f'         valueList = {valueList}')
 
-    resultantDictionary = {}
-    for index in range(len(keyList)) :
-        resultantDictionary[keyList[index]] = valueList[index]
+        resultantDictionary = {}
+        for index in range(len(keyList)) :
+            resultantDictionary[keyList[index]] = valueList[index]
 
-    return resultantDictionary
+        return resultantDictionary
