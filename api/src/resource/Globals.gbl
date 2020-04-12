@@ -1,0 +1,4 @@
+Globals:
+  api:
+    list: [Globals,Application,Chess,Courses,CourseDesktop,CourseEditor]
+  extension: gbl
