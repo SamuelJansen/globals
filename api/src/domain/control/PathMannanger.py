@@ -87,13 +87,6 @@ class PathMannanger:
             self.globalsApiPath = f'{self.getApiPath(self.globalsApiName)}{self.localGlobalsApiFilePath}'
             self.apisPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-1].split(self.backSlash)[:-2])}{self.backSlash}'
 
-            try : extension = self.accessTree(f'{self.apiName}.extension',self.settingTree)
-            except : extension = PathMannanger.NOTHING
-            if not PathMannanger.NOTHING == extension :
-                self.extension = extension
-            if self.printStatus :
-                print(f'{self.apiName}.extension = {extension}')
-
             if self.printStatus :
                 print(f'''                {self.__class__.__name__} = {self}
                 {self.__class__.__name__}.currentPath =                 {self.currentPath}
@@ -108,6 +101,15 @@ class PathMannanger:
                 {self.__class__.__name__}.globalsApiPath =              {self.globalsApiPath}
                 {self.__class__.__name__}.apisPath =                    {self.apisPath}
                 {self.__class__.__name__}.extension =                   {self.extension}\n''')
+
+                extension = self.accessTree(f'{self.apiName}.extension',self.settingTree)
+                print(f'extension = {extension}')
+                try : extension = self.accessTree(f'{self.apiName}.extension',self.settingTree)
+                except : extension = PathMannanger.NOTHING
+                if not PathMannanger.NOTHING == extension :
+                    self.extension = extension
+                if self.printStatus :
+                    print(f'{self.apiName}.extension = {extension}')
 
             self.update()
 
