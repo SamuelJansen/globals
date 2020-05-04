@@ -49,6 +49,7 @@ class PathMannanger:
         mode = PROPER_WAY_TO_MAKE_IT_WORKS,
         globalsApis = DEFAULT_SETTINGS,
         encoding = ENCODING,
+        updateDependencies = False,
         printStatus = False
     ):
 
@@ -73,6 +74,9 @@ class PathMannanger:
             self.encoding = PathMannanger.ENCODING
 
         self.backSlash = PathMannanger.BACK_SLASH
+
+        self.updateDependencies = updateDependencies
+
         self.printStatus = printStatus
 
         if self.mode == PathMannanger.PROPER_WAY_TO_MAKE_IT_WORKS :
@@ -137,7 +141,7 @@ class PathMannanger:
         return f'{self.localPath}{self.apisRoot}{apiName}{self.backSlash}{self.baseApiPath}'
 
     def update(self) :
-        self.updateDependencies()
+        if self.updateDependencies : self.updateDependencies()
         try :
             pathMannangerScript = []
             with open(self.globalsApiPath,PathMannanger.READ,encoding = PathMannanger.ENCODING) as pathMannangerFile :
@@ -169,7 +173,7 @@ class PathMannanger:
             try : dependencyDownloaderClassName = DependencyDownloader.__class__.__name__
             except : dependencyDownloaderClassName = 'DependencyDownloader 2020/04/12'
             if self.printStatus :
-                print(f'''Globas api wans't found in your directory. {DependencyDownloader.__class__.__name__} may not work properly in some edge cases''')
+                print(f'''Globas api wans't found in your directory. {PathMannanger.__class__.__name__} may not work properly in some edge cases''')
 
         self.makeApisAvaliable()
 
