@@ -1,8 +1,5 @@
 import os, sys
 
-try : from domain.control.DependencyDownloader import *
-except : pass
-
 print('PathMannanger library imported')
 
 class PathMannanger:
@@ -54,9 +51,6 @@ class PathMannanger:
         encoding = ENCODING,
         printStatus = False
     ):
-
-        try : self.dependencyDownloader = DependencyDownloader()
-        except : pass
 
         from pathlib import Path
         clear = lambda: os.system('cls')
@@ -112,8 +106,6 @@ class PathMannanger:
                 print('SettingsTree:')
                 self.printTree(self.settingTree)
 
-                extension = self.accessTree(f'{self.apiName}.extension',self.settingTree)
-                print(f'extension = {extension}')
                 try : extension = self.accessTree(f'{self.apiName}.extension',self.settingTree)
                 except : extension = PathMannanger.NOTHING
                 if not PathMannanger.NOTHING == extension :
@@ -145,6 +137,7 @@ class PathMannanger:
         return f'{self.localPath}{self.apisRoot}{apiName}{self.backSlash}{self.baseApiPath}'
 
     def update(self) :
+        self.updateDependencies()
         try :
             pathMannangerScript = []
             with open(self.globalsApiPath,PathMannanger.READ,encoding = PathMannanger.ENCODING) as pathMannangerFile :
@@ -463,3 +456,12 @@ class PathMannanger:
             resultantDictionary[keyList[index]] = valueList[index]
 
         return resultantDictionary
+
+    def updateDependencies(self):
+        try :
+            modules = self.accessTree(f'{self.apiName}.modules',self.settingTree)
+            if modules :
+                subprocess.Popen('python -m pip install --upgrade pip').wait()
+                for module in modules :
+                    subprocess.Popen(f'pip install {module}').wait()
+        except : pass
