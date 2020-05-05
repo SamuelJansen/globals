@@ -18,6 +18,14 @@ class PathMannanger:
 
     DEFAULT_SETTINGS = 'Globals.api.list'
 
+    PIP_INSTALL = f'pip install'
+    UPDATE_PIP_INSTALL = 'python -m pip install --upgrade pip'
+    UPDATE_DEPENDENCIES = 'update-dependencies'
+    MODULES = 'modules'
+
+    TRUE = 'True'
+    FALSE = 'False'
+
     CHARACTERE_FILTER = [
         '__'
     ]
@@ -42,14 +50,13 @@ class PathMannanger:
     NEW_LINE = '\n'
     NOTHING = ''
 
-    WRONG_WAY_TO_MAKE_IT_WORKS = 'WRONG_WAY_TO_MAKE_IT_WORKS'
-    PROPER_WAY_TO_MAKE_IT_WORKS = 'PROPER_WAY_TO_MAKE_IT_WORKS'
+    WRONG_WAY_TO_IMPLEMENT_IT = 'WRONG_WAY_TO_IMPLEMENT_IT'
+    PROPER_WAY_TO_IMPLEMENT_IT = 'PROPER_WAY_TO_IMPLEMENT_IT'
 
     def __init__(self,
-        mode = PROPER_WAY_TO_MAKE_IT_WORKS,
+        mode = PROPER_WAY_TO_IMPLEMENT_IT,
         globalsApis = DEFAULT_SETTINGS,
         encoding = ENCODING,
-        updateDependencies = False,
         printStatus = False
     ):
 
@@ -75,11 +82,9 @@ class PathMannanger:
 
         self.backSlash = PathMannanger.BACK_SLASH
 
-        self.updateDependencies = updateDependencies
-
         self.printStatus = printStatus
 
-        if self.mode == PathMannanger.PROPER_WAY_TO_MAKE_IT_WORKS :
+        if self.mode == PathMannanger.PROPER_WAY_TO_IMPLEMENT_IT :
             self.baseApiPath = PathMannanger.BASE_API_PATH
             self.apiPath = self.currentPath.split(self.baseApiPath)[0]
             self.apiName = self.apiPath.split(self.backSlash)[-2]
@@ -119,7 +124,7 @@ class PathMannanger:
 
             self.update()
 
-        elif self.mode == PathMannanger.WRONG_WAY_TO_MAKE_IT_WORKS :
+        elif self.mode == PathMannanger.WRONG_WAY_TO_IMPLEMENT_IT :
             self.localGlobalsApiFilePath = f'{PathMannanger.BASE_API_PATH}{PathMannanger.LOCAL_GLOBALS_API_PATH}'
             self.baseApiPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-2].split(self.backSlash)[:-1])}{self.backSlash}'
             self.apisPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-2].split(self.backSlash)[:-2])}{self.backSlash}'
@@ -141,7 +146,7 @@ class PathMannanger:
         return f'{self.localPath}{self.apisRoot}{apiName}{self.backSlash}{self.baseApiPath}'
 
     def update(self) :
-        if self.updateDependencies : self.updateDependencies()
+        self.updateApplicationDependencies()
         try :
             pathMannangerScript = []
             with open(self.globalsApiPath,PathMannanger.READ,encoding = PathMannanger.ENCODING) as pathMannangerFile :
@@ -155,25 +160,6 @@ class PathMannanger:
         except :
             if self.printStatus :
                 print(f'''Globas api wans't found in your directory. {self.__class__.__name__} may not work properly in some edge cases''')
-
-        try :
-            self.localGlobalsLibraryDownloaderFilePath = f'{PathMannanger.LOCAL_GLOBALS_API_PATH}{DependencyDownloader.__name__}.{PathMannanger.PYTHON_EXTENSION}'
-            self.globalsLibraryDownloaderPath = f'{self.getApiPath(self.globalsApiName)}{self.localGlobalsLibraryDownloaderFilePath}'
-
-            dependencyDownloaderScript = []
-            with open(self.globalsLibraryDownloaderPath,PathMannanger.READ,encoding = PathMannanger.ENCODING) as dependencyDownloaderFile :
-                for line in dependencyDownloaderFile :
-                    dependencyDownloaderScript.append(line)
-            for apiName in self.apiNames :
-                updatingApiPath =f'{self.getApiPath(apiName)}{self.localGlobalsLibraryDownloaderFilePath}'
-                if apiName != self.globalsApiName :
-                    with open(updatingApiPath,PathMannanger.OVERRIDE,encoding = PathMannanger.ENCODING) as dependencyDownloaderFile :
-                        dependencyDownloaderFile.write(''.join(dependencyDownloaderScript))
-        except :
-            try : dependencyDownloaderClassName = DependencyDownloader.__class__.__name__
-            except : dependencyDownloaderClassName = 'DependencyDownloader 2020/04/12'
-            if self.printStatus :
-                print(f'''Globas api wans't found in your directory. {PathMannanger.__class__.__name__} may not work properly in some edge cases''')
 
         self.makeApisAvaliable()
 
@@ -415,8 +401,13 @@ class PathMannanger:
                     # print(f'      getValue({value}) = {float(value)}')
                     return float(value)
                 except :
-                    # print(f'      getValue({value}) = {value}')
-                    return value
+                    try :
+                        if value == PathMannanger.TRUE : return True
+                        elif value == PathMannanger.FALSE : return False
+                        return value
+                    except:
+                        print(f'      getValue({value}) = {value}')
+                        return value
 
     def getList(self,value):
         roughtValues = value[1:-1].split(PathMannanger.COMA)
@@ -461,11 +452,13 @@ class PathMannanger:
 
         return resultantDictionary
 
-    def updateDependencies(self):
+    def updateApplicationDependencies(self):
         try :
-            modules = self.accessTree(f'{self.apiName}.modules',self.settingTree)
-            if modules :
-                subprocess.Popen('python -m pip install --upgrade pip').wait()
-                for module in modules :
-                    subprocess.Popen(f'pip install {module}').wait()
+            if self.accessTree(f'{self.apiName}.{PathMannanger.UPDATE_DEPENDENCIES}',self.settingTree) :
+                import subprocess
+                modules = self.accessTree(f'{self.apiName}.{PathMannanger.MODULES}',self.settingTree)
+                if modules :
+                    subprocess.Popen(PathMannanger.UPDATE_PIP_INSTALL).wait()
+                    for module in modules :
+                        subprocess.Popen(f'{PathMannanger.PIP_INSTALL} {module}').wait()
         except : pass
