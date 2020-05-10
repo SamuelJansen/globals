@@ -124,7 +124,9 @@ class Globals:
             self.apisRoot = self.currentPath.split(self.localPath)[1].split(self.apiName)[0]
 
             self.settingTree = self.getSettingTree()
-            self.addSettingtree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_AS_PATH}{self.apiName}.{self.extension}')
+            print(self.getSetting(f'{self.globalsApiName}.{AttributeKey.API_EXTENSION}',self.settingTree))
+            try : self.extension = self.getSetting(f'{self.globalsApiName}.{AttributeKey.API_EXTENSION}',self.settingTree)
+            except : self.extension = Globals.EXTENSION
 
             self.printStatus = self.getGlobalsPrintStatus()
             self.apiNames = self.getGlobalsApiList()
@@ -301,9 +303,10 @@ class Globals:
                             longStringList
                         )
                         depth = currentDepth
+
         if self.apiName not in settingTree.keys() :
-            try : self.extension = self.accessTree(f'{self.globalsApiName}.{AttributeKey.API_EXTENSION}',settingTree)
-            except : self.extension = Globals.EXTENSION
+            try : self.concatenateTree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_AS_PATH}{self.apiName}.{self.extension}',settingTree)
+            except : pass
         return settingTree
 
     def settingsTreeInnerLoop(self,settingLine,nodeKey,settingTree,longStringCapturing,quoteType,longStringList):
@@ -325,10 +328,15 @@ class Globals:
             nodeKey = self.updateSettingTreeAndReturnNodeKey(nodeKey,settingTree,settingKey,settingValue)
         return settingKey,settingValue,nodeKey,longStringCapturing,quoteType,longStringList
 
-    def addSettingtree(self,settingFilePath):
+    def concatenateTree(self,settingFilePath):
         newSetting = self.getSettingTree(settingFilePath)
         for settingKey in newSetting :
             self.settingTree[settingKey] = newSetting[settingKey]
+
+    def addTree(self,settingFilePath,tree):
+        newSetting = self.getSettingTree(settingFilePath)
+        for settingKey in newSetting :
+            tree[settingKey] = newSetting[settingKey]
 
     def getApiSetting(self,attributeKeyWithoutApiNameAsRoot):
         return self.getSetting(AttributeKey.getKey(self,attributeKeyWithoutApiNameAsRoot))
