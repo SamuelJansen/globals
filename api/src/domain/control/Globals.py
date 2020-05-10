@@ -54,7 +54,6 @@ class Globals:
     OVERRIDE = 'w+'
     READ = 'r'
 
-    GLOBALS_NAME = 'Globals'
     RESOURCE_AS_PATH = f'resource{BACK_SLASH}'
 
     PIP_INSTALL = f'pip install'
@@ -87,6 +86,8 @@ class Globals:
     OPEN_LIST = '['
     OPEN_DICTIONARY = '{'
 
+    SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE = 4
+
     WRONG_WAY_TO_IMPLEMENT_IT = 'WRONG_WAY_TO_IMPLEMENT_IT'
     PROPER_WAY_TO_IMPLEMENT_IT = 'PROPER_WAY_TO_IMPLEMENT_IT'
 
@@ -102,9 +103,10 @@ class Globals:
         clear = lambda: os.system('cls')
         # clear() # or simply os.system('cls')
 
+        self.globalsApiName = self.__class__.__name__
+
         self.mode = mode
         self.backSlash = Globals.BACK_SLASH
-        self.extension = Globals.EXTENSION
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
         self.currentPath = f'{str(Path(__file__).parent.absolute())}{self.backSlash}'
@@ -122,16 +124,16 @@ class Globals:
             self.apisRoot = self.currentPath.split(self.localPath)[1].split(self.apiName)[0]
 
             self.settingTree = self.getSettingTree()
+            self.addSettingtree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_AS_PATH}{self.apiName}.{self.extension}')
+
             self.printStatus = self.getGlobalsPrintStatus()
             self.apiNames = self.getGlobalsApiList()
 
-            self.globalsApiName = self.__class__.__name__
             self.localGlobalsApiFilePath = f'{Globals.LOCAL_GLOBALS_API_PATH}{self.globalsApiName}.{Globals.PYTHON_EXTENSION}'
             self.globalsApiPath = f'{self.getApiPath(self.globalsApiName)}{self.localGlobalsApiFilePath}'
             self.apisPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-1].split(self.backSlash)[:-2])}{self.backSlash}'
 
             self.updateGlobals = self.getUpdateGlobalsClassFile()
-            self.extension = self.getApiExtension()
 
             if self.printStatus :
                 print(f'''                {self.__class__.__name__} = {self}
@@ -224,21 +226,9 @@ class Globals:
                 except : pass
         return node
 
-    def getSettings(self,path,settingKey) :
-        self.debug(f'''Getting settings from: {path}''')
-        with open(path,Globals.READ,encoding=Globals.ENCODING) as settingsFile :
-            allSettingLines = settingsFile.readlines()
-        for line, settingLine in enumerate(allSettingLines) :
-            depth = self.getDepth(settingLine)
-            setingKeyLine = self.getAttributeKey(settingLine)
-            if settingKey == setingKeyLine :
-                settingValue = self.getAttibuteValue(settingLine)
-                self.debug(f'''{Globals.TAB}key : value --> {settingKey} : {settingValue}''')
-                return settingValue
-
     def getSettingTree(self,settingFilePath=None) :
         if not settingFilePath :
-            settingFilePath = f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_AS_PATH}{self.apiName}.{Globals.EXTENSION}'
+            settingFilePath = f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_AS_PATH}{self.globalsApiName}.{Globals.EXTENSION}'
 
         with open(settingFilePath,Globals.READ,encoding=Globals.ENCODING) as settingsFile :
             allSettingLines = settingsFile.readlines()
@@ -254,7 +244,7 @@ class Globals:
             if not settingLine == Globals.NEW_LINE :
                 if longStringCapturing :
                     if not depthPass :
-                        depthPass = 4
+                        depthPass = Globals.TAB_UNITS
                     if not currentDepth :
                         currentDepth = 0
                     longStringList.append(settingLine.split(Globals.HASH_TAG)[0][depth:])
@@ -311,16 +301,19 @@ class Globals:
                             longStringList
                         )
                         depth = currentDepth
+        if self.apiName not in settingTree.keys() :
+            try : self.extension = self.accessTree(f'{self.globalsApiName}.{AttributeKey.API_EXTENSION}',settingTree)
+            except : self.extension = Globals.EXTENSION
         return settingTree
 
     def settingsTreeInnerLoop(self,settingLine,nodeKey,settingTree,longStringCapturing,quoteType,longStringList):
         settingKey,settingValue = self.getAttributeKeyValue(settingLine)
         settingValueAsString = str(settingValue)
         if settingValue and Globals.STRING == settingValue.__class__.__name__ :
-            checkingCharactererCount = settingValue.count(Globals.TRIPLE_SINGLE_QUOTE) + settingValue.count(Globals.TRIPLE_DOUBLE_QUOTE)
+            ammountOfTripleSingleOrDoubleQuotes = settingValue.count(Globals.TRIPLE_SINGLE_QUOTE) + settingValue.count(Globals.TRIPLE_DOUBLE_QUOTE)
         else :
-            checkingCharactererCount = 0
-        if settingValue and (Globals.TRIPLE_SINGLE_QUOTE in settingValueAsString or Globals.TRIPLE_DOUBLE_QUOTE in settingValueAsString) and checkingCharactererCount < 4 :
+            ammountOfTripleSingleOrDoubleQuotes = 0
+        if settingValue and (Globals.TRIPLE_SINGLE_QUOTE in settingValueAsString or Globals.TRIPLE_DOUBLE_QUOTE in settingValueAsString) and ammountOfTripleSingleOrDoubleQuotes < Globals.SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE :
             longStringCapturing = True
             splitedSettingValueAsString = settingValueAsString.split(Globals.TRIPLE_SINGLE_QUOTE)
             if Globals.TRIPLE_SINGLE_QUOTE in settingValueAsString and splitedSettingValueAsString and Globals.TRIPLE_DOUBLE_QUOTE not in splitedSettingValueAsString[0] :
@@ -502,18 +495,20 @@ class Globals:
                 if self.printStatus :
                     print(f'''Globals api wans't found in your directory. {self.__class__.__name__} may not work properly in some edge cases''')
 
-
-    def getApiExtension(self):
-        try :
-            extension = self.getApiSetting(AttributeKey.API_EXTENSION)
-        except :
-            extension = Globals.NOTHING
-        if not extension or extension == Globals.NOTHING :
-            extension = self.extension
-        return extension
-
     def getExtension(self):
         return self.extension
+
+    def getSettingFromSettingFilePathAndKeyPair(self,path,settingKey) :
+        self.debug(f'''Getting {settingKey} from {path}''')
+        with open(path,Globals.READ,encoding=Globals.ENCODING) as settingsFile :
+            allSettingLines = settingsFile.readlines()
+        for line, settingLine in enumerate(allSettingLines) :
+            depth = self.getDepth(settingLine)
+            setingKeyLine = self.getAttributeKey(settingLine)
+            if settingKey == setingKeyLine :
+                settingValue = self.getAttibuteValue(settingLine)
+                self.debug(f'''{Globals.TAB}key : value --> {settingKey} : {settingValue}''')
+                return settingValue
 
     def debug(self,string):
         if self.debugStatus :

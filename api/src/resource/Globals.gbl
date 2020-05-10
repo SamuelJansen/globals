@@ -2,7 +2,7 @@ Globals:
   update-globals: True
   print-status: True
   api:
-    list: [Globals,Application,Chess,Courses,CourseDesktop,CourseEditor]
+    list: [Globals]
     extension: gbl
     dependency:
       update: True
