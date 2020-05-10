@@ -8,13 +8,14 @@ class AttributeKey:
     KW_EXTENSION = 'extension'
     KW_DEPENDENCY = 'dependency'
     KW_LIST = 'list'
+    KW_UPDATE = 'update'
 
     GLOBALS_API_LIST = f'{KW_API}.{KW_LIST}'
 
-    API_EXTENSION = f'{KW_API}.extension'
-    UPDATE_GLOBALS = 'update-globals'
+    API_EXTENSION = f'{KW_API}.{KW_EXTENSION}'
+    UPDATE_GLOBALS = f'{KW_UPDATE}-globals'
     PRINT_STATUS = 'print-status'
-    DEPENDENCY_UPDATE = f'{KW_API}.{KW_DEPENDENCY}.update'
+    DEPENDENCY_UPDATE = f'{KW_API}.{KW_DEPENDENCY}.{KW_UPDATE}'
     DEPENDENCY_LIST = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}'
 
     def getKey(api,key):
@@ -91,7 +92,7 @@ class Globals:
     WRONG_WAY_TO_IMPLEMENT_IT = 'WRONG_WAY_TO_IMPLEMENT_IT'
     PROPER_WAY_TO_IMPLEMENT_IT = 'PROPER_WAY_TO_IMPLEMENT_IT'
 
-    DEBUG = '[Debug]'
+    DEBUG = '[Debug] '
 
     def __init__(self,
         mode = PROPER_WAY_TO_IMPLEMENT_IT,
@@ -104,6 +105,8 @@ class Globals:
         # clear() # or simply os.system('cls')
 
         self.globalsApiName = self.__class__.__name__
+        self.debugStatus = debugStatus
+        self.debug('Debug mode on')
 
         self.mode = mode
         self.backSlash = Globals.BACK_SLASH
@@ -116,7 +119,6 @@ class Globals:
         else :
             self.encoding = Globals.ENCODING
         self.backSlash = Globals.BACK_SLASH
-        self.debugStatus = debugStatus
         if self.mode == Globals.PROPER_WAY_TO_IMPLEMENT_IT :
             self.baseApiPath = Globals.BASE_API_PATH
             self.apiPath = self.currentPath.split(self.baseApiPath)[0]
@@ -124,7 +126,6 @@ class Globals:
             self.apisRoot = self.currentPath.split(self.localPath)[1].split(self.apiName)[0]
 
             self.settingTree = self.getSettingTree()
-            print(self.getSetting(f'{self.globalsApiName}.{AttributeKey.API_EXTENSION}',self.settingTree))
             try : self.extension = self.getSetting(f'{self.globalsApiName}.{AttributeKey.API_EXTENSION}',self.settingTree)
             except : self.extension = Globals.EXTENSION
 
@@ -190,7 +191,7 @@ class Globals:
             apiTree = {apiName:apiTree}
             self.apisTree.append(apiTree)
         if self.printStatus :
-            print(f'{self.__class__.__name__}.apisTree')
+            print(f'\n{self.__class__.__name__}.apisTree')
             for apiTree in self.apisTree :
                 print()
                 self.printTree(apiTree)
@@ -305,7 +306,7 @@ class Globals:
                         depth = currentDepth
 
         if self.apiName not in settingTree.keys() :
-            try : self.concatenateTree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_AS_PATH}{self.apiName}.{self.extension}',settingTree)
+            try : self.concatenateTree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_AS_PATH}{self.apiName}.{self.accessTree(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.API_EXTENSION),settingTree)}',settingTree)
             except : pass
         return settingTree
 
@@ -328,12 +329,12 @@ class Globals:
             nodeKey = self.updateSettingTreeAndReturnNodeKey(nodeKey,settingTree,settingKey,settingValue)
         return settingKey,settingValue,nodeKey,longStringCapturing,quoteType,longStringList
 
-    def concatenateTree(self,settingFilePath):
+    def addTree(self,settingFilePath):
         newSetting = self.getSettingTree(settingFilePath)
         for settingKey in newSetting :
             self.settingTree[settingKey] = newSetting[settingKey]
 
-    def addTree(self,settingFilePath,tree):
+    def concatenateTree(self,settingFilePath,tree):
         newSetting = self.getSettingTree(settingFilePath)
         for settingKey in newSetting :
             tree[settingKey] = newSetting[settingKey]
@@ -468,6 +469,7 @@ class Globals:
                 print(f'{depthSpace}{node}{Globals.SPACE}{Globals.COLON}{Globals.SPACE}{tree[node]}')
 
     def updateApplicationDependencies(self):
+        print(f'------------> {self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE)}<--')
         try :
             if self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE) :
                 import subprocess
