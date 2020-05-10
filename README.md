@@ -17,18 +17,18 @@ C:\Users\my_user\path\path\path\all_my_git_projects
 
 Unless you wanna use this library the proper way. But it can be done later if it's actually needed.
 
-## Put PathMannanger.py in your "main" api
+## Put Globals.py in your "main" api
 
 On the directory you wanna launch the "main api" (the one that will consume other projects classes and funtions), 
-you put the PathMannanger.py file following this path tree:
+you put the Globals.py file following this path tree:
 
 ```
-C:\Users\my_user\path\path\path\all_my_git_projects\my_launcher_api\api\src\domain\control\PathMannanger.py
+C:\Users\my_user\path\path\path\all_my_git_projects\my_launcher_api\api\src\domain\control\Globals.py
 ```
 
 Don't forget to put your main class in src directory.
 
-<p align="center"><img alt="PathMannanger.py file" src="https://i.pinimg.com/originals/d1/a3/3e/d1a33efcc8880eefadec49f503352429.png" /></p>
+<p align="center"><img alt="Globals.py file" src="https://i.pinimg.com/originals/d1/a3/3e/d1a33efcc8880eefadec49f503352429.png" /></p>
 
 ## Put this code in the "main" file of your main api
 
@@ -36,8 +36,8 @@ Put the following code right on top of the __main__ class of your api.
 
 ```
 if __name__ == '__main__' :
-    from domain.control import PathMannanger
-    PathMannanger.PathMannanger(mode = 'WRONG_WAY_TO_MAKE_IT_WORKS')
+    from domain.control import Globals
+    Globals.Globals(mode = 'WRONG_WAY_TO_MAKE_IT_WORKS')
 ```
 
 <p align="center"><img alt="Chess api main file" src="https://i.pinimg.com/originals/fb/4a/ff/fb4aff6b961958d69707e0ab3c71e054.png" /></p>
