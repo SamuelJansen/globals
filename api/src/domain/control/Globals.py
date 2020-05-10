@@ -469,7 +469,6 @@ class Globals:
                 print(f'{depthSpace}{node}{Globals.SPACE}{Globals.COLON}{Globals.SPACE}{tree[node]}')
 
     def updateApplicationDependencies(self):
-        print(f'------------> {self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE)}<--')
         try :
             if self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE) :
                 import subprocess
