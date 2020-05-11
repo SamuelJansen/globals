@@ -92,7 +92,10 @@ class Globals:
     WRONG_WAY_TO_IMPLEMENT_IT = 'WRONG_WAY_TO_IMPLEMENT_IT'
     PROPER_WAY_TO_IMPLEMENT_IT = 'PROPER_WAY_TO_IMPLEMENT_IT'
 
+    GIT_COMMITTER = 'git-committer'
+
     DEBUG = '[Debug] '
+    ERROR = '[Error] '
 
     def __init__(self,
         mode = PROPER_WAY_TO_IMPLEMENT_IT,
