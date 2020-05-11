@@ -153,7 +153,6 @@ class Globals:
                 {self.__class__.__name__}.apisPath =                    {self.apisPath}
                 {self.__class__.__name__}.extension =                   {self.extension}\n''')
 
-                print('SettingsTree:')
                 self.printTree(self.settingTree)
 
             self.update()
@@ -191,7 +190,6 @@ class Globals:
             apiTree = {apiName:apiTree}
             self.apisTree.append(apiTree)
         if self.printStatus :
-            print(f'\n{self.__class__.__name__}.apisTree')
             for apiTree in self.apisTree :
                 print()
                 self.printTree(apiTree)
@@ -454,7 +452,9 @@ class Globals:
 
     def printTree(self,tree):
         depth = 0
+        print(f'\n{self.__class__.__name__} settings tree')
         self.printNodeTree(tree,depth)
+        print()
 
     def printNodeTree(self,tree,depth):
         depthSpace = ''
