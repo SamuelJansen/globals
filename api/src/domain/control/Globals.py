@@ -1,7 +1,5 @@
 import os, sys
 
-print('Globals library imported')
-
 class AttributeKey:
 
     KW_API = 'api'
