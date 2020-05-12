@@ -42,6 +42,7 @@ class Globals:
     DOUBLE_QUOTE = '''"'''
     TRIPLE_SINGLE_QUOTE = """'''"""
     TRIPLE_DOUBLE_QUOTE = '''"""'''
+    SPACE_DASH_SPACE = ''' - '''
 
     BASE_API_PATH = f'api{BACK_SLASH}src{BACK_SLASH}'
     LOCAL_GLOBALS_API_PATH = f'domain{BACK_SLASH}control{BACK_SLASH}'
@@ -53,7 +54,7 @@ class Globals:
     OVERRIDE = 'w+'
     READ = 'r'
 
-    RESOURCE_AS_PATH = f'resource{BACK_SLASH}'
+    RESOURCE_BACK_SLASH = f'resource{BACK_SLASH}'
 
     PIP_INSTALL = f'pip install'
     UPDATE_PIP_INSTALL = 'python -m pip install --upgrade pip'
@@ -91,6 +92,7 @@ class Globals:
     PROPER_WAY_TO_IMPLEMENT_IT = 'PROPER_WAY_TO_IMPLEMENT_IT'
 
     GIT_COMMITTER = 'git-committer'
+    GIT_COMMITTER_INDEX = 1
 
     DEBUG = '[Debug] '
     ERROR = '[Error] '
@@ -147,14 +149,14 @@ class Globals:
                 {self.__class__.__name__}.apiPath =                     {self.apiPath}
                 {self.__class__.__name__}.apiName =                     {self.apiName}
                 {self.__class__.__name__}.apisRoot =                    {self.apisRoot}
-                {self.__class__.__name__}.apiNameList =                    {self.apiNameList}
+                {self.__class__.__name__}.apiNameList =                 {self.apiNameList}
                 {self.__class__.__name__}.localGlobalsApiFilePath =     {self.localGlobalsApiFilePath}
                 {self.__class__.__name__}.globalsApiName =              {self.globalsApiName}
                 {self.__class__.__name__}.globalsApiPath =              {self.globalsApiPath}
                 {self.__class__.__name__}.apisPath =                    {self.apisPath}
                 {self.__class__.__name__}.extension =                   {self.extension}\n''')
 
-                self.printTree(self.settingTree)
+                self.printTree(self.settingTree,'{self.__class__.__name__} settin tree')
 
             self.update()
 
@@ -174,7 +176,7 @@ class Globals:
                 {self.__class__.__name__}.localGlobalsApiFilePath =     {self.localGlobalsApiFilePath}
                 {self.__class__.__name__}.apisPath =                    {self.apisPath}
                 {self.__class__.__name__}.extension =                   {self.extension}\n''')
-                self.printTree(self.apisTree)
+                self.printTree(self.apisTree,'Apis tree')
 
     def getApiPath(self,apiName):
         return f'{self.localPath}{self.apisRoot}{apiName}{self.backSlash}{self.baseApiPath}'
@@ -187,13 +189,16 @@ class Globals:
     def makeApisAvaliable(self) :
         self.apisTree = []
         for apiName in self.apiNameList :
-            apiTree = self.makePathTreeVisible(self.getApiPath(apiName))
-            apiTree = {apiName:apiTree}
-            self.apisTree.append(apiTree)
+            try :
+                apiTree = self.makePathTreeVisible(self.getApiPath(apiName))
+                apiTree = {apiName:apiTree}
+                self.apisTree.append(apiTree)
+            except :
+                self.debug(f'Not possible to make {apiName} api avaliable')
         if self.printStatus :
             for apiTree in self.apisTree :
                 print()
-                self.printTree(apiTree)
+                self.printTree(apiTree,'Api tree')
             print()
 
     def makePathTreeVisible(self,path):
@@ -228,10 +233,18 @@ class Globals:
                 except : pass
         return node
 
+    def lineAproved(self,settingLine) :
+        aproved = True
+        if settingLine == Globals.NEW_LINE :
+            aproved = False
+        if Globals.HASH_TAG in settingLine :
+            if not None == settingLine.strip().split(Globals.HASH_TAG)[0] :
+                aproved = False
+        return aproved
+
     def getSettingTree(self,settingFilePath=None) :
         if not settingFilePath :
-            settingFilePath = f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_AS_PATH}{self.globalsApiName}.{Globals.EXTENSION}'
-
+            settingFilePath = f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_BACK_SLASH}{self.globalsApiName}.{Globals.EXTENSION}'
         with open(settingFilePath,Globals.READ,encoding=Globals.ENCODING) as settingsFile :
             allSettingLines = settingsFile.readlines()
         longStringCapturing = False
@@ -243,7 +256,7 @@ class Globals:
         nodeKey = Globals.NOTHING
         settingTree = {}
         for line, settingLine in enumerate(allSettingLines) :
-            if not settingLine == Globals.NEW_LINE :
+            if self.lineAproved(settingLine) :
                 if longStringCapturing :
                     if not depthPass :
                         depthPass = Globals.TAB_UNITS
@@ -303,9 +316,8 @@ class Globals:
                             longStringList
                         )
                         depth = currentDepth
-
         if self.apiName not in settingTree.keys() :
-            try : self.concatenateTree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_AS_PATH}{self.apiName}.{self.accessTree(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.API_EXTENSION),settingTree)}',settingTree)
+            try : self.concatenateTree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_BACK_SLASH}{self.apiName}.{self.accessTree(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.API_EXTENSION),settingTree)}',settingTree)
             except : pass
         return settingTree
 
@@ -454,9 +466,20 @@ class Globals:
             resultantDictionary[keyList[index]] = valueList[index]
         return resultantDictionary
 
-    def printTree(self,tree):
+    def getFileNameList(self,path,fileExtension=None) :
+        if not fileExtension :
+            fileExtension = self.extension
+        fileNames = []
+        names = os.listdir(path)
+        for name in names :
+            splitedName = name.split('.')
+            if fileExtension == splitedName[-1] :
+                fileNames.append(''.join(splitedName[:-1]))
+        return fileNames
+
+    def printTree(self,tree,name):
         depth = 0
-        print(f'\n{self.__class__.__name__} settings tree')
+        print(f'\n{name}')
         self.printNodeTree(tree,depth)
         print()
 
