@@ -1,7 +1,5 @@
 import os, sys
 
-print('Globals library imported')
-
 class AttributeKey:
 
     KW_API = 'api'
@@ -44,6 +42,7 @@ class Globals:
     DOUBLE_QUOTE = '''"'''
     TRIPLE_SINGLE_QUOTE = """'''"""
     TRIPLE_DOUBLE_QUOTE = '''"""'''
+    SPACE_HIFEN_SPACE = ''' - '''
 
     BASE_API_PATH = f'api{BACK_SLASH}src{BACK_SLASH}'
     LOCAL_GLOBALS_API_PATH = f'domain{BACK_SLASH}control{BACK_SLASH}'
@@ -92,7 +91,10 @@ class Globals:
     WRONG_WAY_TO_IMPLEMENT_IT = 'WRONG_WAY_TO_IMPLEMENT_IT'
     PROPER_WAY_TO_IMPLEMENT_IT = 'PROPER_WAY_TO_IMPLEMENT_IT'
 
+    GIT_COMMITTER = 'git-committer'
+
     DEBUG = '[Debug] '
+    ERROR = '[Error] '
 
     def __init__(self,
         mode = PROPER_WAY_TO_IMPLEMENT_IT,
@@ -130,7 +132,7 @@ class Globals:
             except : self.extension = Globals.EXTENSION
 
             self.printStatus = self.getGlobalsPrintStatus()
-            self.apiNames = self.getGlobalsApiList()
+            self.apiNameList = self.getGlobalsApiList()
 
             self.localGlobalsApiFilePath = f'{Globals.LOCAL_GLOBALS_API_PATH}{self.globalsApiName}.{Globals.PYTHON_EXTENSION}'
             self.globalsApiPath = f'{self.getApiPath(self.globalsApiName)}{self.localGlobalsApiFilePath}'
@@ -146,14 +148,13 @@ class Globals:
                 {self.__class__.__name__}.apiPath =                     {self.apiPath}
                 {self.__class__.__name__}.apiName =                     {self.apiName}
                 {self.__class__.__name__}.apisRoot =                    {self.apisRoot}
-                {self.__class__.__name__}.apiNames =                    {self.apiNames}
+                {self.__class__.__name__}.apiNameList =                 {self.apiNameList}
                 {self.__class__.__name__}.localGlobalsApiFilePath =     {self.localGlobalsApiFilePath}
                 {self.__class__.__name__}.globalsApiName =              {self.globalsApiName}
                 {self.__class__.__name__}.globalsApiPath =              {self.globalsApiPath}
                 {self.__class__.__name__}.apisPath =                    {self.apisPath}
                 {self.__class__.__name__}.extension =                   {self.extension}\n''')
 
-                print('SettingsTree:')
                 self.printTree(self.settingTree)
 
             self.update()
@@ -186,12 +187,14 @@ class Globals:
 
     def makeApisAvaliable(self) :
         self.apisTree = []
-        for apiName in self.apiNames :
-            apiTree = self.makePathTreeVisible(self.getApiPath(apiName))
-            apiTree = {apiName:apiTree}
-            self.apisTree.append(apiTree)
+        for apiName in self.apiNameList :
+            try :
+                apiTree = self.makePathTreeVisible(self.getApiPath(apiName))
+                apiTree = {apiName:apiTree}
+                self.apisTree.append(apiTree)
+            except :
+                self.debug(f'Not possible to make {apiName} api avaliable')
         if self.printStatus :
-            print(f'\n{self.__class__.__name__}.apisTree')
             for apiTree in self.apisTree :
                 print()
                 self.printTree(apiTree)
@@ -343,9 +346,12 @@ class Globals:
         return self.getSetting(AttributeKey.getKey(self,attributeKeyWithoutApiNameAsRoot))
 
     def getSetting(self,nodeKey,settingTree=None) :
-        if settingTree :
+        if not settingTree :
+            settingTree = self.settingTree
+        try :
             return self.accessTree(nodeKey,settingTree)
-        return self.accessTree(nodeKey,self.settingTree)
+        except :
+            return None
 
     def accessTree(self,nodeKey,tree) :
         if nodeKey == Globals.NOTHING :
@@ -454,7 +460,9 @@ class Globals:
 
     def printTree(self,tree):
         depth = 0
+        print(f'\n{self.__class__.__name__} settings tree')
         self.printNodeTree(tree,depth)
+        print()
 
     def printNodeTree(self,tree,depth):
         depthSpace = ''
@@ -469,7 +477,6 @@ class Globals:
                 print(f'{depthSpace}{node}{Globals.SPACE}{Globals.COLON}{Globals.SPACE}{tree[node]}')
 
     def updateApplicationDependencies(self):
-        print(f'------------> {self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE)}<--')
         try :
             if self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE) :
                 import subprocess
@@ -496,7 +503,7 @@ class Globals:
                 with open(self.globalsApiPath,Globals.READ,encoding = Globals.ENCODING) as globalsFile :
                     for line in globalsFile :
                         globalsScript.append(line)
-                for apiName in self.apiNames :
+                for apiName in self.apiNameList :
                     updatingApiPath =f'{self.getApiPath(apiName)}{self.localGlobalsApiFilePath}'
                     if apiName != self.globalsApiName :
                         with open(updatingApiPath,Globals.OVERRIDE,encoding = Globals.ENCODING) as globalsFile :
