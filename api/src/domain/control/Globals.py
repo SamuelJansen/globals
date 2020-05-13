@@ -30,6 +30,7 @@ class Globals:
     SPACE = ''' '''
     TAB = TAB_UNITS * SPACE
     BACK_SLASH = '''\\'''
+    SLASH = '''/'''
     HASH_TAG = '''#'''
     COLON = ''':'''
     COMA = ''','''
