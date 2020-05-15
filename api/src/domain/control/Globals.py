@@ -269,7 +269,7 @@ class Globals:
                         depthPass = Globals.TAB_UNITS
                     if not currentDepth :
                         currentDepth = 0
-                    longStringList.append(settingLine[depth:].lstrip())
+                    longStringList.append(settingLine[depth:].rstrip())
                     if quoteType in str(settingLine) :
                         longStringList[-1] = Globals.NOTHING.join(longStringList[-1].split(quoteType))[:-1] + quoteType
                         settingValue = Globals.NOTHING.join(longStringList)
