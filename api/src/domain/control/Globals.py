@@ -47,6 +47,7 @@ class Globals:
     TRIPLE_DOUBLE_QUOTE = '''"""'''
     DASH = '''-'''
     SPACE_DASH_SPACE = ''' - '''
+    UNDERSCORE = '''_'''
 
     BASE_API_PATH = f'api{BACK_SLASH}src{BACK_SLASH}'
     LOCAL_GLOBALS_API_PATH = f'domain{BACK_SLASH}control{BACK_SLASH}'
@@ -193,19 +194,22 @@ class Globals:
         self.makeApisAvaliable()
 
     def makeApisAvaliable(self) :
-        self.apisTree = []
+        # self.apisTree = []
+        self.apisTree = {}
         for apiName in self.apiNameList :
             try :
                 apiTree = self.makePathTreeVisible(self.getApiPath(apiName))
-                apiTree = {apiName:apiTree}
-                self.apisTree.append(apiTree)
+                # apiTree = {apiName:apiTree}
+                # self.apisTree.append(apiTree)
+                self.apisTree[apiName] = apiTree
             except Exception as exception :
                 self.debug(f'Not possible to make {apiName} api avaliable{Globals.NEW_LINE}{str(exception)}')
         if self.printStatus :
-            for apiTree in self.apisTree :
-                print()
-                self.printTree(apiTree,'Api tree')
-            print()
+            # for apiTree in self.apisTree :
+            #     print()
+            #     self.printTree(apiTree,'Api tree')
+            # print()
+            self.printTree(apiTree,'Api tree')
 
     def makePathTreeVisible(self,path):
         node = {}
@@ -269,7 +273,7 @@ class Globals:
                         depthPass = Globals.TAB_UNITS
                     if not currentDepth :
                         currentDepth = 0
-                    longStringList.append(settingLine[depth:].rstrip())
+                    longStringList.append(settingLine[depth:])
                     if quoteType in str(settingLine) :
                         longStringList[-1] = Globals.NOTHING.join(longStringList[-1].split(quoteType))[:-1] + quoteType
                         settingValue = Globals.NOTHING.join(longStringList)
