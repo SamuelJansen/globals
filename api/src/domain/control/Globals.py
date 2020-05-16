@@ -7,6 +7,7 @@ class AttributeKey:
     KW_DEPENDENCY = 'dependency'
     KW_LIST = 'list'
     KW_UPDATE = 'update'
+    KW_RESOURCE = 'resource'
 
     GLOBALS_API_LIST = f'{KW_API}.{KW_LIST}'
 
@@ -15,6 +16,7 @@ class AttributeKey:
     PRINT_STATUS = 'print-status'
     DEPENDENCY_UPDATE = f'{KW_API}.{KW_DEPENDENCY}.{KW_UPDATE}'
     DEPENDENCY_LIST = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}'
+    DEPENDENCY_RESOURCE_LIST = f'{KW_API}.{KW_DEPENDENCY}.{KW_RESOURCE}.{KW_LIST}'
 
     def getKey(api,key):
         return f'{api.apiName}.{key}'
@@ -30,6 +32,7 @@ class Globals:
     SPACE = ''' '''
     TAB = TAB_UNITS * SPACE
     BACK_SLASH = '''\\'''
+    SLASH = '''/'''
     HASH_TAG = '''#'''
     COLON = ''':'''
     COMA = ''','''
@@ -42,7 +45,14 @@ class Globals:
     DOUBLE_QUOTE = '''"'''
     TRIPLE_SINGLE_QUOTE = """'''"""
     TRIPLE_DOUBLE_QUOTE = '''"""'''
+<<<<<<< HEAD
     SPACE_DASH_SPACE = ''' - '''
+=======
+    DASH = '''-'''
+    SPACE_DASH_SPACE = ''' - '''
+    UNDERSCORE = '''_'''
+    COLON_SPACE = ': '
+>>>>>>> origin/develop
 
     BASE_API_PATH = f'api{BACK_SLASH}src{BACK_SLASH}'
     LOCAL_GLOBALS_API_PATH = f'domain{BACK_SLASH}control{BACK_SLASH}'
@@ -105,7 +115,7 @@ class Globals:
 
         from pathlib import Path
         clear = lambda: os.system('cls')
-        # clear() # or simply os.system('cls')
+        ###- clear() # or simply os.system('cls')
 
         self.globalsApiName = self.__class__.__name__
         self.debugStatus = debugStatus
@@ -129,8 +139,10 @@ class Globals:
             self.apisRoot = self.currentPath.split(self.localPath)[1].split(self.apiName)[0]
 
             self.settingTree = self.getSettingTree()
-            try : self.extension = self.getSetting(f'{self.globalsApiName}.{AttributeKey.API_EXTENSION}',self.settingTree)
-            except : self.extension = Globals.EXTENSION
+            try :
+                self.extension = self.getSetting(f'{self.globalsApiName}.{AttributeKey.API_EXTENSION}',self.settingTree)
+            except :
+                self.extension = Globals.EXTENSION
 
             self.printStatus = self.getGlobalsPrintStatus()
             self.apiNameList = self.getGlobalsApiList()
@@ -156,7 +168,11 @@ class Globals:
                 {self.__class__.__name__}.apisPath =                    {self.apisPath}
                 {self.__class__.__name__}.extension =                   {self.extension}\n''')
 
+<<<<<<< HEAD
                 self.printTree(self.settingTree,'{self.__class__.__name__} settin tree')
+=======
+                self.printTree(self.settingTree,f'{self.__class__.__name__} settin tree')
+>>>>>>> origin/develop
 
             self.update()
 
@@ -187,6 +203,7 @@ class Globals:
         self.makeApisAvaliable()
 
     def makeApisAvaliable(self) :
+<<<<<<< HEAD
         self.apisTree = []
         for apiName in self.apiNameList :
             try :
@@ -200,6 +217,18 @@ class Globals:
                 print()
                 self.printTree(apiTree,'Api tree')
             print()
+=======
+        # self.apisTree = []
+        self.apisTree = {}
+        for apiName in self.apiNameList :
+            try :
+                apiTree = self.makePathTreeVisible(self.getApiPath(apiName))
+                self.apisTree[apiName] = apiTree
+            except Exception as exception :
+                self.debug(f'Not possible to make {apiName} api avaliable{Globals.NEW_LINE}{str(exception)}')
+        if self.printStatus :
+            self.printTree(apiTree,'Api tree')
+>>>>>>> origin/develop
 
     def makePathTreeVisible(self,path):
         node = {}
@@ -234,6 +263,7 @@ class Globals:
         return node
 
     def lineAproved(self,settingLine) :
+<<<<<<< HEAD
         aproved = True
         if settingLine == Globals.NEW_LINE :
             aproved = False
@@ -241,6 +271,16 @@ class Globals:
             if not None == settingLine.strip().split(Globals.HASH_TAG)[0] :
                 aproved = False
         return aproved
+=======
+        approved = True
+        if Globals.NEW_LINE == settingLine  :
+            approved = False
+        if Globals.HASH_TAG in settingLine :
+            filteredSettingLine = self.filterString(settingLine)
+            if None == filteredSettingLine or Globals.NOTHING == filteredSettingLine or Globals.NEW_LINE == filteredSettingLine :
+                approved = False
+        return approved
+>>>>>>> origin/develop
 
     def getSettingTree(self,settingFilePath=None) :
         if not settingFilePath :
@@ -262,7 +302,7 @@ class Globals:
                         depthPass = Globals.TAB_UNITS
                     if not currentDepth :
                         currentDepth = 0
-                    longStringList.append(settingLine.split(Globals.HASH_TAG)[0][depth:])
+                    longStringList.append(settingLine[depth:])
                     if quoteType in str(settingLine) :
                         longStringList[-1] = Globals.NOTHING.join(longStringList[-1].split(quoteType))[:-1] + quoteType
                         settingValue = Globals.NOTHING.join(longStringList)
@@ -317,8 +357,15 @@ class Globals:
                         )
                         depth = currentDepth
         if self.apiName not in settingTree.keys() :
+<<<<<<< HEAD
             try : self.concatenateTree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_BACK_SLASH}{self.apiName}.{self.accessTree(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.API_EXTENSION),settingTree)}',settingTree)
             except : pass
+=======
+            try :
+                self.concatenateTree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_BACK_SLASH}{self.apiName}.{self.accessTree(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.API_EXTENSION),settingTree)}',settingTree)
+            except Exception as exception :
+                self.debug(f'Not possible to get api properties tree{Globals.NEW_LINE}{str(exception)}')
+>>>>>>> origin/develop
         return settingTree
 
     def settingsTreeInnerLoop(self,settingLine,nodeKey,settingTree,longStringCapturing,quoteType,longStringList):
@@ -358,12 +405,20 @@ class Globals:
             settingTree = self.settingTree
         try :
             return self.accessTree(nodeKey,settingTree)
+<<<<<<< HEAD
         except :
+=======
+        except Exception as exception :
+            self.debug(f'Not possible to get {nodeKey}{Globals.NEW_LINE}{str(exception)}')
+>>>>>>> origin/develop
             return None
 
     def accessTree(self,nodeKey,tree) :
         if nodeKey == Globals.NOTHING :
-            return tree
+            try :
+                return self.filterString(tree)
+            except :
+                return tree
         else :
             nodeKeyList = nodeKey.split(Globals.DOT)
             lenNodeKeyList = len(nodeKeyList)
@@ -371,6 +426,7 @@ class Globals:
                  nextNodeKey = Globals.NOTHING
             else :
                 nextNodeKey = Globals.DOT.join(nodeKeyList[1:])
+                ###- self.debug(tree[nodeKeyList[0]],f'nextNodeKey = {nextNodeKey}')
             return self.accessTree(nextNodeKey,tree[nodeKeyList[0]])
 
     def getAttributeKeyValue(self,settingLine):
@@ -401,16 +457,20 @@ class Globals:
 
     def getAttributeKey(self,settingLine):
         possibleKey = self.filterString(settingLine)
-        return settingLine.strip().split(Globals.HASH_TAG)[0].split(Globals.COLON)[0].strip()
+        return settingLine.strip().split(Globals.COLON)[0].strip()
 
     def getAttibuteValue(self,settingLine):
         possibleValue = self.filterString(settingLine)
-        return self.getValue(Globals.COLON.join(possibleValue.strip().split(Globals.HASH_TAG)[0].split(Globals.COLON)[1:]).strip())
+        return self.getValue(Globals.COLON.join(possibleValue.strip().split(Globals.COLON)[1:]).strip())
 
     def filterString(self,string) :
         if string[-1] == Globals.NEW_LINE :
             string = string[:-1]
-        string = string.strip()
+        strippedString = string.strip()
+        surroundedBySingleQuote = strippedString[0] == Globals.SINGLE_QUOTE and strippedString[-1] == Globals.SINGLE_QUOTE
+        surroundedByDoubleQuote = strippedString[0] == Globals.DOUBLE_QUOTE and strippedString[-1] == Globals.DOUBLE_QUOTE
+        if Globals.HASH_TAG in strippedString and not (surroundedBySingleQuote or surroundedByDoubleQuote) :
+            string = string.split(Globals.HASH_TAG)[0].strip()
         return string
 
     def getValue(self,value) :
@@ -499,12 +559,20 @@ class Globals:
         try :
             if self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE) :
                 import subprocess
-                modules = self.getApiSetting(AttributeKey.DEPENDENCY_LIST)
-                if modules :
+                moduleList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST)
+                if moduleList :
                     subprocess.Popen(Globals.UPDATE_PIP_INSTALL).wait()
-                    for module in modules :
+                    for module in moduleList :
                         subprocess.Popen(f'{Globals.PIP_INSTALL} {module}').wait()
-        except : pass
+                resourceModuleList = self.getApiSetting(AttributeKey.DEPENDENCY_RESOURCE_LIST)
+                if resourceModuleList :
+                    for resourceModule in resourceModuleList :
+                        command = f'{Globals.PIP_INSTALL} {resourceModule}'
+                        processPath = f'{self.getApiPath(self.apiName)}{Globals.RESOURCE_BACK_SLASH}'
+                        subprocess.Popen(command,shell=True,cwd=processPath).wait()
+                        ###- subprocess.run(command,shell=True,capture_output=True,cwd=processPath)
+        except :
+            pass
 
     def getGlobalsPrintStatus(self):
         return self.getSetting(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.PRINT_STATUS))
@@ -527,7 +595,8 @@ class Globals:
                     if apiName != self.globalsApiName :
                         with open(updatingApiPath,Globals.OVERRIDE,encoding = Globals.ENCODING) as globalsFile :
                             globalsFile.write(''.join(globalsScript))
-            except :
+            except Exception as exception :
+                self.debug(f'Not possible to update Globals {Globals.NEW_LINE}{str(exception)}')
                 if self.printStatus :
                     print(f'''Globals api wans't found in your directory. {self.__class__.__name__} may not work properly in some edge cases''')
 
