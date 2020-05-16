@@ -49,7 +49,7 @@ class Globals:
     SPACE_DASH_SPACE = ''' - '''
     UNDERSCORE = '''_'''
     COLON_SPACE = ': '
-    
+
     BASE_API_PATH = f'api{BACK_SLASH}src{BACK_SLASH}'
     LOCAL_GLOBALS_API_PATH = f'domain{BACK_SLASH}control{BACK_SLASH}'
 
@@ -200,16 +200,10 @@ class Globals:
         for apiName in self.apiNameList :
             try :
                 apiTree = self.makePathTreeVisible(self.getApiPath(apiName))
-                # apiTree = {apiName:apiTree}
-                # self.apisTree.append(apiTree)
                 self.apisTree[apiName] = apiTree
             except Exception as exception :
                 self.debug(f'Not possible to make {apiName} api avaliable{Globals.NEW_LINE}{str(exception)}')
         if self.printStatus :
-            # for apiTree in self.apisTree :
-            #     print()
-            #     self.printTree(apiTree,'Api tree')
-            # print()
             self.printTree(apiTree,'Api tree')
 
     def makePathTreeVisible(self,path):
