@@ -48,6 +48,7 @@ class Globals:
     DASH = '''-'''
     SPACE_DASH_SPACE = ''' - '''
     UNDERSCORE = '''_'''
+    COLON_SPACE = ': '
 
     BASE_API_PATH = f'api{BACK_SLASH}src{BACK_SLASH}'
     LOCAL_GLOBALS_API_PATH = f'domain{BACK_SLASH}control{BACK_SLASH}'
