@@ -45,14 +45,10 @@ class Globals:
     DOUBLE_QUOTE = '''"'''
     TRIPLE_SINGLE_QUOTE = """'''"""
     TRIPLE_DOUBLE_QUOTE = '''"""'''
-<<<<<<< HEAD
-    SPACE_DASH_SPACE = ''' - '''
-=======
     DASH = '''-'''
     SPACE_DASH_SPACE = ''' - '''
     UNDERSCORE = '''_'''
     COLON_SPACE = ': '
->>>>>>> origin/develop
 
     BASE_API_PATH = f'api{BACK_SLASH}src{BACK_SLASH}'
     LOCAL_GLOBALS_API_PATH = f'domain{BACK_SLASH}control{BACK_SLASH}'
@@ -168,11 +164,7 @@ class Globals:
                 {self.__class__.__name__}.apisPath =                    {self.apisPath}
                 {self.__class__.__name__}.extension =                   {self.extension}\n''')
 
-<<<<<<< HEAD
-                self.printTree(self.settingTree,'{self.__class__.__name__} settin tree')
-=======
                 self.printTree(self.settingTree,f'{self.__class__.__name__} settin tree')
->>>>>>> origin/develop
 
             self.update()
 
@@ -203,22 +195,6 @@ class Globals:
         self.makeApisAvaliable()
 
     def makeApisAvaliable(self) :
-<<<<<<< HEAD
-        self.apisTree = []
-        for apiName in self.apiNameList :
-            try :
-                apiTree = self.makePathTreeVisible(self.getApiPath(apiName))
-                apiTree = {apiName:apiTree}
-                self.apisTree.append(apiTree)
-            except :
-                self.debug(f'Not possible to make {apiName} api avaliable')
-        if self.printStatus :
-            for apiTree in self.apisTree :
-                print()
-                self.printTree(apiTree,'Api tree')
-            print()
-=======
-        # self.apisTree = []
         self.apisTree = {}
         for apiName in self.apiNameList :
             try :
@@ -228,7 +204,6 @@ class Globals:
                 self.debug(f'Not possible to make {apiName} api avaliable{Globals.NEW_LINE}{str(exception)}')
         if self.printStatus :
             self.printTree(apiTree,'Api tree')
->>>>>>> origin/develop
 
     def makePathTreeVisible(self,path):
         node = {}
@@ -263,15 +238,6 @@ class Globals:
         return node
 
     def lineAproved(self,settingLine) :
-<<<<<<< HEAD
-        aproved = True
-        if settingLine == Globals.NEW_LINE :
-            aproved = False
-        if Globals.HASH_TAG in settingLine :
-            if not None == settingLine.strip().split(Globals.HASH_TAG)[0] :
-                aproved = False
-        return aproved
-=======
         approved = True
         if Globals.NEW_LINE == settingLine  :
             approved = False
@@ -280,7 +246,6 @@ class Globals:
             if None == filteredSettingLine or Globals.NOTHING == filteredSettingLine or Globals.NEW_LINE == filteredSettingLine :
                 approved = False
         return approved
->>>>>>> origin/develop
 
     def getSettingTree(self,settingFilePath=None) :
         if not settingFilePath :
@@ -357,15 +322,10 @@ class Globals:
                         )
                         depth = currentDepth
         if self.apiName not in settingTree.keys() :
-<<<<<<< HEAD
-            try : self.concatenateTree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_BACK_SLASH}{self.apiName}.{self.accessTree(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.API_EXTENSION),settingTree)}',settingTree)
-            except : pass
-=======
             try :
                 self.concatenateTree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_BACK_SLASH}{self.apiName}.{self.accessTree(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.API_EXTENSION),settingTree)}',settingTree)
             except Exception as exception :
                 self.debug(f'Not possible to get api properties tree{Globals.NEW_LINE}{str(exception)}')
->>>>>>> origin/develop
         return settingTree
 
     def settingsTreeInnerLoop(self,settingLine,nodeKey,settingTree,longStringCapturing,quoteType,longStringList):
@@ -405,12 +365,8 @@ class Globals:
             settingTree = self.settingTree
         try :
             return self.accessTree(nodeKey,settingTree)
-<<<<<<< HEAD
-        except :
-=======
         except Exception as exception :
             self.debug(f'Not possible to get {nodeKey}{Globals.NEW_LINE}{str(exception)}')
->>>>>>> origin/develop
             return None
 
     def accessTree(self,nodeKey,tree) :
