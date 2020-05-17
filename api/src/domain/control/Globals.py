@@ -97,8 +97,12 @@ class Globals:
     WRONG_WAY_TO_IMPLEMENT_IT = 'WRONG_WAY_TO_IMPLEMENT_IT'
     PROPER_WAY_TO_IMPLEMENT_IT = 'PROPER_WAY_TO_IMPLEMENT_IT'
 
-    GIT_COMMITTER = 'git-committer'
-    GIT_COMMITTER_INDEX = 1
+    GITC_GIT_COMMITTER = 'git-committer'
+    OFFICE_TRACK_INTEGRATION_TESTS = 'office-track-integration-tests'
+    VOICE_ASSISTANT = 'voice-assistant'
+    API_SYS_ARGV_INDEX = 1
+
+    SYSTEM_HELPER_NAME = 'SystemHelper'
 
     DEBUG = '[Debug] '
     ERROR = '[Error] '
@@ -127,11 +131,11 @@ class Globals:
             self.encoding = encoding
         else :
             self.encoding = Globals.ENCODING
-        self.backSlash = Globals.BACK_SLASH
         if self.mode == Globals.PROPER_WAY_TO_IMPLEMENT_IT :
             self.baseApiPath = Globals.BASE_API_PATH
             self.apiPath = self.currentPath.split(self.baseApiPath)[0]
             self.apiName = self.apiPath.split(self.backSlash)[-2]
+            self.systemHelperRunning = (self.apiName == Globals.SYSTEM_HELPER_NAME)
             self.apisRoot = self.currentPath.split(self.localPath)[1].split(self.apiName)[0]
 
             self.settingTree = self.getSettingTree()
@@ -145,7 +149,7 @@ class Globals:
 
             self.localGlobalsApiFilePath = f'{Globals.LOCAL_GLOBALS_API_PATH}{self.globalsApiName}.{Globals.PYTHON_EXTENSION}'
             self.globalsApiPath = f'{self.getApiPath(self.globalsApiName)}{self.localGlobalsApiFilePath}'
-            self.apisPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-1].split(self.backSlash)[:-2])}{self.backSlash}'
+            self.apisPath = f'{self.currentPath.split(self.apiName)[0]}'
 
             self.updateGlobals = self.getUpdateGlobalsClassFile()
 
@@ -348,12 +352,12 @@ class Globals:
         return settingKey,settingValue,nodeKey,longStringCapturing,quoteType,longStringList
 
     def addTree(self,settingFilePath):
-        newSetting = self.getSettingTree(settingFilePath)
-        for settingKey in newSetting :
-            self.settingTree[settingKey] = newSetting[settingKey]
+        newSetting = self.getSettingTree(settingFilePath=settingFilePath)
+        for settingKey,settingValue in newSetting.items() :
+            self.settingTree[settingKey] = settingValue
 
     def concatenateTree(self,settingFilePath,tree):
-        newSetting = self.getSettingTree(settingFilePath)
+        newSetting = self.getSettingTree(settingFilePath=settingFilePath)
         for settingKey in newSetting :
             tree[settingKey] = newSetting[settingKey]
 
