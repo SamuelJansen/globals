@@ -100,6 +100,8 @@ class Globals:
     GITC_GIT_COMMITTER = 'git-committer'
     OFFICE_TRACK_INTEGRATION_TESTS = 'office-track-integration-tests'
     VOICE_ASSISTANT = 'voice-assistant'
+    WEB_SCRAP_HELPER = 'web-scraper'
+    CIFRAS_CLUB_WEB_SCRAPER = f'cifras-club-{WEB_SCRAP_HELPER}'
     API_SYS_ARGV_INDEX = 1
 
     SYSTEM_HELPER_NAME = 'SystemHelper'
