@@ -98,7 +98,7 @@ class Globals:
     WRONG_WAY_TO_IMPLEMENT_IT = 'WRONG_WAY_TO_IMPLEMENT_IT'
     PROPER_WAY_TO_IMPLEMENT_IT = 'PROPER_WAY_TO_IMPLEMENT_IT'
 
-    GITC_GIT_COMMITTER = 'git-committer'
+    GIT_COMMITTER = 'git-committer'
     OFFICE_TRACK_INTEGRATION_TESTS = 'office-track-integration-tests'
     VOICE_ASSISTANT = 'voice-assistant'
     WEB_SCRAP_HELPER = 'web-scraper'
