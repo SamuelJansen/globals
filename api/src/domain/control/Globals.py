@@ -61,6 +61,7 @@ class Globals:
     READ = 'r'
 
     RESOURCE_BACK_SLASH = f'resource{BACK_SLASH}'
+    REPOSITORY_BACK_SLASH = f'repository{BACK_SLASH}'
 
     PIP_INSTALL = f'pip install'
     UPDATE_PIP_INSTALL = 'python -m pip install --upgrade pip'
