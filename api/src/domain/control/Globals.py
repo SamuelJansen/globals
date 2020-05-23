@@ -103,6 +103,7 @@ class Globals:
     VOICE_ASSISTANT = 'voice-assistant'
     WEB_SCRAP_HELPER = 'web-scraper'
     CIFRAS_CLUB_WEB_SCRAPER = f'cifras-club-{WEB_SCRAP_HELPER}'
+    FACEBOOK_CLASS_MANAGER = f'facebook-class'
     API_SYS_ARGV_INDEX = 1
 
     SYSTEM_HELPER_NAME = 'SystemHelper'
