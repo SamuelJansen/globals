@@ -108,8 +108,9 @@ class Globals:
 
     SYSTEM_HELPER_NAME = 'SystemHelper'
 
-    DEBUG = '[Debug] '
-    ERROR = '[Error] '
+    DEBUG =     '[Debug  ] '
+    ERROR =     '[Error  ] '
+    WARNING =   '[WARNING] '
 
     def __init__(self,
         mode = PROPER_WAY_TO_IMPLEMENT_IT,
