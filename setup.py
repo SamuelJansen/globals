@@ -10,10 +10,7 @@ setup(
   url = 'https://github.com/SamuelJansen/globals',
   download_url = 'https://github.com/SamuelJansen/globals/archive/v0.1.1.tar.gz',
   keywords = ['global', 'python global package', 'python package manager'],
-  install_requires=[
-          'validators',
-          'beautifulsoup4',
-      ],
+  install_requires=['os', 'sys', 'subprocess','pathlib'],
   classifiers=[
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Developers',

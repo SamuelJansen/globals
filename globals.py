@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, subprocess
 from pathlib import Path
 
 class AttributeKey:
@@ -604,7 +604,6 @@ class Globals:
     def updateDependencies(self):
         try :
             if self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE) :
-                import subprocess
                 moduleList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST_WEB)
                 if moduleList :
                     subprocess.Popen(Globals.UPDATE_PIP_INSTALL).wait()
