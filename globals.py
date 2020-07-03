@@ -1,34 +1,43 @@
 import os, sys
+from pathlib import Path
 
 class AttributeKey:
 
     KW_API = 'api'
+    KW_NAME = 'name'
     KW_EXTENSION = 'extension'
     KW_DEPENDENCY = 'dependency'
     KW_LIST = 'list'
+    KW_WEB = 'web'
+    KW_LOCAL = 'local'
     KW_UPDATE = 'update'
     KW_RESOURCE = 'resource'
 
     GLOBALS_API_LIST = f'{KW_API}.{KW_LIST}'
 
+    API_NAME = f'{KW_API}.{KW_NAME}'
     API_EXTENSION = f'{KW_API}.{KW_EXTENSION}'
     UPDATE_GLOBALS = f'{KW_UPDATE}-globals'
     PRINT_STATUS = 'print-status'
     DEPENDENCY_UPDATE = f'{KW_API}.{KW_DEPENDENCY}.{KW_UPDATE}'
-    DEPENDENCY_LIST = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}'
-    DEPENDENCY_RESOURCE_LIST = f'{KW_API}.{KW_DEPENDENCY}.{KW_RESOURCE}.{KW_LIST}'
+    DEPENDENCY_LIST_WEB = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}.{KW_WEB}'
+    DEPENDENCY_LIST_LOCAL = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}.{KW_LOCAL}'
+    DEPENDENCY_RESOURCE_LIST = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}.{KW_LOCAL}'
 
     def getKey(api,key):
-        return f'{api.apiName}.{key}'
+        return f'{Globals.__name__}.{key}'
 
     def getKeyByClassNameAndKey(cls,key):
         return f'{cls.__name__}.{key}'
 
 
 class Globals:
+
+    OS_SEPARATOR = os.path.sep
+
     ### There are 'places' where backslash is not much wellcome
     ### Having it stored into a variable helps a lot
-    TAB_UNITS = 2
+    TAB_UNITS = 4
     SPACE = ''' '''
     TAB = TAB_UNITS * SPACE
     BACK_SLASH = '''\\'''
@@ -50,17 +59,26 @@ class Globals:
     UNDERSCORE = '''_'''
     COLON_SPACE = ': '
 
-    BASE_API_PATH = f'api{BACK_SLASH}src{BACK_SLASH}'
-    LOCAL_GLOBALS_API_PATH = f'domain{BACK_SLASH}control{BACK_SLASH}'
-
-    EXTENSION = 'gbl'
+    EXTENSION = 'yml'
     PYTHON_EXTENSION = 'py'
 
     ENCODING = 'utf-8'
     OVERRIDE = 'w+'
     READ = 'r'
 
-    RESOURCE_BACK_SLASH = f'resource{BACK_SLASH}'
+
+    API_BACK_SLASH = f'api{OS_SEPARATOR}'
+    SRC_BACK_SLASH = f'src{OS_SEPARATOR}'
+    BASE_API_PATH = f'{API_BACK_SLASH}{SRC_BACK_SLASH}'
+
+    GLOBALS_BACK_SLASH = f'globals{OS_SEPARATOR}'
+    FRAMEWORK_BACK_SLASH = f'framework{OS_SEPARATOR}'
+    SERVICE_BACK_SLASH = f'service{OS_SEPARATOR}'
+    RESOURCE_BACK_SLASH = f'resource{OS_SEPARATOR}'
+    REPOSITORY_BACK_SLASH = f'repository{OS_SEPARATOR}'
+    DEPENDENCY_BACK_SLASH = f'dependency{OS_SEPARATOR}'
+
+    LOCAL_GLOBALS_API_PATH = f'{SERVICE_BACK_SLASH}{FRAMEWORK_BACK_SLASH}{GLOBALS_BACK_SLASH}'
 
     PIP_INSTALL = f'pip install'
     UPDATE_PIP_INSTALL = 'python -m pip install --upgrade pip'
@@ -75,7 +93,9 @@ class Globals:
         '__init__',
         '__main__',
         'image',
-        'audio'
+        'audio',
+        '.heroku',
+        '.profile.d'
     ]
 
     STRING = 'str'
@@ -94,126 +114,132 @@ class Globals:
 
     SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE = 4
 
-    WRONG_WAY_TO_IMPLEMENT_IT = 'WRONG_WAY_TO_IMPLEMENT_IT'
-    PROPER_WAY_TO_IMPLEMENT_IT = 'PROPER_WAY_TO_IMPLEMENT_IT'
-
-    GIT_COMMITTER = 'git-committer'
-    GIT_COMMITTER_INDEX = 1
-
-    DEBUG = '[Debug] '
-    ERROR = '[Error] '
+    DEBUG =     '[DEBUG  ] '
+    ERROR =     '[ERROR  ] '
+    WARNING =   '[WARNING] '
+    SUCCESS =   '[SUCCESS] '
+    FAILURE =   '[FAILURE] '
+    SETTING =   '[SETTING] '
 
     def __init__(self,
-        mode = PROPER_WAY_TO_IMPLEMENT_IT,
         encoding = ENCODING,
-        debugStatus = False
+        debugStatus = False,
+        warningStatus = False,
+        errorStatus = False,
+        successStatus = False,
+        failureStatus = False,
+        settingStatus = False,
     ):
 
-        from pathlib import Path
         clear = lambda: os.system('cls')
         ###- clear() # or simply os.system('cls')
 
-        self.globalsApiName = self.__class__.__name__
+        self.globalsName = self.__class__.__name__
         self.debugStatus = debugStatus
-        self.debug('Debug mode on')
+        self.warningStatus = warningStatus
+        self.errorStatus = errorStatus
+        self.successStatus = successStatus
+        self.failureStatus = failureStatus
+        self.settingStatus = settingStatus
+        self.setting(self.__class__,f'debugStatus={self.debugStatus}, errorStatus={self.errorStatus}, successStatus={self.successStatus}, failureStatus={self.failureStatus}, settingStatus={self.settingStatus}')
 
-        self.mode = mode
-        self.backSlash = Globals.BACK_SLASH
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
-        self.currentPath = f'{str(Path(__file__).parent.absolute())}{self.backSlash}'
-        self.localPath = f'{str(Path.home())}{self.backSlash}'
         if encoding :
             self.encoding = encoding
         else :
             self.encoding = Globals.ENCODING
-        self.backSlash = Globals.BACK_SLASH
-        if self.mode == Globals.PROPER_WAY_TO_IMPLEMENT_IT :
-            self.baseApiPath = Globals.BASE_API_PATH
-            self.apiPath = self.currentPath.split(self.baseApiPath)[0]
-            self.apiName = self.apiPath.split(self.backSlash)[-2]
-            self.apisRoot = self.currentPath.split(self.localPath)[1].split(self.apiName)[0]
 
-            self.settingTree = self.getSettingTree()
-            try :
-                self.extension = self.getSetting(f'{self.globalsApiName}.{AttributeKey.API_EXTENSION}',self.settingTree)
-            except :
-                self.extension = Globals.EXTENSION
+        self.buildApplicationPath()
 
-            self.printStatus = self.getGlobalsPrintStatus()
-            self.apiNameList = self.getGlobalsApiList()
+        self.settingTree = self.getSettingTree()
+        self.apiName = self.getApiName()
+        self.extension = self.getExtension()
 
-            self.localGlobalsApiFilePath = f'{Globals.LOCAL_GLOBALS_API_PATH}{self.globalsApiName}.{Globals.PYTHON_EXTENSION}'
-            self.globalsApiPath = f'{self.getApiPath(self.globalsApiName)}{self.localGlobalsApiFilePath}'
-            self.apisPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-1].split(self.backSlash)[:-2])}{self.backSlash}'
+        self.printStatus = self.getGlobalsPrintStatus()
+        self.apiNameList = self.getGlobalsApiNameList()
 
-            self.updateGlobals = self.getUpdateGlobalsClassFile()
+        if self.printStatus :
+            print(f'''            {self.__class__.__name__} = {self}
+            {self.__class__.__name__}.currentPath =     {self.currentPath}
+            {self.__class__.__name__}.localPath =       {self.localPath}
+            {self.__class__.__name__}.baseApiPath =     {self.baseApiPath}
+            {self.__class__.__name__}.apiPath =         {self.apiPath}
+            {self.__class__.__name__}.apiName =         {self.apiName}
+            {self.__class__.__name__}.apisRoot =        {self.apisRoot}
+            {self.__class__.__name__}.globalsName =     {self.globalsName}
+            {self.__class__.__name__}.apisPath =        {self.apisPath}
+            {self.__class__.__name__}.extension =       {self.extension}\n''')
 
-            if self.printStatus :
-                print(f'''                {self.__class__.__name__} = {self}
-                {self.__class__.__name__}.currentPath =                 {self.currentPath}
-                {self.__class__.__name__}.localPath =                   {self.localPath}
-                {self.__class__.__name__}.baseApiPath =                 {self.baseApiPath}
-                {self.__class__.__name__}.apiPath =                     {self.apiPath}
-                {self.__class__.__name__}.apiName =                     {self.apiName}
-                {self.__class__.__name__}.apisRoot =                    {self.apisRoot}
-                {self.__class__.__name__}.apiNameList =                 {self.apiNameList}
-                {self.__class__.__name__}.localGlobalsApiFilePath =     {self.localGlobalsApiFilePath}
-                {self.__class__.__name__}.globalsApiName =              {self.globalsApiName}
-                {self.__class__.__name__}.globalsApiPath =              {self.globalsApiPath}
-                {self.__class__.__name__}.apisPath =                    {self.apisPath}
-                {self.__class__.__name__}.extension =                   {self.extension}\n''')
+            self.printTree(self.settingTree,f'{self.__class__.__name__} settings tree')
 
-                self.printTree(self.settingTree,f'{self.__class__.__name__} settin tree')
+        self.update()
 
-            self.update()
+    def buildApplicationPath(self):
+        self.currentPath = f'{str(Path(__file__).parent.absolute())}{self.OS_SEPARATOR}'
+        self.localPath = f'{str(Path.home())}{self.OS_SEPARATOR}'
 
-        elif self.mode == Globals.WRONG_WAY_TO_IMPLEMENT_IT :
-            self.localGlobalsApiFilePath = f'{Globals.BASE_API_PATH}{Globals.LOCAL_GLOBALS_API_PATH}'
-            self.baseApiPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-2].split(self.backSlash)[:-1])}{self.backSlash}'
-            self.apisPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-2].split(self.backSlash)[:-2])}{self.backSlash}'
+        self.baseApiPath = Globals.BASE_API_PATH
+        self.apiPath = self.currentPath.split(self.baseApiPath)[0]
 
-            self.apisTree = self.getPathTreeFromPath(self.apisPath)
-            self.makePathTreeVisible(self.apisPath)
+        lastLocalPathPackage = self.localPath.split(self.OS_SEPARATOR)[-2]
+        firstBaseApiPath = self.baseApiPath.split(self.OS_SEPARATOR)[0]
+        lastLocalPathPackageFound = False
+        self.apiPackage = Globals.NOTHING
+        for currentPackage in self.currentPath.split(self.OS_SEPARATOR) :
+            if not lastLocalPathPackageFound :
+                if currentPackage == lastLocalPathPackage :
+                    lastLocalPathPackageFound = True
+            elif currentPackage == firstBaseApiPath :
+                break
+            else :
+                self.apiPackage = currentPackage
 
-            if self.printStatus :
-                print(f'''                {self.__class__.__name__} = {self}
-                {self.__class__.__name__}.currentPath =                 {self.currentPath}
-                {self.__class__.__name__}.localPath =                   {self.localPath}
-                {self.__class__.__name__}.baseApiPath =                 {self.baseApiPath}
-                {self.__class__.__name__}.localGlobalsApiFilePath =     {self.localGlobalsApiFilePath}
-                {self.__class__.__name__}.apisPath =                    {self.apisPath}
-                {self.__class__.__name__}.extension =                   {self.extension}\n''')
-                self.printTree(self.apisTree,'Apis tree')
+        if self.apiPackage != Globals.NOTHING :
+            if len(self.currentPath.split(self.localPath)[1].split(self.apiPackage)) > 1:
+                self.apisRoot = self.currentPath.split(self.localPath)[1].split(self.apiPackage)[0]
+            self.apisPath = f'{self.currentPath.split(self.apiPackage)[0]}'
+        else :
+            self.apisRoot = Globals.NOTHING
+            self.apisPath = Globals.NOTHING
 
     def getApiPath(self,apiName):
-        return f'{self.localPath}{self.apisRoot}{apiName}{self.backSlash}{self.baseApiPath}'
+        if not apiName == Globals.NOTHING :
+             return f'{self.localPath}{self.apisRoot}{apiName}{self.OS_SEPARATOR}{self.baseApiPath}'
+        return f'{self.localPath}{self.baseApiPath}'
 
     def update(self) :
-        self.updateApplicationDependencies()
-        self.updateGlobalsClassFile()
-        self.makeApisAvaliable()
+        self.updateDependencies()
+        self.makeApiAvaliable(self.apiPackage)
+        self.giveFrameworLocalkVisibility()
 
-    def makeApisAvaliable(self) :
-        self.apisTree = {}
-        for apiName in self.apiNameList :
-            try :
-                apiTree = self.makePathTreeVisible(self.getApiPath(apiName))
-                self.apisTree[apiName] = apiTree
-            except Exception as exception :
-                self.debug(f'Not possible to make {apiName} api avaliable{Globals.NEW_LINE}{str(exception)}')
-        if self.printStatus :
-            self.printTree(apiTree,'Api tree')
+    def giveFrameworLocalkVisibility(self):
+        if 'PythonFramework' == self.apiName :
+            localApiNameList = os.listdir(self.apisPath)
+            for apiName in localApiNameList :
+                if apiName not in self.apiTree.keys() :
+                    self.apiTree[apiName] = {}
+
+    def makeApiAvaliable(self,apiName) :
+        self.apiTree = {}
+        try :
+            apiPath = self.getApiPath(apiName)
+            self.apiTree[apiName] = self.makePathTreeVisible(self.getApiPath(apiName))
+        except Exception as exception :
+            self.error(self.__class__,f'Not possible to make {apiName} api avaliable',exception)
+        if self.debugStatus :
+            self.printTree(self.apiTree,'Api tree')
 
     def makePathTreeVisible(self,path):
         node = {}
         nodeSons = os.listdir(path)
         for nodeSon in nodeSons :
             if self.nodeIsValid(nodeSon) :
-                nodeSonPath = f'{path}{self.backSlash}{nodeSon}'
+                nodeSonPath = f'{path}{self.OS_SEPARATOR}{nodeSon}'
                 try :
                     node[nodeSon] = self.makePathTreeVisible(nodeSonPath)
-                except : pass
+                except :
+                    node[nodeSon] = ""
         sys.path.append(path)
         return node
 
@@ -231,7 +257,7 @@ class Globals:
         nodeSons = os.listdir(path)
         for nodeSon in nodeSons :
             if self.nodeIsValid(nodeSon) :
-                nodeSonPath = f'{path}{self.backSlash}{nodeSon}'
+                nodeSonPath = f'{path}{self.OS_SEPARATOR}{nodeSon}'
                 try :
                     node[nodeSon] = self.getPathTreeFromPath(nodeSonPath)
                 except : pass
@@ -247,9 +273,21 @@ class Globals:
                 approved = False
         return approved
 
-    def getSettingTree(self,settingFilePath=None) :
+    def overrideApiTree(self,apiName,package=None):
+        if package :
+            actualPackage = package + self.OS_SEPARATOR
+        else :
+            actualPackage = apiName + self.OS_SEPARATOR
+        self.apiName = apiName
+        self.apiPackage = package
+        self.apiPath = f'{self.apisPath}{actualPackage}'
+        settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.globalsName}.{Globals.EXTENSION}'
+        self.settingTree = self.getSettingTree(settingFilePath=settingFilePath,settingTree=self.settingTree)
+
+
+    def getSettingTree(self,settingFilePath=None,settingTree=None) :
         if not settingFilePath :
-            settingFilePath = f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_BACK_SLASH}{self.globalsApiName}.{Globals.EXTENSION}'
+            settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.globalsName}.{Globals.EXTENSION}'
         with open(settingFilePath,Globals.READ,encoding=Globals.ENCODING) as settingsFile :
             allSettingLines = settingsFile.readlines()
         longStringCapturing = False
@@ -259,7 +297,8 @@ class Globals:
         depthPass = None
         nodeRefference = 0
         nodeKey = Globals.NOTHING
-        settingTree = {}
+        if not settingTree :
+            settingTree = {}
         for line, settingLine in enumerate(allSettingLines) :
             if self.lineAproved(settingLine) :
                 if longStringCapturing :
@@ -321,11 +360,6 @@ class Globals:
                             longStringList
                         )
                         depth = currentDepth
-        if self.apiName not in settingTree.keys() :
-            try :
-                self.concatenateTree(f'{self.apiPath}{self.baseApiPath}{Globals.RESOURCE_BACK_SLASH}{self.apiName}.{self.accessTree(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.API_EXTENSION),settingTree)}',settingTree)
-            except Exception as exception :
-                self.debug(f'Not possible to get api properties tree{Globals.NEW_LINE}{str(exception)}')
         return settingTree
 
     def settingsTreeInnerLoop(self,settingLine,nodeKey,settingTree,longStringCapturing,quoteType,longStringList):
@@ -348,12 +382,12 @@ class Globals:
         return settingKey,settingValue,nodeKey,longStringCapturing,quoteType,longStringList
 
     def addTree(self,settingFilePath):
-        newSetting = self.getSettingTree(settingFilePath)
-        for settingKey in newSetting :
-            self.settingTree[settingKey] = newSetting[settingKey]
+        newSetting = self.getSettingTree(settingFilePath=settingFilePath)
+        for settingKey,settingValue in newSetting.items() :
+            self.settingTree[settingKey] = settingValue
 
     def concatenateTree(self,settingFilePath,tree):
-        newSetting = self.getSettingTree(settingFilePath)
+        newSetting = self.getSettingTree(settingFilePath=settingFilePath)
         for settingKey in newSetting :
             tree[settingKey] = newSetting[settingKey]
 
@@ -366,7 +400,7 @@ class Globals:
         try :
             return self.accessTree(nodeKey,settingTree)
         except Exception as exception :
-            self.debug(f'Not possible to get {nodeKey}{Globals.NEW_LINE}{str(exception)}')
+            self.debug(f'Not possible to get {nodeKey} node key. Cause: {str(exception)}')
             return None
 
     def accessTree(self,nodeKey,tree) :
@@ -454,14 +488,14 @@ class Globals:
         roughtValues = value[1:-1].split(Globals.COMA)
         values = []
         for value in roughtValues :
-            values.append(self.getValue(value))
+            values.append(self.getValue(value.strip()))
         return values
 
     def getTuple(self,value):
         roughtValues = value[1:-1].split(Globals.COMA)
         values = []
         for value in roughtValues :
-            values.append(self.getValue(value))
+            values.append(self.getValue(value.strip()))
         return tuple(values)
 
     def getDictionary(self,value) :
@@ -493,8 +527,7 @@ class Globals:
                 fileNames.append(''.join(splitedName[:-1]))
         return fileNames
 
-    def printTree(self,tree,name):
-        depth = 0
+    def printTree(self,tree,name,depth=0):
         print(f'\n{name}')
         self.printNodeTree(tree,depth)
         print()
@@ -511,53 +544,43 @@ class Globals:
             else :
                 print(f'{depthSpace}{node}{Globals.SPACE}{Globals.COLON}{Globals.SPACE}{tree[node]}')
 
-    def updateApplicationDependencies(self):
+    def updateDependencies(self):
         try :
             if self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE) :
                 import subprocess
-                moduleList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST)
+                moduleList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST_WEB)
                 if moduleList :
                     subprocess.Popen(Globals.UPDATE_PIP_INSTALL).wait()
                     for module in moduleList :
                         subprocess.Popen(f'{Globals.PIP_INSTALL} {module}').wait()
-                resourceModuleList = self.getApiSetting(AttributeKey.DEPENDENCY_RESOURCE_LIST)
+                resourceModuleList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST_LOCAL)
                 if resourceModuleList :
                     for resourceModule in resourceModuleList :
                         command = f'{Globals.PIP_INSTALL} {resourceModule}'
-                        processPath = f'{self.getApiPath(self.apiName)}{Globals.RESOURCE_BACK_SLASH}'
+                        processPath = f'{self.getApiPath(self.apiName)}{Globals.RESOURCE_BACK_SLASH}{Globals.DEPENDENCY_BACK_SLASH}'
                         subprocess.Popen(command,shell=True,cwd=processPath).wait()
                         ###- subprocess.run(command,shell=True,capture_output=True,cwd=processPath)
-        except :
-            pass
+        except Exception as exception :
+            self.debug(f'Not possible to update dependencies. Cause: {str(exception)}')
 
     def getGlobalsPrintStatus(self):
         return self.getSetting(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.PRINT_STATUS))
 
-    def getGlobalsApiList(self):
+    def getGlobalsApiNameList(self):
         return self.getSetting(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.GLOBALS_API_LIST))
 
-    def getUpdateGlobalsClassFile(self):
-        return self.getSetting(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.UPDATE_GLOBALS))
-
-    def updateGlobalsClassFile(self):
-        if self.updateGlobals and self.updateGlobals.__class__.__name__ == Globals.BOOLEAN :
-            try :
-                globalsScript = []
-                with open(self.globalsApiPath,Globals.READ,encoding = Globals.ENCODING) as globalsFile :
-                    for line in globalsFile :
-                        globalsScript.append(line)
-                for apiName in self.apiNameList :
-                    updatingApiPath =f'{self.getApiPath(apiName)}{self.localGlobalsApiFilePath}'
-                    if apiName != self.globalsApiName :
-                        with open(updatingApiPath,Globals.OVERRIDE,encoding = Globals.ENCODING) as globalsFile :
-                            globalsFile.write(''.join(globalsScript))
-            except Exception as exception :
-                self.debug(f'Not possible to update Globals {Globals.NEW_LINE}{str(exception)}')
-                if self.printStatus :
-                    print(f'''Globals api wans't found in your directory. {self.__class__.__name__} may not work properly in some edge cases''')
+    def getApiName(self):
+        try :
+            return self.getSetting(f'{self.globalsName}.{AttributeKey.API_NAME}')
+        except Exception as exception :
+            self.failure(self.__class__,'Not possible to get api name', exception)
 
     def getExtension(self):
-        return self.extension
+        try :
+            return self.getSetting(f'{self.globalsName}.{AttributeKey.API_EXTENSION}')
+        except Exception as exception :
+            self.failure(self.__class__,'Not possible to get api extenion. Returning default estension', exception)
+            return Globals.EXTENSION
 
     def getSettingFromSettingFilePathAndKeyPair(self,path,settingKey) :
         self.debug(f'''Getting {settingKey} from {path}''')
@@ -571,6 +594,98 @@ class Globals:
                 self.debug(f'''{Globals.TAB}key : value --> {settingKey} : {settingValue}''')
                 return settingValue
 
-    def debug(self,string):
+    def debug(self,message):
         if self.debugStatus :
-            print(f'{Globals.DEBUG}{string}')
+            print(f'{Globals.DEBUG}{message}')
+
+    def warning(self,string):
+        if self.warningStatus :
+            print(f'{Globals.WARNING}{string}')
+
+    def error(self,classRequest,message,exception):
+        if self.errorStatus :
+            if classRequest == Globals.NOTHING :
+                classPortion = Globals.NOTHING
+            else :
+                classPortion = f'{classRequest.__name__} '
+            if exception == Globals.NOTHING :
+                errorPortion = Globals.NOTHING
+            else :
+                errorPortion = f'. Cause: {str(exception)}'
+            print(f'{Globals.ERROR}{classPortion}{message}{errorPortion}')
+
+    def success(self,classRequest,message):
+        if self.successStatus :
+            if classRequest == Globals.NOTHING :
+                classPortion = Globals.NOTHING
+            else :
+                classPortion = f'{classRequest.__name__} '
+            print(f'{Globals.SUCCESS}{classPortion}{message}')
+
+    def failure(self,classRequest,message,exception):
+        if self.failureStatus :
+            if classRequest == Globals.NOTHING :
+                classPortion = Globals.NOTHING
+            else :
+                classPortion = f'{classRequest.__name__} '
+            if exception == Globals.NOTHING :
+                errorPortion = Globals.NOTHING
+            else :
+                errorPortion = f'. Cause: {str(exception)}'
+            print(f'{Globals.FAILURE}{classPortion}{message}{errorPortion}')
+
+    def setting(self,classRequest,message):
+        if self.settingStatus :
+            if classRequest == Globals.NOTHING :
+                classPortion = Globals.NOTHING
+            else :
+                classPortion = f'{classRequest.__name__} '
+            print(f'{Globals.SETTING}{classPortion}{message}')
+
+def getGlobals() :
+    try :
+        from app import globals
+        return globals
+    except :
+        try :
+            from run import globals
+            return globals
+        except : pass
+
+def getApi() :
+    return getGlobals().api
+
+def addTo(self) :
+    self.globals = getGlobals()
+    self.globals.api = self
+
+def ResourceMethod(outerMethod,*args,**kwargs):
+    def innerMethod(*args,**kwargs):
+        try :
+            if not args[0].api :
+                args[0].api = getApi()
+        except :
+            try :
+                args[0].api = getApi()
+            except : pass
+        return outerMethod(*args,**kwargs)
+    return innerMethod
+
+def Resource(*argument,**keywordArgument) :
+    def Wrapper(OuterClass,*args,**kwargs):
+        class InnerClass(OuterClass):
+            url = keywordArgument.get('path')
+            def __init__(self,*args,**kwargs):
+                OuterClass.__init__(self,*args,**kwargs)
+                self.api = getApi()
+        InnerClass.__name__ = OuterClass.__name__
+        InnerClass.__module__ = OuterClass.__module__
+        InnerClass.__qualname__ = OuterClass.__qualname__
+        # printClass(InnerClass)
+        return InnerClass
+    return Wrapper
+
+def printClass(Class) :
+    print(f'    Class.__name__ = {Class.__name__}')
+    print(f'    Class.__module__ = {Class.__module__}')
+    print(f'    Class.__qualname__ = {Class.__qualname__}')

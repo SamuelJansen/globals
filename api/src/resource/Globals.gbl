@@ -1,9 +1,0 @@
-Globals:
-    update-globals: True
-    print-status: True
-    api:
-        list: [Globals]
-        extension: gbl
-        dependency:
-            update: True
-            list: [Popen,Path]
