@@ -6,7 +6,7 @@ url = 'https://github.com/SamuelJansen/globals/'
 
 setup(
   name = name,
-  packages = ['api','src'],
+  packages = ['api'],
   version = version,
   license='MIT',
   description = 'import package handler',
