@@ -122,8 +122,7 @@ class Globals:
     FAILURE =   '[FAILURE] '
     SETTING =   '[SETTING] '
 
-    def __init__(self,
-        filePath = None,
+    def __init__(self, filePath,
         successStatus = False,
         settingStatus = False,
         debugStatus = False,
@@ -131,6 +130,7 @@ class Globals:
         failureStatus = False,
         errorStatus = False,
         encoding = ENCODING,
+        globalsEverything = False
     ):
 
         clear = lambda: os.system('cls')
@@ -143,7 +143,8 @@ class Globals:
         self.warningStatus = warningStatus
         self.failureStatus = failureStatus
         self.errorStatus = errorStatus
-        self.setting(self.__class__,f'successStatus={self.successStatus}, settingStatus={self.settingStatus}, debugStatus={self.debugStatus}, warningStatus={self.warningStatus}, failureStatus={self.failureStatus}, errorStatus={self.errorStatus}')
+        self.globalsEverything = globalsEverything
+        self.setting(self.__class__,f'successStatus={self.successStatus}, settingStatus={self.settingStatus}, debugStatus={self.debugStatus}, warningStatus={self.warningStatus}, failureStatus={self.failureStatus}, errorStatus={self.errorStatus}, globalsEverything={self.globalsEverything}')
 
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
@@ -153,13 +154,6 @@ class Globals:
             self.encoding = Globals.ENCODING
 
         self.buildApplicationPath()
-        print(f'''            {self.__class__.__name__} = {self}
-        {self.__class__.__name__}.currentPath =     {self.currentPath}
-        {self.__class__.__name__}.localPath =       {self.localPath}
-        {self.__class__.__name__}.baseApiPath =     {self.baseApiPath}
-        {self.__class__.__name__}.apiPath =         {self.apiPath}
-        {self.__class__.__name__}.apisRoot =        {self.apisRoot}
-        {self.__class__.__name__}.apisPath =        {self.apisPath}''')
 
         self.settingTree = self.getSettingTree()
         self.apiName = self.getApiName()
@@ -222,6 +216,7 @@ class Globals:
     def update(self) :
         self.updateDependencies()
         self.makeApiAvaliable(self.apiPackage)
+        self.makeApisAvaliable(self.apisPath)
         self.giveFrameworLocalkVisibility()
 
     def giveFrameworLocalkVisibility(self):
@@ -231,15 +226,22 @@ class Globals:
                 if apiName not in self.apiTree.keys() :
                     self.apiTree[apiName] = {}
 
-    def makeApiAvaliable(self,apiName) :
+    def makeApiAvaliable(self,apiPackageName) :
         self.apiTree = {}
         try :
-            apiPath = self.getApiPath(apiName)
-            self.apiTree[apiName] = self.makePathTreeVisible(self.getApiPath(apiName))
+            apiPath = self.getApiPath(apiPackageName)
+            self.apiTree[apiPackageName] = self.makePathTreeVisible(self.getApiPath(apiPackageName))
         except Exception as exception :
-            self.error(self.__class__,f'Not possible to make {apiName} api avaliable',exception)
+            self.error(self.__class__,f'Not possible to make {apiPackageName} api avaliable',exception)
         if self.debugStatus :
             self.printTree(self.apiTree,'Api tree')
+
+    def makeApisAvaliable(self,apisPath):
+        if self.globalsEverything :
+            apiPackageList = os.listdir(apisPath)
+            for apiPackage in apiPackageList :
+                if not apiPackage in list(self.apiTree.keys()) :
+                    self.apiTree[apiPackage] = self.makePathTreeVisible(f'{apisPath}{apiPackage}')
 
     def makePathTreeVisible(self,path):
         node = {}
