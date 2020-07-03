@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-version = 'v0.0.6'
+version = '0.0.7'
 name = 'globals'
 url = 'https://github.com/SamuelJansen/globals/'
 
@@ -13,7 +13,7 @@ setup(
   author = 'Samuel Jansen',
   author_email = 'samuel.jansenn@gmail.com',
   url = url,
-  download_url = f'{url}archive/{version}.tar.gz',
+  download_url = f'{url}archive/v{version}.tar.gz',
   keywords = ['global', 'python global package', 'python package manager'],
   install_requires=[],
   classifiers=[
