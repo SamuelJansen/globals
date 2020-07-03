@@ -1,12 +1,12 @@
 from distutils.core import setup
 
-version = '0.0.17'
+version = '0.0.18'
 name = 'globals'
 url = 'https://github.com/SamuelJansen/globals/'
 
 setup(
   name = name,
-  packages = [name, f'{name}.api', f'{name}.api.src'],
+  packages = [name, f'{name}/api', f'{name}/api/src'],
   version = version,
   license='MIT',
   description = 'import package handler',
