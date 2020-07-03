@@ -123,28 +123,27 @@ class Globals:
     SETTING =   '[SETTING] '
 
     def __init__(self,
-        file = None,
-        encoding = ENCODING,
+        filePath = None,
+        successStatus = False,
+        settingStatus = False,
         debugStatus = False,
         warningStatus = False,
-        errorStatus = False,
-        successStatus = False,
         failureStatus = False,
-        settingStatus = False,
+        errorStatus = False,
+        encoding = ENCODING,
     ):
-
-        print(file)
 
         clear = lambda: os.system('cls')
         ###- clear() # or simply os.system('cls')
 
-        self.globalsName = self.__class__.__name__
-        self.debugStatus = debugStatus
-        self.errorStatus = errorStatus
+        self.filePath = filePath
         self.successStatus = successStatus
-        self.failureStatus = failureStatus
         self.settingStatus = settingStatus
-        self.setting(self.__class__,f'debugStatus={self.debugStatus}, errorStatus={self.errorStatus}, successStatus={self.successStatus}, failureStatus={self.failureStatus}, settingStatus={self.settingStatus}')
+        self.debugStatus = debugStatus
+        self.warningStatus = warningStatus
+        self.failureStatus = failureStatus
+        self.errorStatus = errorStatus
+        self.setting(self.__class__,f'successStatus={self.successStatus}, settingStatus={self.settingStatus}, debugStatus={self.debugStatus}, warningStatus={self.warningStatus}, failureStatus={self.failureStatus}, errorStatus={self.errorStatus}')
 
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
@@ -154,6 +153,13 @@ class Globals:
             self.encoding = Globals.ENCODING
 
         self.buildApplicationPath()
+        print(f'''            {self.__class__.__name__} = {self}
+        {self.__class__.__name__}.currentPath =     {self.currentPath}
+        {self.__class__.__name__}.localPath =       {self.localPath}
+        {self.__class__.__name__}.baseApiPath =     {self.baseApiPath}
+        {self.__class__.__name__}.apiPath =         {self.apiPath}
+        {self.__class__.__name__}.apisRoot =        {self.apisRoot}
+        {self.__class__.__name__}.apisPath =        {self.apisPath}''')
 
         self.settingTree = self.getSettingTree()
         self.apiName = self.getApiName()
@@ -168,10 +174,9 @@ class Globals:
             {self.__class__.__name__}.localPath =       {self.localPath}
             {self.__class__.__name__}.baseApiPath =     {self.baseApiPath}
             {self.__class__.__name__}.apiPath =         {self.apiPath}
-            {self.__class__.__name__}.apiName =         {self.apiName}
             {self.__class__.__name__}.apisRoot =        {self.apisRoot}
-            {self.__class__.__name__}.globalsName =     {self.globalsName}
             {self.__class__.__name__}.apisPath =        {self.apisPath}
+            {self.__class__.__name__}.apiName =         {self.apiName}
             {self.__class__.__name__}.extension =       {self.extension}\n''')
 
             self.printTree(self.settingTree,f'{self.__class__.__name__} settings tree')
@@ -179,8 +184,11 @@ class Globals:
         self.update()
 
     def buildApplicationPath(self):
-        self.currentPath = f'{str(Path(__file__).parent.absolute())}{self.OS_SEPARATOR}'
-        self.localPath = f'{str(Path.home())}{self.OS_SEPARATOR}'
+        if self.filePath :
+            self.currentPath = str(Path(self.filePath).parent.absolute())
+        else :
+            self.currentPath = str(Path(__file__).parent.absolute())
+        self.localPath = str(Path.home())
 
         self.baseApiPath = Globals.BASE_API_PATH
         self.apiPath = self.currentPath.split(self.baseApiPath)[0]
@@ -284,13 +292,13 @@ class Globals:
         self.apiName = apiName
         self.apiPackage = package
         self.apiPath = f'{self.apisPath}{actualPackage}'
-        settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.globalsName}.{Globals.EXTENSION}'
+        settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.__class__.__name__}.{Globals.EXTENSION}'
         self.settingTree = self.getSettingTree(settingFilePath=settingFilePath,settingTree=self.settingTree)
 
 
     def getSettingTree(self,settingFilePath=None,settingTree=None) :
         if not settingFilePath :
-            settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.globalsName}.{Globals.EXTENSION}'
+            settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.__class__.__name__}.{Globals.EXTENSION}'
         with open(settingFilePath,Globals.READ,encoding=Globals.ENCODING) as settingsFile :
             allSettingLines = settingsFile.readlines()
         longStringCapturing = False
@@ -574,13 +582,13 @@ class Globals:
 
     def getApiName(self):
         try :
-            return self.getSetting(f'{self.globalsName}.{AttributeKey.API_NAME}')
+            return self.getSetting(f'{self.__class__.__name__}.{AttributeKey.API_NAME}')
         except Exception as exception :
             self.failure(self.__class__,'Not possible to get api name', exception)
 
     def getExtension(self):
         try :
-            return self.getSetting(f'{self.globalsName}.{AttributeKey.API_EXTENSION}')
+            return self.getSetting(f'{self.__class__.__name__}.{AttributeKey.API_EXTENSION}')
         except Exception as exception :
             self.failure(self.__class__,'Not possible to get api extenion. Returning default estension', exception)
             return Globals.EXTENSION
