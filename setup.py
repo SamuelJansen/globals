@@ -1,12 +1,12 @@
 from distutils.core import setup
 
-version = '0.0.15'
+version = '0.0.16'
 name = 'globals'
 url = 'https://github.com/SamuelJansen/globals/'
 
 setup(
   name = name,
-  packages = [name],
+  packages = ['api','src'],
   version = version,
   license='MIT',
   description = 'import package handler',
@@ -14,7 +14,7 @@ setup(
   author_email = 'samuel.jansenn@gmail.com',
   url = url,
   download_url = f'{url}archive/v{version}.tar.gz',
-  keywords = ['global', 'python global package', 'python package manager'],
+  keywords = ['global', 'python global package', 'python package manager', 'global package manager'],
   install_requires=[],
   classifiers=[
     'Development Status :: 3 - Alpha',

@@ -90,6 +90,7 @@ class Globals:
     NODE_IGNORE_LIST = [
         '.git',
         'distribution',
+        'dist',
         '__pycache__',
         '__init__',
         '__main__',
@@ -236,6 +237,8 @@ class Globals:
             for apiPackage in apiPackageList :
                 if not apiPackage in list(self.apiTree.keys()) :
                     self.apiTree[apiPackage] = self.makePathTreeVisible(f'{apisPath}{apiPackage}')
+        if self.debugStatus :
+            self.printTree(self.apiTree,'Api tree')
 
     def giveFrameworLocalkVisibility(self):
         if 'PythonFramework' == self.apiName :
