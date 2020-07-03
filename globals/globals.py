@@ -170,6 +170,7 @@ class Globals:
             {self.__class__.__name__}.apiPath =         {self.apiPath}
             {self.__class__.__name__}.apisRoot =        {self.apisRoot}
             {self.__class__.__name__}.apisPath =        {self.apisPath}
+            {self.__class__.__name__}.apiPackage =      {self.apiPackage}
             {self.__class__.__name__}.apiName =         {self.apiName}
             {self.__class__.__name__}.extension =       {self.extension}\n''')
 
@@ -219,13 +220,6 @@ class Globals:
         self.makeApisAvaliable(self.apisPath)
         self.giveFrameworLocalkVisibility()
 
-    def giveFrameworLocalkVisibility(self):
-        if 'PythonFramework' == self.apiName :
-            localApiNameList = os.listdir(self.apisPath)
-            for apiName in localApiNameList :
-                if apiName not in self.apiTree.keys() :
-                    self.apiTree[apiName] = {}
-
     def makeApiAvaliable(self,apiPackageName) :
         self.apiTree = {}
         try :
@@ -242,6 +236,13 @@ class Globals:
             for apiPackage in apiPackageList :
                 if not apiPackage in list(self.apiTree.keys()) :
                     self.apiTree[apiPackage] = self.makePathTreeVisible(f'{apisPath}{apiPackage}')
+
+    def giveFrameworLocalkVisibility(self):
+        if 'PythonFramework' == self.apiName :
+            localApiNameList = os.listdir(self.apisPath)
+            for apiName in localApiNameList :
+                if apiName not in self.apiTree.keys() :
+                    self.apiTree[apiName] = {}
 
     def makePathTreeVisible(self,path):
         node = {}
