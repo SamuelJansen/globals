@@ -185,10 +185,10 @@ class Globals:
 
     def buildApplicationPath(self):
         if self.filePath :
-            self.currentPath = str(Path(self.filePath).parent.absolute())
+            self.currentPath = f'{str(Path(self.filePath).parent.absolute())}{self.OS_SEPARATOR}'
         else :
-            self.currentPath = str(Path(__file__).parent.absolute())
-        self.localPath = str(Path.home())
+            self.currentPath = f'{str(Path(__file__).parent.absolute())}{self.OS_SEPARATOR}'
+        self.localPath = f'{str(Path.home())}{self.OS_SEPARATOR}'
 
         self.baseApiPath = Globals.BASE_API_PATH
         self.apiPath = self.currentPath.split(self.baseApiPath)[0]
