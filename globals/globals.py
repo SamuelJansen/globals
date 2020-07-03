@@ -1,4 +1,4 @@
-import os, sys, subprocess
+import os, sys
 from pathlib import Path
 
 class AttributeKey:
@@ -65,6 +65,7 @@ class Globals:
     ENCODING = 'utf-8'
     OVERRIDE = 'w+'
     READ = 'r'
+
 
     API_BACK_SLASH = f'api{OS_SEPARATOR}'
     SRC_BACK_SLASH = f'src{OS_SEPARATOR}'
@@ -136,7 +137,6 @@ class Globals:
 
         self.globalsName = self.__class__.__name__
         self.debugStatus = debugStatus
-        self.warningStatus = warningStatus
         self.errorStatus = errorStatus
         self.successStatus = successStatus
         self.failureStatus = failureStatus
@@ -149,64 +149,6 @@ class Globals:
             self.encoding = encoding
         else :
             self.encoding = Globals.ENCODING
-        if self.mode == Globals.PROPER_WAY_TO_IMPLEMENT_IT :
-            self.baseApiPath = Globals.BASE_API_PATH
-            self.apiPath = self.currentPath.split(self.baseApiPath)[0]
-            self.apiName = self.apiPath.split(self.backSlash)[-2]
-            self.systemHelperRunning = (self.apiName == Globals.SYSTEM_HELPER_NAME)
-            self.apisRoot = self.currentPath.split(self.localPath)[1].split(self.apiName)[0]
-
-            self.settingTree = self.getSettingTree()
-            try :
-                self.extension = self.getSetting(f'{self.globalsApiName}.{AttributeKey.API_EXTENSION}',self.settingTree)
-            except :
-                self.extension = Globals.EXTENSION
-
-            self.printStatus = self.getGlobalsPrintStatus()
-            self.apiNameList = self.getGlobalsApiList()
-
-            self.localGlobalsApiFilePath = f'{Globals.LOCAL_GLOBALS_API_PATH}{self.globalsApiName}.{Globals.PYTHON_EXTENSION}'
-            self.globalsApiPath = f'{self.getApiPath(self.globalsApiName)}{self.localGlobalsApiFilePath}'
-            self.apisPath = f'{self.currentPath.split(self.apiName)[0]}'
-
-            self.updateGlobals = self.getUpdateGlobalsClassFile()
-
-            if self.printStatus :
-                print(f'''                {self.__class__.__name__} = {self}
-                {self.__class__.__name__}.currentPath =                 {self.currentPath}
-                {self.__class__.__name__}.localPath =                   {self.localPath}
-                {self.__class__.__name__}.baseApiPath =                 {self.baseApiPath}
-                {self.__class__.__name__}.apiPath =                     {self.apiPath}
-                {self.__class__.__name__}.apiName =                     {self.apiName}
-                {self.__class__.__name__}.apisRoot =                    {self.apisRoot}
-                {self.__class__.__name__}.apiNameList =                 {self.apiNameList}
-                {self.__class__.__name__}.localGlobalsApiFilePath =     {self.localGlobalsApiFilePath}
-                {self.__class__.__name__}.globalsApiName =              {self.globalsApiName}
-                {self.__class__.__name__}.globalsApiPath =              {self.globalsApiPath}
-                {self.__class__.__name__}.apisPath =                    {self.apisPath}
-                {self.__class__.__name__}.extension =                   {self.extension}\n''')
-
-                self.printTree(self.settingTree,f'{self.__class__.__name__} settin tree')
-
-            self.update()
-
-        elif self.mode == Globals.WRONG_WAY_TO_IMPLEMENT_IT :
-            self.localGlobalsApiFilePath = f'{Globals.BASE_API_PATH}{Globals.LOCAL_GLOBALS_API_PATH}'
-            self.baseApiPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-2].split(self.backSlash)[:-1])}{self.backSlash}'
-            self.apisPath = f'{self.backSlash.join(self.currentPath.split(self.localGlobalsApiFilePath)[-2].split(self.backSlash)[:-2])}{self.backSlash}'
-
-            self.apisTree = self.getPathTreeFromPath(self.apisPath)
-            self.makePathTreeVisible(self.apisPath)
-
-            if self.printStatus :
-                print(f'''                {self.__class__.__name__} = {self}
-                {self.__class__.__name__}.currentPath =                 {self.currentPath}
-                {self.__class__.__name__}.localPath =                   {self.localPath}
-                {self.__class__.__name__}.baseApiPath =                 {self.baseApiPath}
-                {self.__class__.__name__}.localGlobalsApiFilePath =     {self.localGlobalsApiFilePath}
-                {self.__class__.__name__}.apisPath =                    {self.apisPath}
-                {self.__class__.__name__}.extension =                   {self.extension}\n''')
-                self.printTree(self.apisTree,'Apis tree')
 
         self.buildApplicationPath()
 
@@ -605,6 +547,7 @@ class Globals:
     def updateDependencies(self):
         try :
             if self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE) :
+                import subprocess
                 moduleList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST_WEB)
                 if moduleList :
                     subprocess.Popen(Globals.UPDATE_PIP_INSTALL).wait()
