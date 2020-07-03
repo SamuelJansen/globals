@@ -1,14 +1,19 @@
 from distutils.core import setup
+
+version = 'v0.0.6'
+name = 'globals'
+url = 'https://github.com/SamuelJansen/globals/'
+
 setup(
-  name = 'globals',
+  name = name,
   packages = [],
-  version = '0.0.5',
+  version = version,
   license='MIT',
   description = 'import package handler',
   author = 'Samuel Jansen',
   author_email = 'samuel.jansenn@gmail.com',
-  url = 'https://github.com/SamuelJansen/globals',
-  download_url = 'https://github.com/SamuelJansen/globals/archive/v0.0.5.tar.gz',
+  url = url,
+  download_url = f'{url}archive/{version}.tar.gz',
   keywords = ['global', 'python global package', 'python package manager'],
   install_requires=[],
   classifiers=[
