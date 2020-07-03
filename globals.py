@@ -151,6 +151,14 @@ class Globals:
             self.encoding = Globals.ENCODING
 
         self.buildApplicationPath()
+        print(f'''            {self.__class__.__name__} = {self}
+        {self.__class__.__name__}.currentPath =     {self.currentPath}
+        {self.__class__.__name__}.localPath =       {self.localPath}
+        {self.__class__.__name__}.baseApiPath =     {self.baseApiPath}
+        {self.__class__.__name__}.apiPath =         {self.apiPath}
+        {self.__class__.__name__}.apisRoot =        {self.apisRoot}
+        {self.__class__.__name__}.globalsName =     {self.globalsName}
+        {self.__class__.__name__}.apisPath =        {self.apisPath}''')
 
         self.settingTree = self.getSettingTree()
         self.apiName = self.getApiName()
@@ -165,10 +173,10 @@ class Globals:
             {self.__class__.__name__}.localPath =       {self.localPath}
             {self.__class__.__name__}.baseApiPath =     {self.baseApiPath}
             {self.__class__.__name__}.apiPath =         {self.apiPath}
-            {self.__class__.__name__}.apiName =         {self.apiName}
             {self.__class__.__name__}.apisRoot =        {self.apisRoot}
             {self.__class__.__name__}.globalsName =     {self.globalsName}
             {self.__class__.__name__}.apisPath =        {self.apisPath}
+            {self.__class__.__name__}.apiName =         {self.apiName}
             {self.__class__.__name__}.extension =       {self.extension}\n''')
 
             self.printTree(self.settingTree,f'{self.__class__.__name__} settings tree')
