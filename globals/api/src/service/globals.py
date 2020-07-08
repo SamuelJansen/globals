@@ -191,12 +191,9 @@ class Globals:
 
         lastLocalPathPackage = self.localPath.split(self.OS_SEPARATOR)[-2]
         firstBaseApiPath = self.baseApiPath.split(self.OS_SEPARATOR)[0]
-        print(f'firstBaseApiPath = {firstBaseApiPath}')
         lastLocalPathPackageNotFound = True
         self.apiPackage = Globals.NOTHING
-        print(f'self.currentPath.split(self.OS_SEPARATOR) = {self.currentPath.split(self.OS_SEPARATOR)}')
         for currentPackage in self.currentPath.split(self.OS_SEPARATOR) :
-            print(f'currentPackage = {currentPackage}')
             if lastLocalPathPackageNotFound :
                 if currentPackage == lastLocalPathPackage :
                     lastLocalPathPackageNotFound = False
@@ -204,7 +201,6 @@ class Globals:
                 break
             else :
                 self.apiPackage = currentPackage
-            print(f'self.apiPackage = {self.apiPackage}')
 
         if self.apiPackage != Globals.NOTHING :
             if len(self.currentPath.split(self.localPath)[1].split(self.apiPackage)) > 1:
