@@ -676,7 +676,7 @@ def addTo(self) :
     self.globals = getGlobals()
     self.globals.api = self
 
-def ResourceMethod(outerMethod,*args,**kwargs):
+def GlobalsResourceMethod(outerMethod,*args,**kwargs):
     def innerMethod(*args,**kwargs):
         try :
             if not args[0].api :
@@ -688,7 +688,7 @@ def ResourceMethod(outerMethod,*args,**kwargs):
         return outerMethod(*args,**kwargs)
     return innerMethod
 
-def Resource(*argument,**keywordArgument) :
+def GlobalsResource(*argument,**keywordArgument) :
     def Wrapper(OuterClass,*args,**kwargs):
         class InnerClass(OuterClass):
             url = keywordArgument.get('path')
