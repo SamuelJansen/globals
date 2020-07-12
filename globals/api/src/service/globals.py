@@ -219,7 +219,7 @@ class Globals:
         self.updateDependencies()
         self.makeApiAvaliable(self.apiPackage)
         self.makeApisAvaliable(self.apisPath)
-        self.giveFrameworLocalkVisibility()
+        self.giveLocalVisibilityToFrameworkApis()
 
     def makeApiAvaliable(self,apiPackageName) :
         self.apiTree = {}
@@ -240,7 +240,7 @@ class Globals:
         if self.debugStatus :
             self.printTree(self.apiTree,'Api tree')
 
-    def giveFrameworLocalkVisibility(self):
+    def giveLocalVisibilityToFrameworkApis(self):
         if 'PythonFramework' == self.apiName :
             localApiNameList = os.listdir(self.apisPath)
             for apiName in localApiNameList :
