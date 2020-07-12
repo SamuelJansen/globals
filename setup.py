@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-version = '0.0.26'
+version = '0.0.27'
 name = 'globals'
 url = f'https://github.com/SamuelJansen/{name}/'
 
