@@ -581,11 +581,11 @@ class Globals:
                     for module in moduleList :
                         command = f'{Globals.PIP_INSTALL} {module}'
                         subprocess.Popen(command).wait()
-                resourceModuleList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST_LOCAL)
-                if resourceModuleList :
-                    for resourceModule in resourceModuleList :
-                        command = f'{Globals.PIP_INSTALL} {resourceModule}'
-                        processPath = f'{self.localPath}{self.apisRoot}{apiPackageName}{self.OS_SEPARATOR}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{Globals.DEPENDENCY_BACK_SLASH}'
+                localPackageNameList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST_LOCAL)
+                if localPackageNameList :
+                    for localPackageName in localPackageNameList :
+                        command = f'{Globals.PIP_INSTALL} {localPackageName}'
+                        processPath = f'{self.localPath}{self.apisRoot}{localPackageName}{self.OS_SEPARATOR}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{Globals.DEPENDENCY_BACK_SLASH}'
                         subprocess.Popen(command,shell=True,cwd=processPath).wait()
                         ###- subprocess.run(command,shell=True,capture_output=True,cwd=processPath)
         except Exception as exception :
