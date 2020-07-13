@@ -136,7 +136,7 @@ class Globals:
         encoding = ENCODING,
         globalsEverything = False
     ):
-    
+
         clear = lambda: os.system('cls')
         ###- clear() # or simply os.system('cls')
 
@@ -180,6 +180,7 @@ class Globals:
 
             self.printTree(self.settingTree,f'{self.__class__.__name__} settings tree')
 
+        self.updateDependencyStatus = self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE)
         self.update()
 
     def buildApplicationPath(self):
@@ -575,7 +576,7 @@ class Globals:
 
     def updateDependencies(self):
         try :
-            if self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE) :
+            if self.updateDependencyStatus :
                 import subprocess
                 moduleList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST_WEB)
                 if moduleList :
