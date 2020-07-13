@@ -82,7 +82,7 @@ class Globals:
     LOCAL_GLOBALS_API_PATH = f'{SERVICE_BACK_SLASH}{FRAMEWORK_BACK_SLASH}{GLOBALS_BACK_SLASH}'
 
     TOKEN_PACKAGE_NAME = '__TOKEN_PACKAGE_NAME__'
-    PIP_INSTALL = 'python pip install'
+    # PIP_INSTALL = 'python pip install'
     PIP_INSTALL = f'pip install {TOKEN_PACKAGE_NAME} --upgrade'
     UPDATE_PIP_INSTALL = 'python -m pip install --upgrade pip'
 
@@ -214,9 +214,9 @@ class Globals:
             self.apisRoot = Constant.NOTHING
             self.apisPath = Constant.NOTHING
 
-    def getApiPath(self,apiName):
-        if not apiName == Constant.NOTHING :
-             return f'{self.localPath}{self.apisRoot}{apiName}{self.OS_SEPARATOR}{self.baseApiPath}'
+    def getApiPath(self,apiPackageName):
+        if not apiPackageName == Constant.NOTHING :
+             return f'{self.localPath}{self.apisRoot}{apiPackageName}{self.OS_SEPARATOR}'###-'{self.baseApiPath}'
         return f'{self.localPath}{self.baseApiPath}'
 
     def update(self) :
@@ -258,7 +258,6 @@ class Globals:
                         self.apiTree[packageName] = Constant.NOTHING
             if self.debugStatus :
                 self.printTree(self.apiTree,'Api tree')
-
 
     def makePathTreeVisible(self,path):
         node = {}
@@ -588,7 +587,7 @@ class Globals:
                 if resourceModuleList :
                     for resourceModule in resourceModuleList :
                         command = Globals.PIP_INSTALL.replace(Globals.TOKEN_PACKAGE_NAME,resourceModule)
-                        processPath = f'{self.getApiPath(self.apiName)}{Globals.RESOURCE_BACK_SLASH}{Globals.DEPENDENCY_BACK_SLASH}'
+                        processPath = f'{self.localPath}{self.apisRoot}{apiPackageName}{self.OS_SEPARATOR}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{Globals.DEPENDENCY_BACK_SLASH}'
                         subprocess.Popen(command,shell=True,cwd=processPath).wait()
                         ###- subprocess.run(command,shell=True,capture_output=True,cwd=processPath)
         except Exception as exception :
