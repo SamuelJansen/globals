@@ -1,5 +1,6 @@
 import os, sys
 from pathlib import Path
+from python_helper import Constant
 
 class AttributeKey:
 
@@ -80,7 +81,9 @@ class Globals:
 
     LOCAL_GLOBALS_API_PATH = f'{SERVICE_BACK_SLASH}{FRAMEWORK_BACK_SLASH}{GLOBALS_BACK_SLASH}'
 
-    PIP_INSTALL = f'pip install'
+    TOKEN_PACKAGE_NAME = '__TOKEN_PACKAGE_NAME__'
+    PIP_INSTALL = 'python pip install'
+    PIP_INSTALL = f'pip install {TOKEN_PACKAGE_NAME} --upgrade'
     UPDATE_PIP_INSTALL = 'python -m pip install --upgrade pip'
 
     CHARACTERE_FILTER = [
@@ -133,7 +136,7 @@ class Globals:
         encoding = ENCODING,
         globalsEverything = False
     ):
-
+    
         clear = lambda: os.system('cls')
         ###- clear() # or simply os.system('cls')
 
@@ -192,7 +195,7 @@ class Globals:
         lastLocalPathPackage = self.localPath.split(self.OS_SEPARATOR)[-2]
         firstBaseApiPath = self.baseApiPath.split(self.OS_SEPARATOR)[0]
         lastLocalPathPackageNotFound = True
-        self.apiPackage = Globals.NOTHING
+        self.apiPackage = Constant.NOTHING
         for currentPackage in self.currentPath.split(self.OS_SEPARATOR) :
             if lastLocalPathPackageNotFound :
                 if currentPackage == lastLocalPathPackage :
@@ -202,16 +205,16 @@ class Globals:
             else :
                 self.apiPackage = currentPackage
 
-        if self.apiPackage != Globals.NOTHING :
+        if self.apiPackage != Constant.NOTHING :
             if len(self.currentPath.split(self.localPath)[1].split(self.apiPackage)) > 1:
                 self.apisRoot = self.currentPath.split(self.localPath)[1].split(self.apiPackage)[0]
             self.apisPath = f'{self.currentPath.split(self.apiPackage)[0]}'
         else :
-            self.apisRoot = Globals.NOTHING
-            self.apisPath = Globals.NOTHING
+            self.apisRoot = Constant.NOTHING
+            self.apisPath = Constant.NOTHING
 
     def getApiPath(self,apiName):
-        if not apiName == Globals.NOTHING :
+        if not apiName == Constant.NOTHING :
              return f'{self.localPath}{self.apisRoot}{apiName}{self.OS_SEPARATOR}{self.baseApiPath}'
         return f'{self.localPath}{self.baseApiPath}'
 
@@ -219,7 +222,7 @@ class Globals:
         self.updateDependencies()
         self.makeApiAvaliable(self.apiPackage)
         self.makeApisAvaliable(self.apisPath)
-        self.giveLocalVisibilityToFrameworkApis()
+        ###- self.giveLocalVisibilityToFrameworkApis()
 
     def makeApiAvaliable(self,apiPackageName) :
         self.apiTree = {}
@@ -237,15 +240,24 @@ class Globals:
             for apiPackage in apiPackageList :
                 if not apiPackage in list(self.apiTree.keys()) :
                     self.apiTree[apiPackage] = self.makePathTreeVisible(f'{apisPath}{apiPackage}')
-        if self.debugStatus :
-            self.printTree(self.apiTree,'Api tree')
+            if self.debugStatus :
+                self.printTree(self.apiTree,'Api tree (globalsEverithing is active)')
 
-    def giveLocalVisibilityToFrameworkApis(self):
-        if 'PythonFramework' == self.apiName :
-            localApiNameList = os.listdir(self.apisPath)
-            for apiName in localApiNameList :
-                if apiName not in self.apiTree.keys() :
-                    self.apiTree[apiName] = {}
+    def giveLocalVisibilityToFrameworkApis(self,apiPackageNameList):
+        ###- if 'PythonFramework' == self.apiName :
+        if apiPackageNameList :
+            localPackageNameList = os.listdir(self.apisPath)
+            for packageName in localPackageNameList :
+                if packageName not in self.apiTree.keys() and packageName in apiPackageNameList :
+                    packagePath = f'{self.apisPath}{packageName}'
+                    print(f'packagePath = {packagePath}')
+                    try :
+                        self.apiTree[packageName] = self.makePathTreeVisible(packagePath)
+                    except :
+                        self.apiTree[packageName] = Constant.NOTHING
+            if self.debugStatus :
+                self.printTree(self.apiTree,'Api tree')
+
 
     def makePathTreeVisible(self,path):
         node = {}
@@ -256,7 +268,7 @@ class Globals:
                 try :
                     node[nodeSon] = self.makePathTreeVisible(nodeSonPath)
                 except :
-                    node[nodeSon] = ""
+                    node[nodeSon] = Constant.NOTHING
         sys.path.append(path)
         return node
 
@@ -282,11 +294,11 @@ class Globals:
 
     def lineAproved(self,settingLine) :
         approved = True
-        if Globals.NEW_LINE == settingLine  :
+        if Constant.NEW_LINE == settingLine  :
             approved = False
-        if Globals.HASH_TAG in settingLine :
+        if Constant.HASH_TAG in settingLine :
             filteredSettingLine = self.filterString(settingLine)
-            if None == filteredSettingLine or Globals.NOTHING == filteredSettingLine or Globals.NEW_LINE == filteredSettingLine :
+            if None == filteredSettingLine or Constant.NOTHING == filteredSettingLine or Constant.NEW_LINE == filteredSettingLine :
                 approved = False
         return approved
 
@@ -313,20 +325,20 @@ class Globals:
         depth = 0
         depthPass = None
         nodeRefference = 0
-        nodeKey = Globals.NOTHING
+        nodeKey = Constant.NOTHING
         if not settingTree :
             settingTree = {}
         for line, settingLine in enumerate(allSettingLines) :
             if self.lineAproved(settingLine) :
                 if longStringCapturing :
                     if not depthPass :
-                        depthPass = Globals.TAB_UNITS
+                        depthPass = Constant.TAB_UNITS
                     if not currentDepth :
                         currentDepth = 0
                     longStringList.append(settingLine[depth:])
                     if quoteType in str(settingLine) :
-                        longStringList[-1] = Globals.NOTHING.join(longStringList[-1].split(quoteType))[:-1] + quoteType
-                        settingValue = Globals.NOTHING.join(longStringList)
+                        longStringList[-1] = Constant.NOTHING.join(longStringList[-1].split(quoteType))[:-1] + quoteType
+                        settingValue = Constant.NOTHING.join(longStringList)
                         nodeKey = self.updateSettingTreeAndReturnNodeKey(nodeKey,settingTree,settingKey,settingValue)
                         longStringCapturing = False
                         quoteType = None
@@ -360,14 +372,14 @@ class Globals:
                     elif currentDepth < depth :
                         nodeRefference = currentDepth // depthPass
                         depth = currentDepth
-                        splitedNodeKey = nodeKey.split(Globals.DOT)[:nodeRefference]
+                        splitedNodeKey = nodeKey.split(Constant.DOT)[:nodeRefference]
                         splitedNodeKeyLength = len(splitedNodeKey)
                         if splitedNodeKeyLength == 0 :
-                            nodeKey = Globals.NOTHING
+                            nodeKey = Constant.NOTHING
                         elif splitedNodeKeyLength == 1 :
                             nodeKey = splitedNodeKey[0]
                         else :
-                            nodeKey = Globals.DOT.join(splitedNodeKey)
+                            nodeKey = Constant.DOT.join(splitedNodeKey)
                         settingKey,settingValue,nodeKey,longStringCapturing,quoteType,longStringList = self.settingsTreeInnerLoop(
                             settingLine,
                             nodeKey,
@@ -382,18 +394,18 @@ class Globals:
     def settingsTreeInnerLoop(self,settingLine,nodeKey,settingTree,longStringCapturing,quoteType,longStringList):
         settingKey,settingValue = self.getAttributeKeyValue(settingLine)
         settingValueAsString = str(settingValue)
-        if settingValue and Globals.STRING == settingValue.__class__.__name__ :
-            ammountOfTripleSingleOrDoubleQuotes = settingValue.count(Globals.TRIPLE_SINGLE_QUOTE) + settingValue.count(Globals.TRIPLE_DOUBLE_QUOTE)
+        if settingValue and Constant.STRING == settingValue.__class__.__name__ :
+            ammountOfTripleSingleOrDoubleQuotes = settingValue.count(Constant.TRIPLE_SINGLE_QUOTE) + settingValue.count(Constant.TRIPLE_DOUBLE_QUOTE)
         else :
             ammountOfTripleSingleOrDoubleQuotes = 0
-        if settingValue and (Globals.TRIPLE_SINGLE_QUOTE in settingValueAsString or Globals.TRIPLE_DOUBLE_QUOTE in settingValueAsString) and ammountOfTripleSingleOrDoubleQuotes < Globals.SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE :
+        if settingValue and (Constant.TRIPLE_SINGLE_QUOTE in settingValueAsString or Constant.TRIPLE_DOUBLE_QUOTE in settingValueAsString) and ammountOfTripleSingleOrDoubleQuotes < Globals.SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE :
             longStringCapturing = True
-            splitedSettingValueAsString = settingValueAsString.split(Globals.TRIPLE_SINGLE_QUOTE)
-            if Globals.TRIPLE_SINGLE_QUOTE in settingValueAsString and splitedSettingValueAsString and Globals.TRIPLE_DOUBLE_QUOTE not in splitedSettingValueAsString[0] :
-                quoteType = Globals.TRIPLE_SINGLE_QUOTE
+            splitedSettingValueAsString = settingValueAsString.split(Constant.TRIPLE_SINGLE_QUOTE)
+            if Constant.TRIPLE_SINGLE_QUOTE in settingValueAsString and splitedSettingValueAsString and Constant.TRIPLE_DOUBLE_QUOTE not in splitedSettingValueAsString[0] :
+                quoteType = Constant.TRIPLE_SINGLE_QUOTE
             else :
-                quoteType = Globals.TRIPLE_DOUBLE_QUOTE
-            longStringList = [settingValue + Globals.NEW_LINE]
+                quoteType = Constant.TRIPLE_DOUBLE_QUOTE
+            longStringList = [settingValue + Constant.NEW_LINE]
         else :
             nodeKey = self.updateSettingTreeAndReturnNodeKey(nodeKey,settingTree,settingKey,settingValue)
         return settingKey,settingValue,nodeKey,longStringCapturing,quoteType,longStringList
@@ -421,18 +433,18 @@ class Globals:
             return None
 
     def accessTree(self,nodeKey,tree) :
-        if nodeKey == Globals.NOTHING :
+        if nodeKey == Constant.NOTHING :
             try :
                 return self.filterString(tree)
             except :
                 return tree
         else :
-            nodeKeyList = nodeKey.split(Globals.DOT)
+            nodeKeyList = nodeKey.split(Constant.DOT)
             lenNodeKeyList = len(nodeKeyList)
             if lenNodeKeyList > 0 and lenNodeKeyList == 1 :
-                 nextNodeKey = Globals.NOTHING
+                 nextNodeKey = Constant.NOTHING
             else :
-                nextNodeKey = Globals.DOT.join(nodeKeyList[1:])
+                nextNodeKey = Constant.DOT.join(nodeKeyList[1:])
                 ###- self.debug(tree[nodeKeyList[0]],f'nextNodeKey = {nextNodeKey}')
             return self.accessTree(nextNodeKey,tree[nodeKeyList[0]])
 
@@ -442,21 +454,21 @@ class Globals:
         return settingKey,settingValue
 
     def updateSettingTreeAndReturnNodeKey(self,nodeKey,settingTree,settingKey,settingValue):
-        if settingValue or settingValue.__class__.__name__ == Globals.BOOLEAN :
+        if settingValue or settingValue.__class__.__name__ == Constant.BOOLEAN :
             self.accessTree(nodeKey,settingTree)[settingKey] = settingValue
         else :
             self.accessTree(nodeKey,settingTree)[settingKey] = {}
-            if Globals.NOTHING == nodeKey :
+            if Constant.NOTHING == nodeKey :
                 nodeKey += f'{settingKey}'
             else :
-                nodeKey += f'{Globals.DOT}{settingKey}'
+                nodeKey += f'{Constant.DOT}{settingKey}'
         return nodeKey
 
     def getDepth(self,settingLine):
         depthNotFount = True
         depth = 0
-        while not settingLine[depth] == Globals.NEW_LINE and depthNotFount:
-            if settingLine[depth] == Globals.SPACE:
+        while not settingLine[depth] == Constant.NEW_LINE and depthNotFount:
+            if settingLine[depth] == Constant.SPACE :
                 depth += 1
             else :
                 depthNotFount = False
@@ -464,29 +476,29 @@ class Globals:
 
     def getAttributeKey(self,settingLine):
         possibleKey = self.filterString(settingLine)
-        return settingLine.strip().split(Globals.COLON)[0].strip()
+        return settingLine.strip().split(Constant.COLON)[0].strip()
 
     def getAttibuteValue(self,settingLine):
         possibleValue = self.filterString(settingLine)
-        return self.getValue(Globals.COLON.join(possibleValue.strip().split(Globals.COLON)[1:]).strip())
+        return self.getValue(Constant.COLON.join(possibleValue.strip().split(Constant.COLON)[1:]).strip())
 
     def filterString(self,string) :
-        if string[-1] == Globals.NEW_LINE :
+        if string[-1] == Constant.NEW_LINE :
             string = string[:-1]
         strippedString = string.strip()
-        surroundedBySingleQuote = strippedString[0] == Globals.SINGLE_QUOTE and strippedString[-1] == Globals.SINGLE_QUOTE
-        surroundedByDoubleQuote = strippedString[0] == Globals.DOUBLE_QUOTE and strippedString[-1] == Globals.DOUBLE_QUOTE
-        if Globals.HASH_TAG in strippedString and not (surroundedBySingleQuote or surroundedByDoubleQuote) :
-            string = string.split(Globals.HASH_TAG)[0].strip()
+        surroundedBySingleQuote = strippedString[0] == Constant.SINGLE_QUOTE and strippedString[-1] == Constant.SINGLE_QUOTE
+        surroundedByDoubleQuote = strippedString[0] == Constant.DOUBLE_QUOTE and strippedString[-1] == Constant.DOUBLE_QUOTE
+        if Constant.HASH_TAG in strippedString and not (surroundedBySingleQuote or surroundedByDoubleQuote) :
+            string = string.split(Constant.HASH_TAG)[0].strip()
         return string
 
     def getValue(self,value) :
         if value :
-            if Globals.OPEN_LIST == value[0] :
+            if Constant.OPEN_LIST == value[0] :
                 return self.getList(value)
-            elif Globals.OPEN_TUPLE == value[0] :
+            elif Constant.OPEN_TUPLE == value[0] :
                 return self.getTuple(value)
-            elif Globals.OPEN_DICTIONARY == value[0] :
+            elif Constant.OPEN_DICTIONARY == value[0] :
                 return self.getDictionary(value)
             try :
                 return int(value)
@@ -495,38 +507,38 @@ class Globals:
                     return float(value)
                 except :
                     try :
-                        if value == Globals.TRUE : return True
-                        elif value == Globals.FALSE : return False
+                        if value == Constant.TRUE : return True
+                        elif value == Constant.FALSE : return False
                         return value
                     except:
                         return value
 
     def getList(self,value):
-        roughtValues = value[1:-1].split(Globals.COMA)
+        roughtValues = value[1:-1].split(Constant.COMA)
         values = []
         for value in roughtValues :
             values.append(self.getValue(value.strip()))
         return values
 
     def getTuple(self,value):
-        roughtValues = value[1:-1].split(Globals.COMA)
+        roughtValues = value[1:-1].split(Constant.COMA)
         values = []
         for value in roughtValues :
             values.append(self.getValue(value.strip()))
         return tuple(values)
 
     def getDictionary(self,value) :
-        splitedValue = value[1:-1].split(Globals.COLON)
+        splitedValue = value[1:-1].split(Constant.COLON)
         keyList = []
         for index in range(len(splitedValue) -1) :
-            keyList.append(splitedValue[index].split(Globals.COMA)[-1].strip())
+            keyList.append(splitedValue[index].split(Constant.COMA)[-1].strip())
         valueList = []
         valueListSize = len(splitedValue) -1
         for index in range(valueListSize) :
             if index == valueListSize -1 :
                 correctValue = splitedValue[index+1].strip()
             else :
-                correctValue = Globals.COMA.join(splitedValue[index+1].split(Globals.COMA)[:-1]).strip()
+                correctValue = Constant.COMA.join(splitedValue[index+1].split(Constant.COMA)[:-1]).strip()
             valueList.append(self.getValue(correctValue))
         resultantDictionary = {}
         for index in range(len(keyList)) :
@@ -552,14 +564,14 @@ class Globals:
     def printNodeTree(self,tree,depth):
         depthSpace = ''
         for nodeDeep in range(depth) :
-            depthSpace += f'{Globals.TAB_UNITS * Globals.SPACE}'
+            depthSpace += f'{Constant.TAB_UNITS * Constant.SPACE}'
         depth += 1
         for node in list(tree) :
             if tree[node].__class__.__name__ == Globals.DICTIONARY_CLASS :
-                print(f'{depthSpace}{node}{Globals.SPACE}{Globals.COLON}')
+                print(f'{depthSpace}{node}{Constant.SPACE}{Constant.COLON}')
                 self.printNodeTree(tree[node],depth)
             else :
-                print(f'{depthSpace}{node}{Globals.SPACE}{Globals.COLON}{Globals.SPACE}{tree[node]}')
+                print(f'{depthSpace}{node}{Constant.SPACE}{Constant.COLON}{Constant.SPACE}{tree[node]}')
 
     def updateDependencies(self):
         try :
@@ -569,11 +581,12 @@ class Globals:
                 if moduleList :
                     subprocess.Popen(Globals.UPDATE_PIP_INSTALL).wait()
                     for module in moduleList :
-                        subprocess.Popen(f'{Globals.PIP_INSTALL} {module}').wait()
+                        command = Globals.PIP_INSTALL.replace(Globals.TOKEN_PACKAGE_NAME,module)
+                        subprocess.Popen(command).wait()
                 resourceModuleList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST_LOCAL)
                 if resourceModuleList :
                     for resourceModule in resourceModuleList :
-                        command = f'{Globals.PIP_INSTALL} {resourceModule}'
+                        command = Globals.PIP_INSTALL.replace(Globals.TOKEN_PACKAGE_NAME,resourceModule)
                         processPath = f'{self.getApiPath(self.apiName)}{Globals.RESOURCE_BACK_SLASH}{Globals.DEPENDENCY_BACK_SLASH}'
                         subprocess.Popen(command,shell=True,cwd=processPath).wait()
                         ###- subprocess.run(command,shell=True,capture_output=True,cwd=processPath)
@@ -608,56 +621,56 @@ class Globals:
             setingKeyLine = self.getAttributeKey(settingLine)
             if settingKey == setingKeyLine :
                 settingValue = self.getAttibuteValue(settingLine)
-                self.debug(f'''{Globals.TAB}key : value --> {settingKey} : {settingValue}''')
+                self.debug(f'''{Constant.TAB}key : value --> {settingKey} : {settingValue}''')
                 return settingValue
 
     def debug(self,message):
         if self.debugStatus :
-            print(f'{Globals.DEBUG}{message}')
+            print(f'{Constant.DEBUG}{message}')
 
     def warning(self,string):
         if self.warningStatus :
-            print(f'{Globals.WARNING}{string}')
+            print(f'{Constant.WARNING}{string}')
 
     def error(self,classRequest,message,exception):
         if self.errorStatus :
-            if classRequest == Globals.NOTHING :
-                classPortion = Globals.NOTHING
+            if classRequest == Constant.NOTHING :
+                classPortion = Constant.NOTHING
             else :
                 classPortion = f'{classRequest.__name__} '
-            if exception == Globals.NOTHING :
-                errorPortion = Globals.NOTHING
+            if exception == Constant.NOTHING :
+                errorPortion = Constant.NOTHING
             else :
                 errorPortion = f'. Cause: {str(exception)}'
-            print(f'{Globals.ERROR}{classPortion}{message}{errorPortion}')
+            print(f'{Constant.ERROR}{classPortion}{message}{errorPortion}')
 
     def success(self,classRequest,message):
         if self.successStatus :
-            if classRequest == Globals.NOTHING :
-                classPortion = Globals.NOTHING
+            if classRequest == Constant.NOTHING :
+                classPortion = Constant.NOTHING
             else :
                 classPortion = f'{classRequest.__name__} '
-            print(f'{Globals.SUCCESS}{classPortion}{message}')
+            print(f'{Constant.SUCCESS}{classPortion}{message}')
 
     def failure(self,classRequest,message,exception):
         if self.failureStatus :
-            if classRequest == Globals.NOTHING :
-                classPortion = Globals.NOTHING
+            if classRequest == Constant.NOTHING :
+                classPortion = Constant.NOTHING
             else :
                 classPortion = f'{classRequest.__name__} '
-            if exception == Globals.NOTHING :
-                errorPortion = Globals.NOTHING
+            if exception == Constant.NOTHING :
+                errorPortion = Constant.NOTHING
             else :
                 errorPortion = f'. Cause: {str(exception)}'
-            print(f'{Globals.FAILURE}{classPortion}{message}{errorPortion}')
+            print(f'{Constant.FAILURE}{classPortion}{message}{errorPortion}')
 
     def setting(self,classRequest,message):
         if self.settingStatus :
-            if classRequest == Globals.NOTHING :
-                classPortion = Globals.NOTHING
+            if classRequest == Constant.NOTHING :
+                classPortion = Constant.NOTHING
             else :
                 classPortion = f'{classRequest.__name__} '
-            print(f'{Globals.SETTING}{classPortion}{message}')
+            print(f'{Constant.SETTING}{classPortion}{message}')
 
 def getGlobals() :
     try :
