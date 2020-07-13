@@ -594,17 +594,18 @@ class Globals:
 
     def runUpdateCommand(self,command):
         commonExceptionMessage = 'Not possible to update dependencies'
-        LOG_FIRST_TRY =     '[FIRST_TRY ] '
-        LOG_SECOND_TRY =    '[SECOND_TRY] '
-        LOG_COMMAND_COLON_SPACE = f'command{Constant.COLON_SPACE}'
-        LOG_RESPONSE_COLON_SPACE = f'response{Constant.COLON_SPACE}'
+        LOG_FIRST_TRY =     '[FIRST_TRY ]'
+        LOG_SECOND_TRY =    '[SECOND_TRY]'
+        LOG_COMMAND = f'command'
+        LOG_RESPONSE = f'response'
         LOG_SUCCESS = 'SUCCESS'
         LOG_FAIL = 'FAIL'
         KW_DIDNT_RUN = 'DIDNT_RUN'
         def getCommandLog(tryOrder,command):
-            return f'{tryOrder}{LOG_COMMAND_COLON_SPACE}{command}'
+            return f'{tryOrder}{Constant.SPACE}{LOG_COMMAND}{Constant.COLON_SPACE}{command}'
         def getResponseLog(tryOrder,command,response):
-            logResponse = f'{tryOrder}{LOG_COMMAND_COLON_SPACE}{command}{LOG_RESPONSE_COLON_SPACE}'
+            logResponse = f'{tryOrder}{Constant.SPACE}{LOG_COMMAND}{Constant.COLON_SPACE}{command}'
+            logResponse = f'{logResponse}{Constant.SPACE_DASH_SPACE}{LOG_RESPONSE}{Constant.COLON_SPACE}'
             if 1 == response :
                 return f'{logResponse}{LOG_FAIL}'
             elif 0 == response :
