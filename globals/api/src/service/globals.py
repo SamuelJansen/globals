@@ -585,7 +585,7 @@ class Globals:
                 if localPackageNameList :
                     for localPackageName in localPackageNameList :
                         command = f'{Globals.PIP_INSTALL} {localPackageName}'
-                        processPath = f'{self.localPath}{self.apisRoot}{localPackageName}{self.OS_SEPARATOR}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{Globals.DEPENDENCY_BACK_SLASH}'
+                        processPath = f'{self.apiPath}{localPackageName}{self.OS_SEPARATOR}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{Globals.DEPENDENCY_BACK_SLASH}'
                         subprocess.Popen(command,shell=True,cwd=processPath).wait()
                         ###- subprocess.run(command,shell=True,capture_output=True,cwd=processPath)
         except Exception as exception :
