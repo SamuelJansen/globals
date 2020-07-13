@@ -81,9 +81,7 @@ class Globals:
 
     LOCAL_GLOBALS_API_PATH = f'{SERVICE_BACK_SLASH}{FRAMEWORK_BACK_SLASH}{GLOBALS_BACK_SLASH}'
 
-    TOKEN_PACKAGE_NAME = '__TOKEN_PACKAGE_NAME__'
-    # PIP_INSTALL = 'python pip install'
-    PIP_INSTALL = f'pip install {TOKEN_PACKAGE_NAME} --upgrade'
+    PIP_INSTALL = f'pip install --upgrade --force-reinstall'
     UPDATE_PIP_INSTALL = 'python -m pip install --upgrade pip'
 
     CHARACTERE_FILTER = [
@@ -581,12 +579,12 @@ class Globals:
                 if moduleList :
                     subprocess.Popen(Globals.UPDATE_PIP_INSTALL).wait()
                     for module in moduleList :
-                        command = Globals.PIP_INSTALL.replace(Globals.TOKEN_PACKAGE_NAME,module)
+                        command = f'{Globals.PIP_INSTALL} {module}'
                         subprocess.Popen(command).wait()
                 resourceModuleList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST_LOCAL)
                 if resourceModuleList :
                     for resourceModule in resourceModuleList :
-                        command = Globals.PIP_INSTALL.replace(Globals.TOKEN_PACKAGE_NAME,resourceModule)
+                        command = f'{Globals.PIP_INSTALL} {resourceModule}'
                         processPath = f'{self.localPath}{self.apisRoot}{apiPackageName}{self.OS_SEPARATOR}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{Globals.DEPENDENCY_BACK_SLASH}'
                         subprocess.Popen(command,shell=True,cwd=processPath).wait()
                         ###- subprocess.run(command,shell=True,capture_output=True,cwd=processPath)
