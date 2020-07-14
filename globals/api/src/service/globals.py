@@ -223,7 +223,6 @@ class Globals:
         self.updateDependencies()
         self.makeApiAvaliable(self.apiPackage)
         self.makeApisAvaliable(self.apisPath)
-        ###- self.giveLocalVisibilityToFrameworkApis()
 
     def makeApiAvaliable(self,apiPackageName) :
         self.apiTree = {}
@@ -242,22 +241,20 @@ class Globals:
                 if not apiPackage in list(self.apiTree.keys()) :
                     self.apiTree[apiPackage] = self.makePathTreeVisible(f'{apisPath}{apiPackage}')
             if self.debugStatus :
-                self.printTree(self.apiTree,'Api tree (globalsEverithing is active)')
+                self.printTree(self.apiTree,f'[{Constant.DEBUG}] Api tree (globalsEverithing is active)')
 
     def giveLocalVisibilityToFrameworkApis(self,apiPackageNameList):
-        ###- if 'PythonFramework' == self.apiName :
         if apiPackageNameList :
             localPackageNameList = os.listdir(self.apisPath)
             for packageName in localPackageNameList :
                 if packageName not in self.apiTree.keys() and packageName in apiPackageNameList :
                     packagePath = f'{self.apisPath}{packageName}'
-                    print(f'packagePath = {packagePath}')
                     try :
                         self.apiTree[packageName] = self.makePathTreeVisible(packagePath)
                     except :
                         self.apiTree[packageName] = Constant.NOTHING
             if self.debugStatus :
-                self.printTree(self.apiTree,'Api tree')
+                self.printTree(self.apiTree,f'[{Constant.DEBUG}] Api tree')
 
     def makePathTreeVisible(self,path):
         node = {}
