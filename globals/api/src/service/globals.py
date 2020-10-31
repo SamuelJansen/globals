@@ -247,6 +247,15 @@ class Globals:
             if self.debugStatus :
                 self.printTree(self.apiTree,f'{Constant.DEBUG}Api tree (globalsEverithing is active)')
 
+    def printRootPath(self,rootPath) :
+        if self.globalsEverything :
+            rootTree = {}
+            apiPackageList = os.listdir(rootPath)
+            for apiPackage in apiPackageList :
+                rootTree[apiPackage] = self.addNoote(f'{rootPath}{apiPackage}')
+            if self.debugStatus :
+                self.printTree(rootTree,f'{Constant.DEBUG}Root tree (globalsEverithing is active)')
+
     def giveLocalVisibilityToFrameworkApis(self,apiPackageNameList):
         if apiPackageNameList :
             localPackageNameList = os.listdir(self.apisPath)
@@ -271,6 +280,17 @@ class Globals:
                 except :
                     node[nodeSon] = Constant.NOTHING
         sys.path.append(path)
+        return node
+
+    def addNoote(self,path):
+        node = {}
+        nodeSons = os.listdir(path)
+        for nodeSon in nodeSons :
+            nodeSonPath = f'{path}{self.OS_SEPARATOR}{nodeSon}'
+            try :
+                node[nodeSon] = self.addNoote(nodeSonPath)
+            except :
+                node[nodeSon] = Constant.NOTHING
         return node
 
     def nodeIsValid(self,node):
