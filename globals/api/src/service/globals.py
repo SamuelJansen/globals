@@ -262,7 +262,7 @@ class Globals:
                 rootTree = {}
                 apiPackageList = os.listdir(rootPath)
                 for apiPackage in apiPackageList :
-                    rootTree[apiPackage] = self.addNoote(f'{rootPath}{apiPackage}')
+                    rootTree[apiPackage] = self.addNode(f'{rootPath}{apiPackage}')
                 if self.debugStatus :
                     self.printTree(rootTree,f'{Constant.DEBUG}Root tree (globalsEverithing is active)')
             except Exception as exception :
@@ -295,15 +295,18 @@ class Globals:
         sys.path.append(path)
         return node
 
-    def addNoote(self,path):
+    def addNode(self,nodePath):
         node = {}
-        nodeSons = os.listdir(path)
-        for nodeSon in nodeSons :
-            nodeSonPath = f'{path}{self.OS_SEPARATOR}{nodeSon}'
-            try :
-                node[nodeSon] = self.addNoote(nodeSonPath)
-            except :
-                node[nodeSon] = Constant.NOTHING
+        try :
+            nodeSons = os.listdir(nodePath)
+            for nodeSon in nodeSons :
+                nodeSonPath = f'{nodePath}{self.OS_SEPARATOR}{nodeSon}'
+                try :
+                    node[nodeSon] = self.addNode(nodeSonPath)
+                except :
+                    node[nodeSon] = Constant.NOTHING
+        except Exception as exception :
+            self.error(self.__class__,f'Not possible to run addNode({nodePath}) rotine',exception)
         return node
 
     def nodeIsValid(self,node):
