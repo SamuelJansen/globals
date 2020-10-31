@@ -227,6 +227,7 @@ class Globals:
         self.updateDependencies()
         self.makeApiAvaliable(self.apiPackage)
         self.makeApisAvaliable(self.apisPath)
+        self.printRootPath("/")
 
     def makeApiAvaliable(self,apiPackageName) :
         self.apiTree = {}
