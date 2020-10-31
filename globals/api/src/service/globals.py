@@ -134,7 +134,7 @@ class Globals:
         failureStatus = False,
         errorStatus = False,
         encoding = ENCODING,
-        printRootPath = False,
+        printRootPathStatus = False,
         globalsEverything = False
     ):
 
@@ -148,7 +148,7 @@ class Globals:
         self.warningStatus = warningStatus
         self.failureStatus = failureStatus
         self.errorStatus = errorStatus
-        self.printRootPath = printRootPath
+        self.printRootPathStatus = printRootPathStatus
         self.globalsEverything = globalsEverything
         self.setting(self.__class__,f'successStatus={self.successStatus}, settingStatus={self.settingStatus}, debugStatus={self.debugStatus}, warningStatus={self.warningStatus}, failureStatus={self.failureStatus}, errorStatus={self.errorStatus}, globalsEverything={self.globalsEverything}')
 
@@ -255,7 +255,7 @@ class Globals:
 
 
     def printRootPath(self,rootPath) :
-        if self.printRootPath :
+        if self.printRootPathStatus :
             try :
                 rootTree = {}
                 apiPackageList = os.listdir(rootPath)
