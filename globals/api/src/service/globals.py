@@ -190,7 +190,9 @@ class Globals:
             self.currentPath = f'{str(Path(self.filePath).parent.absolute())}{self.OS_SEPARATOR}'
         else :
             self.currentPath = f'{str(Path(__file__).parent.absolute())}{self.OS_SEPARATOR}'
-        self.localPath = f'{str(Path.home())}{self.OS_SEPARATOR}'
+        self.localPath = str(Path.home())
+        if not self.localPath[-1] == str(self.OS_SEPARATOR) :
+            self.localPath = f'{self.localPath}{self.OS_SEPARATOR}'
 
         self.baseApiPath = Globals.BASE_API_PATH
         self.apiPath = self.currentPath.split(self.baseApiPath)[0]
@@ -229,7 +231,7 @@ class Globals:
         self.updateDependencies()
         self.makeApiAvaliable(self.apiPackage)
         self.makeApisAvaliable(self.apisPath)
-        self.printRootPath("/")
+        self.printRootPath(self.localPath)
 
     def makeApiAvaliable(self,apiPackageName) :
         self.apiTree = {}
@@ -250,7 +252,7 @@ class Globals:
                         self.apiTree[apiPackage] = self.makePathTreeVisible(f'{apisPath}{apiPackage}')
                 if self.debugStatus :
                     self.printTree(self.apiTree,f'{Constant.DEBUG}Api tree (globalsEverithing is active)')
-            except Exception as e :
+            except Exception as exception :
                 self.error(self.__class__,f'Not possible to run makeApisAvaliable({apisPath}) rotine',exception)
 
 
@@ -263,7 +265,7 @@ class Globals:
                     rootTree[apiPackage] = self.addNoote(f'{rootPath}{apiPackage}')
                 if self.debugStatus :
                     self.printTree(rootTree,f'{Constant.DEBUG}Root tree (globalsEverithing is active)')
-            except Exception as e :
+            except Exception as exception :
                 self.error(self.__class__,f'Not possible to run printRootPath({rootPath}) rotine',exception)
 
 
