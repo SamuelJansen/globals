@@ -241,21 +241,29 @@ class Globals:
 
     def makeApisAvaliable(self,apisPath):
         if self.globalsEverything :
-            apiPackageList = os.listdir(apisPath)
-            for apiPackage in apiPackageList :
-                if not apiPackage in list(self.apiTree.keys()) :
-                    self.apiTree[apiPackage] = self.makePathTreeVisible(f'{apisPath}{apiPackage}')
-            if self.debugStatus :
-                self.printTree(self.apiTree,f'{Constant.DEBUG}Api tree (globalsEverithing is active)')
+            try :
+                apiPackageList = os.listdir(apisPath)
+                for apiPackage in apiPackageList :
+                    if not apiPackage in list(self.apiTree.keys()) :
+                        self.apiTree[apiPackage] = self.makePathTreeVisible(f'{apisPath}{apiPackage}')
+                if self.debugStatus :
+                    self.printTree(self.apiTree,f'{Constant.DEBUG}Api tree (globalsEverithing is active)')
+            except Exception as e :
+                self.error(self.__class__,f'Not possible to run makeApisAvaliable({apisPath}) rotine',exception)
+
 
     def printRootPath(self,rootPath) :
         if self.globalsEverything :
-            rootTree = {}
-            apiPackageList = os.listdir(rootPath)
-            for apiPackage in apiPackageList :
-                rootTree[apiPackage] = self.addNoote(f'{rootPath}{apiPackage}')
-            if self.debugStatus :
-                self.printTree(rootTree,f'{Constant.DEBUG}Root tree (globalsEverithing is active)')
+            try :
+                rootTree = {}
+                apiPackageList = os.listdir(rootPath)
+                for apiPackage in apiPackageList :
+                    rootTree[apiPackage] = self.addNoote(f'{rootPath}{apiPackage}')
+                if self.debugStatus :
+                    self.printTree(rootTree,f'{Constant.DEBUG}Root tree (globalsEverithing is active)')
+            except Exception as e :
+                self.error(self.__class__,f'Not possible to run printRootPath({rootPath}) rotine',exception)
+
 
     def giveLocalVisibilityToFrameworkApis(self,apiPackageNameList):
         if apiPackageNameList :
