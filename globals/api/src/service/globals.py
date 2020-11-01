@@ -713,7 +713,7 @@ class Globals:
 
         if distPackage[-1] == str(self.OS_SEPARATOR) :
             distPackage = distPackage[:-1]
-        return f'{distPackage}{DIST_DIRECTORY_PATH}'
+        return f'{distPackage}{self.DIST_DIRECTORY_PATH}'
 
     def getEncoding(self) :
         if encoding :
