@@ -154,12 +154,12 @@ class Globals:
         self.globalsEverything = globalsEverything
         self.setting(self.__class__,f'successStatus={self.successStatus}, settingStatus={self.settingStatus}, debugStatus={self.debugStatus}, warningStatus={self.warningStatus}, failureStatus={self.failureStatus}, errorStatus={self.errorStatus}, globalsEverything={self.globalsEverything}')
 
-        self.distPackage = getDistPackagPath()
+        self.distPackage = self.getDistPackagePath()
 
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
 
-        self.encoding = getEncoding()
+        self.encoding = self.getEncoding()
 
         self.buildApplicationPath()
 
@@ -702,7 +702,7 @@ class Globals:
                 self.debug(f'''{Constant.TAB}key : value --> {settingKey} : {settingValue}''')
                 return settingValue
 
-    def getDistPackagPath(self) :
+    def getDistPackagePath(self) :
         distPackageList = site.getsitepackages()
         self.debug(f'Dist packages list: {distPackageList}. Picking the first one')
 
