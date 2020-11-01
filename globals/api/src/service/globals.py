@@ -99,7 +99,7 @@ class Globals:
         '__main__',
         'image',
         'audio',
-        '.heroku',
+        # '.heroku',
         '.profile.d'
     ]
 
@@ -713,7 +713,9 @@ class Globals:
 
         if distPackage[-1] == str(self.OS_SEPARATOR) :
             distPackage = distPackage[:-1]
-        return f'{distPackage}{self.DIST_DIRECTORY_PATH}'
+        distPackage = f'{distPackage}{self.DIST_DIRECTORY_PATH}'
+        self.debug(f'Dist package: "{distPackageList}"')
+        return distPackage
 
     def getEncoding(self, encoding) :
         if encoding :
