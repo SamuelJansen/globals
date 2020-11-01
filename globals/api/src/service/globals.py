@@ -141,14 +141,6 @@ class Globals:
         clear = lambda: os.system('cls')
         ###- clear() # or simply os.system('cls')
 
-        distPackageList = site.getsitepackages()
-        self.debug(f'Dist packages list: {distPackageList}. Picking the first one')
-        distPackage = str(distPackageList[0])
-        distPackage = distPackage.replace(f'{self.BACK_SLASH}{self.BACK_SLASH}',self.OS_SEPARATOR)
-        distPackage = distPackage.replace(self.SLASH,self.OS_SEPARATOR)
-        distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
-        self.distPackage = distPackage
-
         self.filePath = filePath
         self.successStatus = successStatus
         self.settingStatus = settingStatus
@@ -159,6 +151,14 @@ class Globals:
         self.printRootPathStatus = printRootPathStatus
         self.globalsEverything = globalsEverything
         self.setting(self.__class__,f'successStatus={self.successStatus}, settingStatus={self.settingStatus}, debugStatus={self.debugStatus}, warningStatus={self.warningStatus}, failureStatus={self.failureStatus}, errorStatus={self.errorStatus}, globalsEverything={self.globalsEverything}')
+
+        distPackageList = site.getsitepackages()
+        self.debug(f'Dist packages list: {distPackageList}. Picking the first one')
+        distPackage = str(distPackageList[0])
+        distPackage = distPackage.replace(f'{self.BACK_SLASH}{self.BACK_SLASH}',self.OS_SEPARATOR)
+        distPackage = distPackage.replace(self.SLASH,self.OS_SEPARATOR)
+        distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
+        self.distPackage = distPackage
 
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
