@@ -159,7 +159,7 @@ class Globals:
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
 
-        self.encoding = self.getEncoding()
+        self.encoding = self.getEncoding(encoding)
 
         self.buildApplicationPath()
 
@@ -715,7 +715,7 @@ class Globals:
             distPackage = distPackage[:-1]
         return f'{distPackage}{self.DIST_DIRECTORY_PATH}'
 
-    def getEncoding(self) :
+    def getEncoding(self, encoding) :
         if encoding :
             return encoding
         else :
