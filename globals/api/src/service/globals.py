@@ -142,8 +142,8 @@ class Globals:
         ###- clear() # or simply os.system('cls')
 
         distPackageList = site.getsitepackages()
-        self.debug(f'Dist packages list: {distPackageList}. Picking the last one')
-        distPackage = str(distPackageList[-1])
+        self.debug(f'Dist packages list: {distPackageList}. Picking the first one')
+        distPackage = str(distPackageList[0])
         distPackage = distPackage.replace(f'{self.BACK_SLASH}{self.BACK_SLASH}',self.OS_SEPARATOR)
         distPackage = distPackage.replace(self.SLASH,self.OS_SEPARATOR)
         distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
