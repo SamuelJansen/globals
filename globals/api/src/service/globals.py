@@ -119,6 +119,8 @@ class Globals:
 
     SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE = 4
 
+    DIST_DIRECTORY_PATH = f'{OS_SEPARATOR}dist'
+
     DEBUG =     '[DEBUG  ] '
     ERROR =     '[ERROR  ] '
     WARNING =   '[WARNING] '
@@ -152,20 +154,12 @@ class Globals:
         self.globalsEverything = globalsEverything
         self.setting(self.__class__,f'successStatus={self.successStatus}, settingStatus={self.settingStatus}, debugStatus={self.debugStatus}, warningStatus={self.warningStatus}, failureStatus={self.failureStatus}, errorStatus={self.errorStatus}, globalsEverything={self.globalsEverything}')
 
-        distPackageList = site.getsitepackages()
-        self.debug(f'Dist packages list: {distPackageList}. Picking the first one')
-        distPackage = str(distPackageList[0])
-        distPackage = distPackage.replace(f'{self.BACK_SLASH}{self.BACK_SLASH}',self.OS_SEPARATOR)
-        distPackage = distPackage.replace(self.SLASH,self.OS_SEPARATOR)
-        distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
-        self.distPackage = distPackage
+        self.distPackage = getDistPackagPath()
 
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
-        if encoding :
-            self.encoding = encoding
-        else :
-            self.encoding = Globals.ENCODING
+
+        self.encoding = getEncoding()
 
         self.buildApplicationPath()
 
@@ -707,6 +701,25 @@ class Globals:
                 settingValue = self.getAttibuteValue(settingLine)
                 self.debug(f'''{Constant.TAB}key : value --> {settingKey} : {settingValue}''')
                 return settingValue
+
+    def getDistPackagPath(self) :
+        distPackageList = site.getsitepackages()
+        self.debug(f'Dist packages list: {distPackageList}. Picking the first one')
+
+        distPackage = str(distPackageList[0])
+        distPackage = distPackage.replace(f'{self.BACK_SLASH}{self.BACK_SLASH}',self.OS_SEPARATOR)
+        distPackage = distPackage.replace(self.SLASH,self.OS_SEPARATOR)
+        distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
+
+        if distPackage[-1] == str(self.OS_SEPARATOR) :
+            distPackage = distPackage[:-1]
+        return f'{distPackage}{DIST_DIRECTORY_PATH}'
+
+    def getEncoding(self) :
+        if encoding :
+            return encoding
+        else :
+            return Globals.ENCODING
 
     def debug(self,message):
         if self.debugStatus :
