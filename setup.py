@@ -1,16 +1,19 @@
 from distutils.core import setup
+import os
 
-version = '0.0.43-5'
+version = '0.0.43-6'
 name = 'globals'
 url = f'https://github.com/SamuelJansen/{name}/'
+
+OS_SEPARATOR = os.path.sep
 
 setup(
     name = name,
     packages = [
         name,
-        f'{name}/api',
-        f'{name}/api/src',
-        f'{name}/api/src/service'
+        f'{name}{OS_SEPARATOR}api',
+        f'{name}{OS_SEPARATOR}api{OS_SEPARATOR}src',
+        f'{name}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}service'
     ],
     version = version,
     license = 'MIT',

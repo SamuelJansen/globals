@@ -1,4 +1,4 @@
-import os, sys, subprocess
+import os, sys, subprocess, site
 from pathlib import Path
 from python_helper import Constant, log
 
@@ -140,6 +140,22 @@ class Globals:
 
         clear = lambda: os.system('cls')
         ###- clear() # or simply os.system('cls')
+
+        distPackageList = site.getsitepackages()
+        if 1 <= len(distPackageList) :
+            distPackage = str(distPackageList[0])
+            distPackage = distPackage.replace(f'{self.BACK_SLASH}{self.BACK_SLASH}',self.OS_SEPARATOR)
+            distPackage = distPackage.replace(self.SLASH,self.OS_SEPARATOR)
+            distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
+            distPackage = distPackage.split(f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}site-packages')[0]
+            distPackage = f'{distPackage}{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}site-packages'
+        else :
+            distPackage = str(distPackageList[1])
+            distPackage = distPackage.replace(f'{self.BACK_SLASH}{self.BACK_SLASH}',self.OS_SEPARATOR)
+            distPackage = distPackage.replace(self.SLASH,self.OS_SEPARATOR)
+            distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
+
+        self.distPackage = distPackage
 
         self.filePath = filePath
         self.successStatus = successStatus
