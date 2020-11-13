@@ -14,5 +14,5 @@ Globals:
             url: https://github.com/SamuelJansen/
             extension: git
     python:
-        version: '3.8'
+        version: 3.8
         version-command: python --version

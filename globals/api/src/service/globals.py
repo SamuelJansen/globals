@@ -155,7 +155,7 @@ class Globals:
         self.globalsEverything = globalsEverything
         self.setting(self.__class__,f'successStatus={self.successStatus}, settingStatus={self.settingStatus}, debugStatus={self.debugStatus}, warningStatus={self.warningStatus}, failureStatus={self.failureStatus}, errorStatus={self.errorStatus}, globalsEverything={self.globalsEverything}')
         self.debug(f'{self.__class__.__name__}.instance.filePath = {self.filePath}')
-        self.debug(f'{self.__class__.__name__}.filePath = {self.__file__}')
+        self.debug(f'{self.__class__.__name__}.filePath = {__file__}')
 
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
