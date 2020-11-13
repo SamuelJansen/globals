@@ -711,13 +711,13 @@ class Globals:
         if distPackage[-1] == str(self.OS_SEPARATOR) or distPackage[-1] == self.SLASH :
             distPackage = distPackage[:-1]
         distPackage = f'{distPackage}{self.DIST_DIRECTORY_PATH}'
-        if distPackage and distPackage.lower().endswith(f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}site-packages') :
-            distPackage = distPackage.replace(f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}site-packages',Constant.NOTHING)
-        if distPackage and os.path.isdir(f'.{self.OS_SEPARATOR}{distPackage}') :
-            try :
-                sys.path.append(f'.{self.OS_SEPARATOR}{distPackage}')
-            except Exception as exception :
-                self.error(self.__class__,f'Not possible to append static file directory: "{distPackage}"',exception)
+        if distPackage and distPackage.lower().endswith(f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}python3.8{self.OS_SEPARATOR}site-packages') :
+            distPackage = distPackage.replace(f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}python3.8{self.OS_SEPARATOR}site-packages',Constant.NOTHING)
+        # if distPackage and os.path.isdir(f'.{self.OS_SEPARATOR}{distPackage}') :
+        #     try :
+        #         sys.path.append(f'.{self.OS_SEPARATOR}{distPackage}')
+        #     except Exception as exception :
+        #         self.error(self.__class__,f'Not possible to append static file directory: "{distPackage}"',exception)
         self.debug(f'Dist package: "{distPackage}"')
         return distPackage
 
