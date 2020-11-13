@@ -24,6 +24,7 @@ class AttributeKey:
     DEPENDENCY_LIST_WEB = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}.{KW_WEB}'
     DEPENDENCY_LIST_LOCAL = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}.{KW_LOCAL}'
     DEPENDENCY_RESOURCE_LIST = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}.{KW_LOCAL}'
+    PYTHON_VERSION = 'python.version'
 
     def getKey(api,key):
         return f'{Globals.__name__}.{key}'
@@ -153,7 +154,8 @@ class Globals:
         self.printRootPathStatus = printRootPathStatus
         self.globalsEverything = globalsEverything
         self.setting(self.__class__,f'successStatus={self.successStatus}, settingStatus={self.settingStatus}, debugStatus={self.debugStatus}, warningStatus={self.warningStatus}, failureStatus={self.failureStatus}, errorStatus={self.errorStatus}, globalsEverything={self.globalsEverything}')
-        self.debug(f'{self.__class__.__name__}.filePath = {self.filePath}')
+        self.debug(f'{self.__class__.__name__}.instance.filePath = {self.filePath}')
+        self.debug(f'{self.__class__.__name__}.filePath = {self.__file__}')
 
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
@@ -710,7 +712,7 @@ class Globals:
         distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
         if distPackage[-1] == str(self.OS_SEPARATOR) or distPackage[-1] == self.SLASH :
             distPackage = distPackage[:-1]
-        herokuInstallationPackage = f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}python{getSetting('python.version')}{self.OS_SEPARATOR}site-packages'
+        herokuInstallationPackage = f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}python{self.getSetting(AttributeKey.PYTHON_VERSION)}{self.OS_SEPARATOR}site-packages'
         if distPackage and distPackage.lower().endswith(herokuInstallationPackage) :
             distPackage = distPackage.replace(herokuInstallationPackage,Constant.NOTHING)
         distPackage = f'{distPackage}{self.STATIC_DIRECTORY_PATH}'
