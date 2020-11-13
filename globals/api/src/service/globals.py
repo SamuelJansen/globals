@@ -119,7 +119,7 @@ class Globals:
 
     SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE = 4
 
-    DIST_DIRECTORY_PATH = f'{OS_SEPARATOR}dist'
+    DIST_DIRECTORY_PATH = f'{OS_SEPARATOR}statics'
 
     DEBUG =     '[DEBUG  ] '
     ERROR =     '[ERROR  ] '
