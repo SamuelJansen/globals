@@ -711,8 +711,10 @@ class Globals:
         distPackage = distPackage.replace(self.SLASH,self.OS_SEPARATOR)
         distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
 
-        if distPackage[-1] == str(self.OS_SEPARATOR) :
+        if distPackage[-1] == str(self.OS_SEPARATOR) || distPackage[-1] == self.SLASH :
             distPackage = distPackage[:-1]
+        if distPackage[0] == str(self.OS_SEPARATOR) || distPackage[-1] == self.SLASH :
+            distPackage = distPackage[1:]
         distPackage = f'{distPackage}{self.DIST_DIRECTORY_PATH}'
         self.debug(f'Dist package: "{distPackage}"')
         return distPackage
