@@ -119,7 +119,7 @@ class Globals:
 
     SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE = 4
 
-    DIST_DIRECTORY_PATH = f'{OS_SEPARATOR}statics'
+    STATIC_DIRECTORY_PATH = f'{OS_SEPARATOR}statics'
 
     DEBUG =     '[DEBUG  ] '
     ERROR =     '[ERROR  ] '
@@ -162,6 +162,7 @@ class Globals:
         self.buildApplicationPath()
 
         self.settingTree = self.getSettingTree()
+        self.distPackage = self.getDistPackagePath()
         self.apiName = self.getApiName()
         self.extension = self.getExtension()
 
@@ -186,7 +187,6 @@ class Globals:
         self.update()
 
     def buildApplicationPath(self):
-        self.distPackage = self.getDistPackagePath()
         if self.filePath :
             self.currentPath = f'{str(Path(self.filePath).parent.absolute())}{self.OS_SEPARATOR}'
         else :
@@ -710,9 +710,10 @@ class Globals:
         distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
         if distPackage[-1] == str(self.OS_SEPARATOR) or distPackage[-1] == self.SLASH :
             distPackage = distPackage[:-1]
-        if distPackage and distPackage.lower().endswith(f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}python3.8{self.OS_SEPARATOR}site-packages') :
-            distPackage = distPackage.replace(f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}python3.8{self.OS_SEPARATOR}site-packages',Constant.NOTHING)
-        distPackage = f'{distPackage}{self.DIST_DIRECTORY_PATH}'
+        herokuInstallationPackage = f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}python{getSetting('python.version')}{self.OS_SEPARATOR}site-packages'
+        if distPackage and distPackage.lower().endswith(herokuInstallationPackage) :
+            distPackage = distPackage.replace(herokuInstallationPackage,Constant.NOTHING)
+        distPackage = f'{distPackage}{self.STATIC_DIRECTORY_PATH}'
         self.debug(f'Dist package: "{distPackage}"')
         return distPackage
 
