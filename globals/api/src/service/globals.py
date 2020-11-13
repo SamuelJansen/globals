@@ -712,7 +712,7 @@ class Globals:
         distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
         if distPackage[-1] == str(self.OS_SEPARATOR) or distPackage[-1] == self.SLASH :
             distPackage = distPackage[:-1]
-        herokuInstallationPackage = f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}python{self.getSetting(AttributeKey.PYTHON_VERSION)}{self.OS_SEPARATOR}site-packages'
+        herokuInstallationPackage = f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}python{self.getApiSetting(AttributeKey.PYTHON_VERSION)}{self.OS_SEPARATOR}site-packages'
         if distPackage and distPackage.lower().endswith(herokuInstallationPackage) :
             distPackage = distPackage.replace(herokuInstallationPackage,Constant.NOTHING)
         distPackage = f'{distPackage}{self.STATIC_DIRECTORY_PATH}'
