@@ -153,12 +153,10 @@ class Globals:
         self.printRootPathStatus = printRootPathStatus
         self.globalsEverything = globalsEverything
         self.setting(self.__class__,f'successStatus={self.successStatus}, settingStatus={self.settingStatus}, debugStatus={self.debugStatus}, warningStatus={self.warningStatus}, failureStatus={self.failureStatus}, errorStatus={self.errorStatus}, globalsEverything={self.globalsEverything}')
-
-        self.distPackage = self.getDistPackagePath()
+        self.debug(f'{self.__class__.__name__}.filePath = {self.filePath}')
 
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
-
         self.encoding = self.getEncoding(encoding)
 
         self.buildApplicationPath()
@@ -188,6 +186,7 @@ class Globals:
         self.update()
 
     def buildApplicationPath(self):
+        self.distPackage = self.getDistPackagePath()
         if self.filePath :
             self.currentPath = f'{str(Path(self.filePath).parent.absolute())}{self.OS_SEPARATOR}'
         else :
@@ -705,17 +704,20 @@ class Globals:
     def getDistPackagePath(self) :
         distPackageList = site.getsitepackages()
         self.debug(f'Dist packages list: {distPackageList}. Picking the first one')
-
         distPackage = str(distPackageList[0])
         distPackage = distPackage.replace(f'{self.BACK_SLASH}{self.BACK_SLASH}',self.OS_SEPARATOR)
         distPackage = distPackage.replace(self.SLASH,self.OS_SEPARATOR)
         distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
-
         if distPackage[-1] == str(self.OS_SEPARATOR) or distPackage[-1] == self.SLASH :
             distPackage = distPackage[:-1]
-        if distPackage[0] == str(self.OS_SEPARATOR) or distPackage[-1] == self.SLASH :
-            distPackage = distPackage[1:]
         distPackage = f'{distPackage}{self.DIST_DIRECTORY_PATH}'
+        if distPackage and distPackage.lower().endswith(f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}site-packages') :
+            distPackage = distPackage.replace(f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}site-packages',Constant.NOTHING)
+        if distPackage and os.path.isdir(f'.{self.OS_SEPARATOR}{distPackage}') :
+            try :
+                sys.path.append(f'.{self.OS_SEPARATOR}{distPackage}')
+            except Exception as exception :
+                self.error(self.__class__,f'Not possible to append static file directory: "{distPackage}"',exception)
         self.debug(f'Dist package: "{distPackage}"')
         return distPackage
 
@@ -771,7 +773,7 @@ class Globals:
                 classPortion = Constant.NOTHING
             else :
                 classPortion = f'{classRequest.__name__} '
-            print(f'{Constant.SETTING}{classPortion}{message}')
+                print(f'{Constant.SETTING}{classPortion}{message}')
 
 def getGlobals() :
     try :
