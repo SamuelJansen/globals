@@ -164,7 +164,8 @@ class Globals:
         self.buildApplicationPath()
 
         self.settingTree = self.getSettingTree()
-        self.distPackage = self.getDistPackagePath()
+        self.staticPackage = self.getStaticPackagePath()
+        self.distPackage = self.staticPackage ###- this should be removed as soon as python_framework update do self.staticPackage
         self.apiName = self.getApiName()
         self.extension = self.getExtension()
 
@@ -679,21 +680,8 @@ class Globals:
                 self.debug(f'''{Constant.TAB}key : value --> {settingKey} : {settingValue}''')
                 return settingValue
 
-    def getDistPackagePath(self) :
-        distPackageList = site.getsitepackages()
-        self.debug(f'Dist packages list: {distPackageList}. Picking the first one')
-        distPackage = str(distPackageList[0])
-        distPackage = distPackage.replace(f'{self.BACK_SLASH}{self.BACK_SLASH}',self.OS_SEPARATOR)
-        distPackage = distPackage.replace(self.SLASH,self.OS_SEPARATOR)
-        distPackage = distPackage.replace(self.BACK_SLASH,self.OS_SEPARATOR)
-        if distPackage[-1] == str(self.OS_SEPARATOR) or distPackage[-1] == self.SLASH :
-            distPackage = distPackage[:-1]
-        herokuInstallationPackage = f'{self.OS_SEPARATOR}lib{self.OS_SEPARATOR}python{self.getApiSetting(AttributeKey.PYTHON_VERSION)}{self.OS_SEPARATOR}site-packages'
-        if distPackage and distPackage.lower().endswith(herokuInstallationPackage) :
-            distPackage = distPackage.replace(herokuInstallationPackage,Constant.NOTHING)
-        distPackage = f'{distPackage}{self.STATIC_DIRECTORY_PATH}'
-        self.debug(f'Dist package: "{distPackage}"')
-        return distPackage
+    def getStaticPackagePath(self) :
+        return getStaticPackagePath()
 
     def getEncoding(self, encoding) :
         if encoding :
@@ -749,9 +737,9 @@ class Globals:
                 classPortion = f'{classRequest.__name__} '
                 print(f'{Constant.SETTING}{classPortion}{message}')
 
-def getDistPackagePath() :
+def getStaticPackagePath() :
     distPackageList = site.getsitepackages()
-    log.debug(getDistPackagePath,f'Dist packages list: {distPackageList}. Picking the first one')
+    log.debug(getStaticPackagePath,f'Dist packages list: {distPackageList}. Picking the first one')
     distPackage = str(distPackageList[0])
     distPackage = distPackage.replace(f'{Globals.BACK_SLASH}{Globals.BACK_SLASH}',Globals.OS_SEPARATOR)
     distPackage = distPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
@@ -759,5 +747,5 @@ def getDistPackagePath() :
     if distPackage[-1] == str(Globals.OS_SEPARATOR) or distPackage[-1] == Globals.SLASH :
         distPackage = distPackage[:-1]
     distPackage = f'{distPackage}{Globals.STATIC_DIRECTORY_PATH}'
-    log.debug(getDistPackagePath,f'Dist package: "{distPackage}"')
+    log.debug(getStaticPackagePath,f'Dist package: "{distPackage}"')
     return distPackage
