@@ -1,6 +1,6 @@
 import os, sys, subprocess, site
 from pathlib import Path
-from python_helper import Constant, log
+from python_helper import Constant, log, StringHelper, SettingHelper
 
 class AttributeKey:
 
@@ -466,27 +466,10 @@ class Globals:
     def getSetting(self,nodeKey,settingTree=None) :
         if not settingTree :
             settingTree = self.settingTree
-        try :
-            return self.accessTree(nodeKey,settingTree)
-        except Exception as exception :
-            self.debug(f'Not possible to get {nodeKey} node key. Cause: {str(exception)}')
-            return None
+        return SettingHelper.getSetting(nodeKey,settingTree)
 
     def accessTree(self,nodeKey,tree) :
-        if nodeKey == Constant.NOTHING :
-            try :
-                return self.filterString(tree)
-            except :
-                return tree
-        else :
-            nodeKeyList = nodeKey.split(Constant.DOT)
-            lenNodeKeyList = len(nodeKeyList)
-            if lenNodeKeyList > 0 and lenNodeKeyList == 1 :
-                 nextNodeKey = Constant.NOTHING
-            else :
-                nextNodeKey = Constant.DOT.join(nodeKeyList[1:])
-                ###- self.debug(tree[nodeKeyList[0]],f'nextNodeKey = {nextNodeKey}')
-            return self.accessTree(nextNodeKey,tree[nodeKeyList[0]])
+        return SettingHelper.accessTree(nodeKey,tree)
 
     def getAttributeKeyValue(self,settingLine):
         settingKey = self.getAttributeKey(settingLine)
@@ -523,14 +506,7 @@ class Globals:
         return self.getValue(Constant.COLON.join(possibleValue.strip().split(Constant.COLON)[1:]).strip())
 
     def filterString(self,string) :
-        if string[-1] == Constant.NEW_LINE :
-            string = string[:-1]
-        strippedString = string.strip()
-        surroundedBySingleQuote = strippedString[0] == Constant.SINGLE_QUOTE and strippedString[-1] == Constant.SINGLE_QUOTE
-        surroundedByDoubleQuote = strippedString[0] == Constant.DOUBLE_QUOTE and strippedString[-1] == Constant.DOUBLE_QUOTE
-        if Constant.HASH_TAG in strippedString and not (surroundedBySingleQuote or surroundedByDoubleQuote) :
-            string = string.split(Constant.HASH_TAG)[0].strip()
-        return string
+        return StringHelper.filterString(string)
 
     def getValue(self,value) :
         if value :
@@ -773,50 +749,15 @@ class Globals:
                 classPortion = f'{classRequest.__name__} '
                 print(f'{Constant.SETTING}{classPortion}{message}')
 
-def getGlobals() :
-    try :
-        from app import globals
-        return globals
-    except :
-        try :
-            from run import globals
-            return globals
-        except : pass
-
-def getApi() :
-    return getGlobals().api
-
-def addTo(self) :
-    self.globals = getGlobals()
-    self.globals.api = self
-
-def GlobalsResourceMethod(outerMethod,*args,**kwargs):
-    def innerMethod(*args,**kwargs):
-        try :
-            if not args[0].api :
-                args[0].api = getApi()
-        except :
-            try :
-                args[0].api = getApi()
-            except : pass
-        return outerMethod(*args,**kwargs)
-    return innerMethod
-
-def GlobalsResource(*argument,**keywordArgument) :
-    def Wrapper(OuterClass,*args,**kwargs):
-        class InnerClass(OuterClass):
-            url = keywordArgument.get('path')
-            def __init__(self,*args,**kwargs):
-                OuterClass.__init__(self,*args,**kwargs)
-                self.api = getApi()
-        InnerClass.__name__ = OuterClass.__name__
-        InnerClass.__module__ = OuterClass.__module__
-        InnerClass.__qualname__ = OuterClass.__qualname__
-        # printClass(InnerClass)
-        return InnerClass
-    return Wrapper
-
-def printClass(Class) :
-    print(f'    Class.__name__ = {Class.__name__}')
-    print(f'    Class.__module__ = {Class.__module__}')
-    print(f'    Class.__qualname__ = {Class.__qualname__}')
+def getDistPackagePath() :
+    distPackageList = site.getsitepackages()
+    log.debug(getDistPackagePath,f'Dist packages list: {distPackageList}. Picking the first one')
+    distPackage = str(distPackageList[0])
+    distPackage = distPackage.replace(f'{Globals.BACK_SLASH}{Globals.BACK_SLASH}',Globals.OS_SEPARATOR)
+    distPackage = distPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
+    distPackage = distPackage.replace(Globals.BACK_SLASH,Globals.OS_SEPARATOR)
+    if distPackage[-1] == str(Globals.OS_SEPARATOR) or distPackage[-1] == Globals.SLASH :
+        distPackage = distPackage[:-1]
+    distPackage = f'{distPackage}{Globals.STATIC_DIRECTORY_PATH}'
+    log.debug(getDistPackagePath,f'Dist package: "{distPackage}"')
+    return distPackage
