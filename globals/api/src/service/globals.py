@@ -693,7 +693,7 @@ class Globals:
         pythonVersion = Globals.STATIC_DIRECTORY_PATH.replace(Globals.PYTHON_VERSION_PLACEHOLDER, str(self.getApiSetting(AttributeKey.PYTHON_VERSION)))
         if not pythonVersion in staticPackage :
             staticPackage = f'{staticPackage}{pythonVersion}'
-        self.debug(getStaticPackagePath,f'Static package: "{staticPackage}"')
+        self.debug(f'Static package: "{staticPackage}"')
         return staticPackage
 
     def searchTreeList(self,search,tree):
