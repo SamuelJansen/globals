@@ -681,7 +681,7 @@ class Globals:
 
     def getStaticPackagePath(self) :
         staticPackageList = site.getsitepackages()
-        log.debug(getStaticPackagePath,f'Static packages list: {staticPackageList}. Picking the first one')
+        self.debug(f'Static packages list: {staticPackageList}. Picking the first one')
         staticPackage = str(staticPackageList[0])
         staticPackage = staticPackage.replace(f'{Globals.BACK_SLASH}{Globals.BACK_SLASH}',Globals.OS_SEPARATOR)
         staticPackage = staticPackage.replace(Globals.BACK_SLASH,Globals.OS_SEPARATOR)
