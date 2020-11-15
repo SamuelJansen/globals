@@ -174,6 +174,7 @@ class Globals:
 
         if self.printStatus :
             print(f'''            {self.__class__.__name__} = {self}
+            {self.__class__.__name__}.staticPackage =   {self.staticPackage}
             {self.__class__.__name__}.currentPath =     {self.currentPath}
             {self.__class__.__name__}.localPath =       {self.localPath}
             {self.__class__.__name__}.baseApiPath =     {self.baseApiPath}
@@ -187,6 +188,7 @@ class Globals:
             self.printTree(self.settingTree,f'{self.__class__.__name__} settings tree')
 
         self.updateDependencyStatus = self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE)
+        self.rootPathTree = {}
         self.update()
 
     def buildApplicationPath(self):
@@ -263,12 +265,11 @@ class Globals:
     def printRootPath(self,rootPath) :
         if self.printRootPathStatus :
             try :
-                rootTree = {}
                 apiPackageList = os.listdir(rootPath)
                 for apiPackage in apiPackageList :
-                    rootTree[apiPackage] = self.addNode(f'{rootPath}{apiPackage}')
+                    self.rootPath[apiPackage] = self.addNode(f'{rootPath}{apiPackage}')
                 if self.debugStatus :
-                    self.printTree(rootTree,f'{Constant.DEBUG}Root tree (globalsEverithing is active)')
+                    self.printTree(self.rootPathTree,f'{Constant.DEBUG}Root tree (printRootPathStatus is active)')
             except Exception as exception :
                 self.error(self.__class__,f'Not possible to run printRootPath({rootPath}) rotine',exception)
 
