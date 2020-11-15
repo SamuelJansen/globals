@@ -121,6 +121,7 @@ class Globals:
     SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE = 4
 
     STATIC_DIRECTORY_PATH = f'{OS_SEPARATOR}statics'
+    PYTHON_LANGUAGE_NAME = 'python'
 
     DEBUG =     '[DEBUG  ] '
     ERROR =     '[ERROR  ] '
@@ -165,7 +166,6 @@ class Globals:
 
         self.settingTree = self.getSettingTree()
         self.staticPackage = self.getStaticPackagePath()
-        self.distPackage = self.staticPackage ###- this should be removed as soon as python_framework update do self.staticPackage
         self.apiName = self.getApiName()
         self.extension = self.getExtension()
 
@@ -738,14 +738,15 @@ class Globals:
                 print(f'{Constant.SETTING}{classPortion}{message}')
 
 def getStaticPackagePath() :
-    distPackageList = site.getsitepackages()
-    log.debug(getStaticPackagePath,f'Dist packages list: {distPackageList}. Picking the first one')
-    distPackage = str(distPackageList[0])
-    distPackage = distPackage.replace(f'{Globals.BACK_SLASH}{Globals.BACK_SLASH}',Globals.OS_SEPARATOR)
-    distPackage = distPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
-    distPackage = distPackage.replace(Globals.BACK_SLASH,Globals.OS_SEPARATOR)
-    if distPackage[-1] == str(Globals.OS_SEPARATOR) or distPackage[-1] == Globals.SLASH :
-        distPackage = distPackage[:-1]
-    distPackage = f'{distPackage}{Globals.STATIC_DIRECTORY_PATH}'
-    log.debug(getStaticPackagePath,f'Dist package: "{distPackage}"')
-    return distPackage
+    staticPackageList = site.getsitepackages()
+    log.debug(getStaticPackagePath,f'Static packages list: {staticPackageList}. Picking the first one')
+    staticPackage = str(staticPackageList[0])
+    staticPackage = staticPackage.replace(f'{Globals.BACK_SLASH}{Globals.BACK_SLASH}',Globals.OS_SEPARATOR)
+    staticPackage = staticPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
+    staticPackage = staticPackage.replace(Globals.BACK_SLASH,Globals.OS_SEPARATOR)
+    staticPackage = f'{staticPackage.split(Globals.PYTHON_LANGUAGE_NAME)[0]}'
+    if not staticPackage[-1] == str(Globals.OS_SEPARATOR) :
+        staticPackage = f'{staticPackage}{Globals.OS_SEPARATOR}'
+    staticPackage = f'{staticPackage}{Globals.PYTHON_LANGUAGE_NAME}{Globals.STATIC_DIRECTORY_PATH}'
+    log.debug(getStaticPackagePath,f'Static package: "{staticPackage}"')
+    return staticPackage
