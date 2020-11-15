@@ -755,11 +755,14 @@ def getStaticPackagePath() :
 
 def searchTreeList(search,tree) :
     def keepSearching(search,history,tree,treeList):
-        for key in tree.keys() :
-            newHistory = f'{history}.{key}'
-            if search and search in newHistory :
-                treeList.append(newHistory)
-            keepSearching(search,newHistory,tree[key], treeList)
+        if dict = type(tree) :
+            for key in tree.keys() :
+                newHistory = f'{history}.{key}'
+                if search and search in newHistory :
+                    treeList.append(newHistory)
+                keepSearching(search,newHistory,tree[key], treeList)
+        else :
+            log.debug(keepSearching,f'"{tree}" is not a dictionary')
     treeList = []
     keepSearching(search,'root',tree,treeList)
     return treeList
