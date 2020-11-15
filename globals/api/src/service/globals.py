@@ -237,7 +237,7 @@ class Globals:
         self.updateDependencies()
         self.makeApiAvaliable(self.apiPackage)
         self.makeApisAvaliable(self.apisPath)
-        self.printRootPath(self.localPath)
+        self.spotRootPath(self.localPath)
 
     def makeApiAvaliable(self,apiPackageName) :
         self.apiTree = {}
@@ -261,8 +261,7 @@ class Globals:
             except Exception as exception :
                 self.error(self.__class__,f'Not possible to run makeApisAvaliable({apisPath}) rotine',exception)
 
-
-    def printRootPath(self,rootPath) :
+    def spotRootPath(self,rootPath) :
         if self.printRootPathStatus :
             try :
                 apiPackageList = os.listdir(rootPath)
@@ -271,8 +270,7 @@ class Globals:
                 if self.debugStatus :
                     self.printTree(self.rootPathTree,f'{Constant.DEBUG}Root tree (printRootPathStatus is active)')
             except Exception as exception :
-                self.error(self.__class__,f'Not possible to run printRootPath({rootPath}) rotine',exception)
-
+                self.error(self.__class__,f'Not possible to run spotRootPath({rootPath}) rotine',exception)
 
     def giveLocalVisibilityToFrameworkApis(self,apiPackageNameList):
         if apiPackageNameList :
@@ -745,9 +743,12 @@ def getStaticPackagePath() :
     staticPackage = staticPackage.replace(f'{Globals.BACK_SLASH}{Globals.BACK_SLASH}',Globals.OS_SEPARATOR)
     staticPackage = staticPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
     staticPackage = staticPackage.replace(Globals.BACK_SLASH,Globals.OS_SEPARATOR)
-    staticPackage = f'{staticPackage.split(Globals.PYTHON_LANGUAGE_NAME)[0]}'
-    if not staticPackage[-1] == str(Globals.OS_SEPARATOR) :
-        staticPackage = f'{staticPackage}{Globals.OS_SEPARATOR}'
-    staticPackage = f'{staticPackage}{Globals.PYTHON_LANGUAGE_NAME}{Globals.STATIC_DIRECTORY_PATH}'
+    if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
+        staticPackage = staticPackage[:-1]
+    staticPackage = f'{staticPackage}{Globals.STATIC_DIRECTORY_PATH}'
+    # staticPackage = f'{staticPackage.split(Globals.PYTHON_LANGUAGE_NAME)[0]}'
+    # if not staticPackage[-1] == str(Globals.OS_SEPARATOR) :
+    #     staticPackage = f'{staticPackage}{Globals.OS_SEPARATOR}'
+    # staticPackage = f'{staticPackage}{Globals.PYTHON_LANGUAGE_NAME}{Globals.STATIC_DIRECTORY_PATH}'
     log.debug(getStaticPackagePath,f'Static package: "{staticPackage}"')
     return staticPackage
