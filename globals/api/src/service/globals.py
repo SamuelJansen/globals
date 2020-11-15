@@ -690,10 +690,10 @@ class Globals:
         staticPackage = staticPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
         if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
             staticPackage = staticPackage[:-1]
-        pythonVersion = Globals.STATIC_DIRECTORY_PATH.replace(Globals.PYTHON_VERSION_PLACEHOLDER, self.getApiSetting(AttributeKey.PYTHON_VERSION))
+        pythonVersion = Globals.STATIC_DIRECTORY_PATH.replace(Globals.PYTHON_VERSION_PLACEHOLDER, str(self.getApiSetting(AttributeKey.PYTHON_VERSION)))
         if not pythonVersion in staticPackage :
             staticPackage = f'{staticPackage}{pythonVersion}'
-        log.debug(getStaticPackagePath,f'Static package: "{staticPackage}"')
+        self.debug(getStaticPackagePath,f'Static package: "{staticPackage}"')
         return staticPackage
 
     def searchTreeList(self,search,tree):
