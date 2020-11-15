@@ -120,9 +120,8 @@ class Globals:
 
     SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE = 4
 
-    PYTHON_VERSION_PLACEHOLDER = '__PYTHON_VERSION_PLACEHOLDER__'
-    STATIC_DIRECTORY_PATH = f'{OS_SEPARATOR}lib{OS_SEPARATOR}python{PYTHON_VERSION_PLACEHOLDER}{OS_SEPARATOR}site-packages{OS_SEPARATOR}statics'
-    PYTHON_LANGUAGE_NAME = 'python'
+    LIB = 'lib'
+    STATIC_PACKAGE_PATH = f'{OS_SEPARATOR}statics'
 
     DEBUG =     '[DEBUG  ] '
     ERROR =     '[ERROR  ] '
@@ -690,9 +689,7 @@ class Globals:
         staticPackage = staticPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
         if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
             staticPackage = staticPackage[:-1]
-        pythonVersion = Globals.STATIC_DIRECTORY_PATH.replace(Globals.PYTHON_VERSION_PLACEHOLDER, str(self.getApiSetting(AttributeKey.PYTHON_VERSION)))
-        if not pythonVersion in staticPackage :
-            staticPackage = f'{staticPackage}{pythonVersion}'
+        staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
         self.debug(f'Static package: "{staticPackage}"')
         return staticPackage
 
@@ -752,21 +749,6 @@ class Globals:
             else :
                 classPortion = f'{classRequest.__name__} '
                 print(f'{Constant.SETTING}{classPortion}{message}')
-
-def getStaticPackagePath() :
-    staticPackageList = site.getsitepackages()
-    log.debug(getStaticPackagePath,f'Static packages list: {staticPackageList}. Picking the first one')
-    staticPackage = str(staticPackageList[0])
-    staticPackage = staticPackage.replace(f'{Globals.BACK_SLASH}{Globals.BACK_SLASH}',Globals.OS_SEPARATOR)
-    staticPackage = staticPackage.replace(Globals.BACK_SLASH,Globals.OS_SEPARATOR)
-    staticPackage = staticPackage.replace(f'{Globals.SLASH}{Globals.SLASH}',Globals.OS_SEPARATOR)
-    staticPackage = staticPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
-    if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
-        staticPackage = staticPackage[:-1]
-    staticPackage = f'{staticPackage}{Globals.STATIC_DIRECTORY_PATH}'
-    staticPackage = staticPackage.replace(Globals.PYTHON_VERSION_PLACEHOLDER, Constant.NOTHING)
-    log.debug(getStaticPackagePath,f'Static package: "{staticPackage}"')
-    return staticPackage
 
 def searchTreeList(search,tree) :
     def keepSearching(search,history,tree,treeList):
