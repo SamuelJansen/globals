@@ -122,6 +122,7 @@ class Globals:
 
     LIB = 'lib'
     STATIC_PACKAGE_PATH = f'{OS_SEPARATOR}statics'
+    HEROKU_PYTHON_38 = f'{OS_SEPARATOR}lib{OS_SEPARATOR}python3.8{OS_SEPARATOR}site-packages'
 
     DEBUG =     '[DEBUG  ] '
     ERROR =     '[ERROR  ] '
@@ -689,6 +690,8 @@ class Globals:
         staticPackage = staticPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
         if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
             staticPackage = staticPackage[:-1]
+        if staticPackage.endswith(Globals.HEROKU_PYTHON_38) :
+            staticPackage = staticPackage.replace(Globals.HEROKU_PYTHON_38,Constant.NOTHING)
         staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
         self.debug(f'Static package: "{staticPackage}"')
         return staticPackage
