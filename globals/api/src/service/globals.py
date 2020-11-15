@@ -267,7 +267,7 @@ class Globals:
             try :
                 apiPackageList = os.listdir(rootPath)
                 for apiPackage in apiPackageList :
-                    self.rootPath[apiPackage] = self.addNode(f'{rootPath}{apiPackage}')
+                    self.rootPathTree[apiPackage] = self.addNode(f'{rootPath}{apiPackage}')
                 if self.debugStatus :
                     self.printTree(self.rootPathTree,f'{Constant.DEBUG}Root tree (printRootPathStatus is active)')
             except Exception as exception :
