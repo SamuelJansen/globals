@@ -755,7 +755,7 @@ def getStaticPackagePath() :
 
 def searchTreeList(search,tree) :
     def keepSearching(search,history,tree,treeList):
-        if dict = type(tree) :
+        if dict == type(tree) :
             for key in tree.keys() :
                 newHistory = f'{history}.{key}'
                 if search and search in newHistory :
