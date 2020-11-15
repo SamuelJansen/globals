@@ -682,6 +682,9 @@ class Globals:
     def getStaticPackagePath(self) :
         return getStaticPackagePath()
 
+    def searchTreeList(self,search,tree):
+        return searchTreeList(search,tree)
+
     def getEncoding(self, encoding) :
         if encoding :
             return encoding
@@ -741,14 +744,22 @@ def getStaticPackagePath() :
     log.debug(getStaticPackagePath,f'Static packages list: {staticPackageList}. Picking the first one')
     staticPackage = str(staticPackageList[0])
     staticPackage = staticPackage.replace(f'{Globals.BACK_SLASH}{Globals.BACK_SLASH}',Globals.OS_SEPARATOR)
-    staticPackage = staticPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
     staticPackage = staticPackage.replace(Globals.BACK_SLASH,Globals.OS_SEPARATOR)
+    staticPackage = staticPackage.replace(f'{Globals.SLASH}{Globals.SLASH}',Globals.OS_SEPARATOR)
+    staticPackage = staticPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
     if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
         staticPackage = staticPackage[:-1]
     staticPackage = f'{staticPackage}{Globals.STATIC_DIRECTORY_PATH}'
-    # staticPackage = f'{staticPackage.split(Globals.PYTHON_LANGUAGE_NAME)[0]}'
-    # if not staticPackage[-1] == str(Globals.OS_SEPARATOR) :
-    #     staticPackage = f'{staticPackage}{Globals.OS_SEPARATOR}'
-    # staticPackage = f'{staticPackage}{Globals.PYTHON_LANGUAGE_NAME}{Globals.STATIC_DIRECTORY_PATH}'
     log.debug(getStaticPackagePath,f'Static package: "{staticPackage}"')
     return staticPackage
+
+def searchTreeList(search,tree) :
+    def keepSearching(search,history,tree,treeList):
+        for key in tree.keys() :
+            newHistory = f'{history}.{key}'
+            if search and search in newHistory :
+                treeList.append(newHistory)
+            keepSearching(search,newHistory,tree[key], treeList)
+    treeList = []
+    keepSearching(search,'root',tree,treeList)
+    return treeList
