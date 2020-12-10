@@ -691,7 +691,8 @@ class Globals:
         staticPackage = staticPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
         if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
             staticPackage = staticPackage[:-1]
-        herokuPythonLibPath = Globals.HEROKU_PYTHON.replace(TOKEN_PYTHON_VERSION, self.getApiSetting(AttributeKey.PYTHON_VERSION))
+        pythonVersionWithoutDot = str(self.getApiSetting(AttributeKey.PYTHON_VERSION)).replace(Constant.DOT, Constant.NOTHING)
+        herokuPythonLibPath = Globals.HEROKU_PYTHON.replace(TOKEN_PYTHON_VERSION, pythonVersionWithoutDot)
         if staticPackage.endswith(herokuPythonLibPath) :
             staticPackage = staticPackage.replace(herokuPythonLibPath,Constant.NOTHING)
         staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
