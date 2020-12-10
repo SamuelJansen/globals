@@ -85,7 +85,7 @@ class Globals:
     TOKEN_PIP_USER = '__TOKEN_PIP_USER__'
     KW_SPACE_PIP_USER = f'{Constant.SPACE}--user'
     PIP_INSTALL = f'python -m pip install --upgrade{TOKEN_PIP_USER} --force-reinstall'
-    UPDATE_PIP_INSTALL = f'python -m pip install --upgrade {TOKEN_PIP_USER} pip'
+    UPDATE_PIP_INSTALL = f'python -m pip install --upgrade{TOKEN_PIP_USER} pip'
 
     CHARACTERE_FILTER = [
         '__'
@@ -122,7 +122,8 @@ class Globals:
 
     LIB = 'lib'
     STATIC_PACKAGE_PATH = f'{OS_SEPARATOR}statics'
-    HEROKU_PYTHON_38 = f'{OS_SEPARATOR}lib{OS_SEPARATOR}python3.8{OS_SEPARATOR}site-packages'
+    TOKEN_PYTHON_VERSION = '__TOKEN_PYTHON_VERSION__'
+    HEROKU_PYTHON = f'{OS_SEPARATOR}lib{OS_SEPARATOR}python{TOKEN_PYTHON_VERSION}{OS_SEPARATOR}site-packages'
 
     DEBUG =     '[DEBUG  ] '
     ERROR =     '[ERROR  ] '
@@ -690,8 +691,9 @@ class Globals:
         staticPackage = staticPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
         if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
             staticPackage = staticPackage[:-1]
-        if staticPackage.endswith(Globals.HEROKU_PYTHON_38) :
-            staticPackage = staticPackage.replace(Globals.HEROKU_PYTHON_38,Constant.NOTHING)
+        herokuPythonLibPath = Globals.HEROKU_PYTHON.replace(self.getApiSetting(AttributeKey.PYTHON_VERSION))
+        if staticPackage.endswith(herokuPythonLibPath) :
+            staticPackage = staticPackage.replace(herokuPythonLibPath,Constant.NOTHING)
         staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
         self.debug(f'Static package: "{staticPackage}"')
         return staticPackage
