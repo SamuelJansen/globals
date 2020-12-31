@@ -1,0 +1,7 @@
+from globals.test.api.src import MyApplicationTest
+
+# MyApplicationTest.startMyApplicationTest()
+# MyApplicationTest.myConfigurationTests_whenEnvironmentVariableIsPresent()
+# MyApplicationTest.myConfigurationTests_whenEnvironmentVariableIsNotPresentAndIsSettingKeyReferencedAndSettingKeyAlreadyIsDefined()
+MyApplicationTest.myConfigurationTests_basicVariableDefinitions()
+MyApplicationTest.myConfigurationTests_musHandleSettingsWithNoSelfOrCircularReference()

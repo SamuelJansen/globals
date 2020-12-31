@@ -1,6 +1,7 @@
-import os, sys, subprocess, site
+import os, sys, subprocess, site, importlib
 from pathlib import Path
-from python_helper import Constant, log, StringHelper, SettingHelper
+from python_helper import Constant as c
+from python_helper import log, StringHelper, SettingHelper, EnvironmentHelper
 
 class AttributeKey:
 
@@ -32,6 +33,26 @@ class AttributeKey:
     def getKeyByClassNameAndKey(cls,key):
         return f'{cls.__name__}.{key}'
 
+def importResource(resourceName, resourceModuleName=None) :
+    if not resourceName in IGNORE_REOURCE_LIST :
+        resource = None
+        module = None
+        if not resourceModuleName :
+            resourceModuleName = resourceName
+        try :
+            module = importlib.import_module(resourceModuleName)
+        except Exception as exception:
+            log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module. Going for a second attempt')
+            try :
+                module = __import__(resourceModuleName)
+            except :
+                log.error(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module in the second attempt either', exception)
+        if module :
+            try :
+                resource = getattr(module, resourceName)
+            except Exception as exception :
+                log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module. cause: {str(exception)}')
+            return resource
 
 class Globals:
 
@@ -68,7 +89,6 @@ class Globals:
     OVERRIDE = 'w+'
     READ = 'r'
 
-
     API_BACK_SLASH = f'api{OS_SEPARATOR}'
     SRC_BACK_SLASH = f'src{OS_SEPARATOR}'
     BASE_API_PATH = f'{API_BACK_SLASH}{SRC_BACK_SLASH}'
@@ -83,7 +103,7 @@ class Globals:
     LOCAL_GLOBALS_API_PATH = f'{SERVICE_BACK_SLASH}{FRAMEWORK_BACK_SLASH}{GLOBALS_BACK_SLASH}'
 
     TOKEN_PIP_USER = '__TOKEN_PIP_USER__'
-    KW_SPACE_PIP_USER = f'{Constant.SPACE}--user'
+    KW_SPACE_PIP_USER = f'{c.SPACE}--user'
     PIP_INSTALL = f'python -m pip install --upgrade{TOKEN_PIP_USER} --force-reinstall'
     UPDATE_PIP_INSTALL = f'python -m pip install --upgrade{TOKEN_PIP_USER} pip'
 
@@ -116,6 +136,7 @@ class Globals:
     DICTIONARY_CLASS = 'dict'
     OPEN_TUPLE = '('
     OPEN_LIST = '['
+    OPEN_SET = '{'
     OPEN_DICTIONARY = '{'
 
     SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE = 4
@@ -132,13 +153,28 @@ class Globals:
     FAILURE =   '[FAILURE] '
     SETTING =   '[SETTING] '
 
+    OPEN_SETTING_INJECTION = '${'
+    CLOSE_SETTING_INJECTION = '}'
+
+    DEFAULT_LOG_STATUS = False
+    DEFAULT_SUCCESS_STATUS = False
+    DEFAULT_SETTING_STATUS = False
+    DEFAULT_DEBUG_STATUS = False
+    DEFAULT_WARNING_STATUS = False
+    DEFAULT_FAILURE_STATUS = False
+    DEFAULT_ERROR_STATUS = False
+
+    APPLICATION = 'application'
+
     def __init__(self, filePath,
-        successStatus = False,
-        settingStatus = False,
-        debugStatus = False,
-        warningStatus = False,
-        failureStatus = False,
-        errorStatus = False,
+        settingsFileName=APPLICATION,
+        logStatus = DEFAULT_LOG_STATUS,
+        successStatus = DEFAULT_SUCCESS_STATUS,
+        settingStatus = DEFAULT_SETTING_STATUS,
+        debugStatus = DEFAULT_DEBUG_STATUS,
+        warningStatus = DEFAULT_WARNING_STATUS,
+        failureStatus = DEFAULT_FAILURE_STATUS,
+        errorStatus = DEFAULT_ERROR_STATUS,
         encoding = ENCODING,
         printRootPathStatus = False,
         globalsEverything = False
@@ -148,15 +184,30 @@ class Globals:
         ###- clear() # or simply os.system('cls')
 
         self.filePath = filePath
-        self.successStatus = successStatus
-        self.settingStatus = settingStatus
-        self.debugStatus = debugStatus
-        self.warningStatus = warningStatus
-        self.failureStatus = failureStatus
-        self.errorStatus = errorStatus
+        self.settingsFileName = self.getSettingsFileName(settingsFileName)
+        self.logStatus = EnvironmentHelper.setEnvironmentValue(log.LOG, logStatus, default=Globals.DEFAULT_LOG_STATUS)
+        self.successStatus = EnvironmentHelper.setEnvironmentValue(log.SUCCESS, successStatus, default=Globals.DEFAULT_SUCCESS_STATUS)
+        self.settingStatus = EnvironmentHelper.setEnvironmentValue(log.SETTING, settingStatus, default=Globals.DEFAULT_SETTING_STATUS)
+        self.debugStatus = EnvironmentHelper.setEnvironmentValue(log.DEBUG, debugStatus, default=Globals.DEFAULT_DEBUG_STATUS)
+        self.warningStatus = EnvironmentHelper.setEnvironmentValue(log.WARNING, warningStatus, default=Globals.DEFAULT_WARNING_STATUS)
+        self.failureStatus = EnvironmentHelper.setEnvironmentValue(log.FAILURE, failureStatus, default=Globals.DEFAULT_FAILURE_STATUS)
+        self.errorStatus = EnvironmentHelper.setEnvironmentValue(log.ERROR, errorStatus, default=Globals.DEFAULT_ERROR_STATUS)
+        log.loadSettings()
         self.printRootPathStatus = printRootPathStatus
         self.globalsEverything = globalsEverything
-        self.setting(self.__class__,f'successStatus={self.successStatus}, settingStatus={self.settingStatus}, debugStatus={self.debugStatus}, warningStatus={self.warningStatus}, failureStatus={self.failureStatus}, errorStatus={self.errorStatus}, globalsEverything={self.globalsEverything}')
+        basicSettingsAsDictionary = {
+            'activeEnvironment' : self.activeEnvironment,
+            'successStatus' : self.successStatus,
+            'settingStatus' : self.settingStatus,
+            'debugStatus' : self.debugStatus,
+            'warningStatus' : self.warningStatus,
+            'failureStatus' : self.failureStatus,
+            'errorStatus' : self.errorStatus,
+            'logStatus' : self.logStatus,
+            'globalsEverything' : self.globalsEverything,
+            'printRootPathStatus' : self.printRootPathStatus
+        }
+        self.setting(self.__class__,f'Basic settings: {StringHelper.prettyPython(basicSettingsAsDictionary, tabCount=1)}')
         self.debug(f'{self.__class__.__name__}.instance.filePath = {self.filePath}')
         self.debug(f'{self.__class__.__name__}.filePath = {__file__}')
 
@@ -171,8 +222,8 @@ class Globals:
         self.apiName = self.getApiName()
         self.extension = self.getExtension()
 
-        self.printStatus = self.getGlobalsPrintStatus()
-        self.apiNameList = self.getGlobalsApiNameList()
+        self.printStatus = self.getSetting(AttributeKey.PRINT_STATUS)
+        self.apiNameList = self.getSetting(AttributeKey.GLOBALS_API_LIST)
 
         if self.printStatus :
             print(f'''            {self.__class__.__name__} = {self}
@@ -189,9 +240,17 @@ class Globals:
 
             self.printTree(self.settingTree,f'{self.__class__.__name__} settings tree')
 
-        self.updateDependencyStatus = self.getApiSetting(AttributeKey.DEPENDENCY_UPDATE)
+        self.updateDependencyStatus = self.getSetting(AttributeKey.DEPENDENCY_UPDATE)
         self.rootPathTree = {}
         self.update()
+
+    def getSettingsFileName(self, settingsFileName) :
+        self.mainSettingsFileName = settingsFileName
+        self.activeEnvironment = SettingHelper.getActiveEnvironment()
+        if SettingHelper.DEFAULT_ENVIRONMENT == self.activeEnvironment :
+            return settingsFileName
+        else :
+            return f'{settingsFileName}{c.DASH}{self.activeEnvironment}'
 
     def buildApplicationPath(self):
         if self.filePath :
@@ -208,7 +267,7 @@ class Globals:
         lastLocalPathPackage = self.localPath.split(self.OS_SEPARATOR)[-2]
         firstBaseApiPath = self.baseApiPath.split(self.OS_SEPARATOR)[0]
         lastLocalPathPackageNotFound = True
-        self.apiPackage = Constant.NOTHING
+        self.apiPackage = c.NOTHING
         for currentPackage in self.currentPath.split(self.OS_SEPARATOR) :
             if lastLocalPathPackageNotFound :
                 if currentPackage == lastLocalPathPackage :
@@ -218,16 +277,16 @@ class Globals:
             else :
                 self.apiPackage = currentPackage
 
-        if self.apiPackage != Constant.NOTHING :
+        if self.apiPackage != c.NOTHING :
             if len(self.currentPath.split(self.localPath)[1].split(self.apiPackage)) > 1:
                 self.apisRoot = self.currentPath.split(self.localPath)[1].split(self.apiPackage)[0]
             self.apisPath = f'{self.currentPath.split(self.apiPackage)[0]}'
         else :
-            self.apisRoot = Constant.NOTHING
-            self.apisPath = Constant.NOTHING
+            self.apisRoot = c.NOTHING
+            self.apisPath = c.NOTHING
 
     def getApiPath(self,apiPackageName):
-        if not apiPackageName == Constant.NOTHING :
+        if not apiPackageName == c.NOTHING :
              return f'{self.localPath}{self.apisRoot}{apiPackageName}{self.OS_SEPARATOR}'###-'{self.baseApiPath}'
         if self.apisPath :
             return self.apisPath
@@ -259,7 +318,7 @@ class Globals:
                     if not apiPackage in list(self.apiTree.keys()) :
                         self.apiTree[apiPackage] = self.makePathTreeVisible(f'{apisPath}{apiPackage}')
                 if self.debugStatus :
-                    self.printTree(self.apiTree,f'{Constant.DEBUG}Api tree (globalsEverithing is active)')
+                    self.printTree(self.apiTree,f'{c.DEBUG}Api tree (globalsEverithing is active)')
             except Exception as exception :
                 self.error(self.__class__,f'Not possible to run makeApisAvaliable({apisPath}) rotine',exception)
 
@@ -270,7 +329,7 @@ class Globals:
                 for apiPackage in apiPackageList :
                     self.rootPathTree[apiPackage] = self.addNode(f'{rootPath}{apiPackage}')
                 if self.debugStatus :
-                    self.printTree(self.rootPathTree,f'{Constant.DEBUG}Root tree (printRootPathStatus is active)')
+                    self.printTree(self.rootPathTree,f'{c.DEBUG}Root tree (printRootPathStatus is active)')
             except Exception as exception :
                 self.error(self.__class__,f'Not possible to run spotRootPath({rootPath}) rotine',exception)
 
@@ -283,9 +342,9 @@ class Globals:
                     try :
                         self.apiTree[packageName] = self.makePathTreeVisible(packagePath)
                     except :
-                        self.apiTree[packageName] = Constant.NOTHING
+                        self.apiTree[packageName] = c.NOTHING
             if self.debugStatus :
-                self.printTree(self.apiTree,f'{Constant.DEBUG}Api tree')
+                self.printTree(self.apiTree,f'{c.DEBUG}Api tree')
 
     def makePathTreeVisible(self,path):
         node = {}
@@ -296,7 +355,7 @@ class Globals:
                 try :
                     node[nodeSon] = self.makePathTreeVisible(nodeSonPath)
                 except :
-                    node[nodeSon] = Constant.NOTHING
+                    node[nodeSon] = c.NOTHING
         sys.path.append(path)
         return node
 
@@ -309,7 +368,7 @@ class Globals:
                 try :
                     node[nodeSon] = self.addNode(nodeSonPath)
                 except :
-                    node[nodeSon] = Constant.NOTHING
+                    node[nodeSon] = c.NOTHING
         except Exception as exception :
             self.error(self.__class__,f'Not possible to run addNode({nodePath}) rotine',exception)
         return node
@@ -336,11 +395,11 @@ class Globals:
 
     def lineAproved(self,settingLine) :
         approved = True
-        if Constant.NEW_LINE == settingLine  :
+        if c.NEW_LINE == settingLine  :
             approved = False
-        if Constant.HASH_TAG in settingLine :
+        if c.HASH_TAG in settingLine :
             filteredSettingLine = self.filterString(settingLine)
-            if None == filteredSettingLine or Constant.NOTHING == filteredSettingLine or Constant.NEW_LINE == filteredSettingLine :
+            if None == filteredSettingLine or c.NOTHING == filteredSettingLine or c.NEW_LINE == filteredSettingLine :
                 approved = False
         return approved
 
@@ -352,105 +411,14 @@ class Globals:
         self.apiName = apiName
         self.apiPackage = package
         self.apiPath = f'{self.apisPath}{actualPackage}'
-        settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.__class__.__name__}.{Globals.EXTENSION}'
+        settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.settingsFileName}.{Globals.EXTENSION}'
         self.settingTree = self.getSettingTree(settingFilePath=settingFilePath,settingTree=self.settingTree)
 
 
     def getSettingTree(self,settingFilePath=None,settingTree=None) :
         if not settingFilePath :
-            settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.__class__.__name__}.{Globals.EXTENSION}'
-        with open(settingFilePath,Globals.READ,encoding=Globals.ENCODING) as settingsFile :
-            allSettingLines = settingsFile.readlines()
-        longStringCapturing = False
-        quoteType = None
-        longStringList = None
-        depth = 0
-        depthPass = None
-        nodeRefference = 0
-        nodeKey = Constant.NOTHING
-        if not settingTree :
-            settingTree = {}
-        for line, settingLine in enumerate(allSettingLines) :
-            if self.lineAproved(settingLine) :
-                if longStringCapturing :
-                    if not depthPass :
-                        depthPass = Constant.TAB_UNITS
-                    if not currentDepth :
-                        currentDepth = 0
-                    longStringList.append(settingLine[depth:])
-                    if quoteType in str(settingLine) :
-                        longStringList[-1] = Constant.NOTHING.join(longStringList[-1].split(quoteType))[:-1] + quoteType
-                        settingValue = Constant.NOTHING.join(longStringList)
-                        nodeKey = self.updateSettingTreeAndReturnNodeKey(nodeKey,settingTree,settingKey,settingValue)
-                        longStringCapturing = False
-                        quoteType = None
-                        longStringList = None
-                else :
-                    currentDepth = self.getDepth(settingLine)
-                    if currentDepth == depth :
-                        settingKey,settingValue,nodeKey,longStringCapturing,quoteType,longStringList = self.settingsTreeInnerLoop(
-                            settingLine,
-                            nodeKey,
-                            settingTree,
-                            longStringCapturing,
-                            quoteType,
-                            longStringList
-                        )
-                    elif currentDepth > depth :
-                        if not depthPass :
-                            depthPass = currentDepth - depth
-                        currentNodeRefference = currentDepth // (currentDepth - depth)
-                        if currentNodeRefference - nodeRefference == 1 :
-                            settingKey,settingValue,nodeKey,longStringCapturing,quoteType,longStringList = self.settingsTreeInnerLoop(
-                                settingLine,
-                                nodeKey,
-                                settingTree,
-                                longStringCapturing,
-                                quoteType,
-                                longStringList
-                            )
-                            nodeRefference = currentNodeRefference
-                            depth = currentDepth
-                    elif currentDepth < depth :
-                        nodeRefference = currentDepth // depthPass
-                        depth = currentDepth
-                        splitedNodeKey = nodeKey.split(Constant.DOT)[:nodeRefference]
-                        splitedNodeKeyLength = len(splitedNodeKey)
-                        if splitedNodeKeyLength == 0 :
-                            nodeKey = Constant.NOTHING
-                        elif splitedNodeKeyLength == 1 :
-                            nodeKey = splitedNodeKey[0]
-                        else :
-                            nodeKey = Constant.DOT.join(splitedNodeKey)
-                        settingKey,settingValue,nodeKey,longStringCapturing,quoteType,longStringList = self.settingsTreeInnerLoop(
-                            settingLine,
-                            nodeKey,
-                            settingTree,
-                            longStringCapturing,
-                            quoteType,
-                            longStringList
-                        )
-                        depth = currentDepth
-        return settingTree
-
-    def settingsTreeInnerLoop(self,settingLine,nodeKey,settingTree,longStringCapturing,quoteType,longStringList):
-        settingKey,settingValue = self.getAttributeKeyValue(settingLine)
-        settingValueAsString = str(settingValue)
-        if settingValue and Constant.STRING == settingValue.__class__.__name__ :
-            ammountOfTripleSingleOrDoubleQuotes = settingValue.count(Constant.TRIPLE_SINGLE_QUOTE) + settingValue.count(Constant.TRIPLE_DOUBLE_QUOTE)
-        else :
-            ammountOfTripleSingleOrDoubleQuotes = 0
-        if settingValue and (Constant.TRIPLE_SINGLE_QUOTE in settingValueAsString or Constant.TRIPLE_DOUBLE_QUOTE in settingValueAsString) and ammountOfTripleSingleOrDoubleQuotes < Globals.SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE :
-            longStringCapturing = True
-            splitedSettingValueAsString = settingValueAsString.split(Constant.TRIPLE_SINGLE_QUOTE)
-            if Constant.TRIPLE_SINGLE_QUOTE in settingValueAsString and splitedSettingValueAsString and Constant.TRIPLE_DOUBLE_QUOTE not in splitedSettingValueAsString[0] :
-                quoteType = Constant.TRIPLE_SINGLE_QUOTE
-            else :
-                quoteType = Constant.TRIPLE_DOUBLE_QUOTE
-            longStringList = [settingValue + Constant.NEW_LINE]
-        else :
-            nodeKey = self.updateSettingTreeAndReturnNodeKey(nodeKey,settingTree,settingKey,settingValue)
-        return settingKey,settingValue,nodeKey,longStringCapturing,quoteType,longStringList
+            settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.settingsFileName}.{Globals.EXTENSION}'
+        return SettingHelper.getSettingTree(settingFilePath)
 
     def addTree(self,settingFilePath):
         newSetting = self.getSettingTree(settingFilePath=settingFilePath)
@@ -462,140 +430,25 @@ class Globals:
         for settingKey in newSetting :
             tree[settingKey] = newSetting[settingKey]
 
-    def getApiSetting(self,attributeKeyWithoutApiNameAsRoot):
-        return self.getSetting(AttributeKey.getKey(self,attributeKeyWithoutApiNameAsRoot))
+    def getApiSetting(self,nodeKey):
+        return self.getSetting(nodeKey)
 
     def getSetting(self,nodeKey,settingTree=None) :
         if not settingTree :
             settingTree = self.settingTree
-        return SettingHelper.getSetting(nodeKey,settingTree)
+        return SettingHelper.getSetting(nodeKey,self.settingTree)
 
     def accessTree(self,nodeKey,tree) :
-        return SettingHelper.accessTree(nodeKey,tree)
-
-    def getAttributeKeyValue(self,settingLine):
-        settingKey = self.getAttributeKey(settingLine)
-        settingValue = self.getAttibuteValue(settingLine)
-        return settingKey,settingValue
-
-    def updateSettingTreeAndReturnNodeKey(self,nodeKey,settingTree,settingKey,settingValue):
-        if settingValue or settingValue.__class__.__name__ == Constant.BOOLEAN :
-            self.accessTree(nodeKey,settingTree)[settingKey] = settingValue
-        else :
-            self.accessTree(nodeKey,settingTree)[settingKey] = {}
-            if Constant.NOTHING == nodeKey :
-                nodeKey += f'{settingKey}'
-            else :
-                nodeKey += f'{Constant.DOT}{settingKey}'
-        return nodeKey
-
-    def getDepth(self,settingLine):
-        depthNotFount = True
-        depth = 0
-        while not settingLine[depth] == Constant.NEW_LINE and depthNotFount:
-            if settingLine[depth] == Constant.SPACE :
-                depth += 1
-            else :
-                depthNotFount = False
-        return depth
-
-    def getAttributeKey(self,settingLine):
-        possibleKey = self.filterString(settingLine)
-        return settingLine.strip().split(Constant.COLON)[0].strip()
-
-    def getAttibuteValue(self,settingLine):
-        possibleValue = self.filterString(settingLine)
-        return self.getValue(Constant.COLON.join(possibleValue.strip().split(Constant.COLON)[1:]).strip())
-
-    def filterString(self,string) :
-        return StringHelper.filterString(string)
-
-    def getValue(self,value) :
-        if value :
-            if Constant.OPEN_LIST == value[0] :
-                return self.getList(value)
-            elif Constant.OPEN_TUPLE == value[0] :
-                return self.getTuple(value)
-            elif Constant.OPEN_DICTIONARY == value[0] :
-                return self.getDictionary(value)
-            try :
-                return int(value)
-            except :
-                try :
-                    return float(value)
-                except :
-                    try :
-                        if value == Constant.TRUE : return True
-                        elif value == Constant.FALSE : return False
-                        return value
-                    except:
-                        return value
-
-    def getList(self,value):
-        roughtValues = value[1:-1].split(Constant.COMA)
-        values = []
-        for value in roughtValues :
-            values.append(self.getValue(value.strip()))
-        return values
-
-    def getTuple(self,value):
-        roughtValues = value[1:-1].split(Constant.COMA)
-        values = []
-        for value in roughtValues :
-            values.append(self.getValue(value.strip()))
-        return tuple(values)
-
-    def getDictionary(self,value) :
-        splitedValue = value[1:-1].split(Constant.COLON)
-        keyList = []
-        for index in range(len(splitedValue) -1) :
-            keyList.append(splitedValue[index].split(Constant.COMA)[-1].strip())
-        valueList = []
-        valueListSize = len(splitedValue) -1
-        for index in range(valueListSize) :
-            if index == valueListSize -1 :
-                correctValue = splitedValue[index+1].strip()
-            else :
-                correctValue = Constant.COMA.join(splitedValue[index+1].split(Constant.COMA)[:-1]).strip()
-            valueList.append(self.getValue(correctValue))
-        resultantDictionary = {}
-        for index in range(len(keyList)) :
-            resultantDictionary[keyList[index]] = valueList[index]
-        return resultantDictionary
-
-    def getFileNameList(self,path,fileExtension=None) :
-        if not fileExtension :
-            fileExtension = self.extension
-        fileNames = []
-        names = os.listdir(path)
-        for name in names :
-            splitedName = name.split('.')
-            if fileExtension == splitedName[-1] :
-                fileNames.append(''.join(splitedName[:-1]))
-        return fileNames
+        return SettingHelper.getSetting(nodeKey,tree)
 
     def printTree(self,tree,name,depth=0):
-        print(f'\n{name}')
-        self.printNodeTree(tree,depth)
-        print()
-
-    def printNodeTree(self,tree,depth):
-        depthSpace = ''
-        for nodeDeep in range(depth) :
-            depthSpace += f'{Constant.TAB_UNITS * Constant.SPACE}'
-        depth += 1
-        for node in list(tree) :
-            if tree[node].__class__.__name__ == Globals.DICTIONARY_CLASS :
-                print(f'{depthSpace}{node}{Constant.SPACE}{Constant.COLON}')
-                self.printNodeTree(tree[node],depth)
-            else :
-                print(f'{depthSpace}{node}{Constant.SPACE}{Constant.COLON}{Constant.SPACE}{tree[node]}')
+        SettingHelper.printSettings(tree,name)
 
     def updateDependencies(self):
         try :
             if self.updateDependencyStatus :
-                moduleList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST_WEB)
-                localPackageNameList = self.getApiSetting(AttributeKey.DEPENDENCY_LIST_LOCAL)
+                moduleList = self.getSetting(AttributeKey.DEPENDENCY_LIST_WEB)
+                localPackageNameList = self.getSetting(AttributeKey.DEPENDENCY_LIST_LOCAL)
                 if moduleList or localPackageNameList :
                     self.runUpdateCommand(Globals.UPDATE_PIP_INSTALL)
                 if moduleList :
@@ -620,10 +473,10 @@ class Globals:
         LOG_FAIL = 'FAIL'
         KW_DIDNT_RUN = 'DIDNT_RUN'
         def getCommandLog(tryOrder,command):
-            return f'{tryOrder}{Constant.SPACE}{LOG_COMMAND}{Constant.COLON_SPACE}{command}'
+            return f'{tryOrder}{c.SPACE}{LOG_COMMAND}{c.COLON_SPACE}{command}'
         def getResponseLog(tryOrder,command,response):
-            logResponse = f'{tryOrder}{Constant.SPACE}{LOG_COMMAND}{Constant.COLON_SPACE}{command}'
-            logResponse = f'{logResponse}{Constant.SPACE_DASH_SPACE}{LOG_RESPONSE}{Constant.COLON_SPACE}'
+            logResponse = f'{tryOrder}{c.SPACE}{LOG_COMMAND}{c.COLON_SPACE}{command}'
+            logResponse = f'{logResponse}{c.SPACE_DASH_SPACE}{LOG_RESPONSE}{c.COLON_SPACE}'
             if 1 == response :
                 return f'{logResponse}{LOG_FAIL}'
             elif 0 == response :
@@ -639,7 +492,7 @@ class Globals:
         except Exception as exceptionFirstTry :
             self.error(self.__class__,f'{commonExceptionMessage}',exceptionFirstTry)
         if KW_DIDNT_RUN == responseFirstTry or 1 == responseFirstTry :
-            commandSecondTry = command.replace(self.TOKEN_PIP_USER,Constant.NOTHING)
+            commandSecondTry = command.replace(self.TOKEN_PIP_USER,c.NOTHING)
             self.debug(getCommandLog(LOG_SECOND_TRY,commandSecondTry))
             responseSecondTry = KW_DIDNT_RUN
             try :
@@ -650,50 +503,45 @@ class Globals:
             if KW_DIDNT_RUN == responseFirstTry and KW_DIDNT_RUN == responseSecondTry :
                 log.error(self.__class__,f'Not possible to run {commandFirstTry}',Exception(f'Both attempt failed'))
 
-    def getGlobalsPrintStatus(self):
-        return self.getSetting(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.PRINT_STATUS))
-
-    def getGlobalsApiNameList(self):
-        return self.getSetting(AttributeKey.getKeyByClassNameAndKey(Globals,AttributeKey.GLOBALS_API_LIST))
-
     def getApiName(self):
         try :
-            return self.getSetting(f'{self.__class__.__name__}.{AttributeKey.API_NAME}')
+            return self.getSetting(AttributeKey.API_NAME)
         except Exception as exception :
             self.failure(self.__class__,'Not possible to get api name', exception)
 
     def getExtension(self):
+        extension = Globals.EXTENSION
         try :
-            return self.getSetting(f'{self.__class__.__name__}.{AttributeKey.API_EXTENSION}')
+            extension = self.getSetting(AttributeKey.API_EXTENSION)
         except Exception as exception :
             self.failure(self.__class__,'Not possible to get api extenion. Returning default estension', exception)
-            return Globals.EXTENSION
+        return extension
 
     def getSettingFromSettingFilePathAndKeyPair(self,path,settingKey) :
         self.debug(f'''Getting {settingKey} from {path}''')
-        with open(path,Globals.READ,encoding=Globals.ENCODING) as settingsFile :
+        with open(path,c.READ,encoding=c.ENCODING) as settingsFile :
             allSettingLines = settingsFile.readlines()
         for line, settingLine in enumerate(allSettingLines) :
             depth = self.getDepth(settingLine)
             setingKeyLine = self.getAttributeKey(settingLine)
             if settingKey == setingKeyLine :
                 settingValue = self.getAttibuteValue(settingLine)
-                self.debug(f'''{Constant.TAB}key : value --> {settingKey} : {settingValue}''')
+                self.debug(f'''{c.TAB}key : value --> {settingKey} : {settingValue}''')
                 return settingValue
 
     def getStaticPackagePath(self) :
         staticPackageList = site.getsitepackages()
-        self.debug(f'Static packages list: {staticPackageList}. Picking the first one')
+        self.debug(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
         staticPackage = str(staticPackageList[0])
-        staticPackage = staticPackage.replace(f'{Globals.BACK_SLASH}{Globals.BACK_SLASH}',Globals.OS_SEPARATOR)
-        staticPackage = staticPackage.replace(Globals.BACK_SLASH,Globals.OS_SEPARATOR)
-        staticPackage = staticPackage.replace(f'{Globals.SLASH}{Globals.SLASH}',Globals.OS_SEPARATOR)
-        staticPackage = staticPackage.replace(Globals.SLASH,Globals.OS_SEPARATOR)
+        staticPackage = staticPackage.replace(f'{c.BACK_SLASH}{c.BACK_SLASH}',Globals.OS_SEPARATOR)
+        staticPackage = staticPackage.replace(c.BACK_SLASH,Globals.OS_SEPARATOR)
+        staticPackage = staticPackage.replace(f'{c.SLASH}{c.SLASH}',Globals.OS_SEPARATOR)
+        staticPackage = staticPackage.replace(c.SLASH,Globals.OS_SEPARATOR)
         if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
             staticPackage = staticPackage[:-1]
-        herokuPythonLibPath = Globals.HEROKU_PYTHON.replace(Globals.TOKEN_PYTHON_VERSION, str(self.getApiSetting(AttributeKey.PYTHON_VERSION)))
+        herokuPythonLibPath = Globals.HEROKU_PYTHON.replace(Globals.TOKEN_PYTHON_VERSION, str(self.getSetting(AttributeKey.PYTHON_VERSION)))
         if staticPackage.endswith(herokuPythonLibPath) :
-            staticPackage = staticPackage.replace(herokuPythonLibPath,Constant.NOTHING)
+            staticPackage = staticPackage.replace(herokuPythonLibPath,c.NOTHING)
         staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
         self.debug(f'Static package: "{staticPackage}"')
         return staticPackage
@@ -705,66 +553,28 @@ class Globals:
         if encoding :
             return encoding
         else :
-            return Globals.ENCODING
+            return c.ENCODING
 
     def debug(self,message):
-        if self.debugStatus :
-            print(f'{Constant.DEBUG}{message}')
+        if 'True' == self.debugStatus :
+            log.debug(self.__class__,message)
 
-    def warning(self,string):
-        if self.warningStatus :
-            print(f'{Constant.WARNING}{string}')
+    def warning(self,message):
+        if 'True' == self.warningStatus :
+            log.warning(self.__class__,message)
 
     def error(self,classRequest,message,exception):
-        if self.errorStatus :
-            if classRequest == Constant.NOTHING :
-                classPortion = Constant.NOTHING
-            else :
-                classPortion = f'{classRequest.__name__} '
-            if exception == Constant.NOTHING :
-                errorPortion = Constant.NOTHING
-            else :
-                errorPortion = f'. Cause: {str(exception)}'
-            print(f'{Constant.ERROR}{classPortion}{message}{errorPortion}')
+        if 'True' == self.errorStatus :
+            log.error(classRequest,message,exception)
 
     def success(self,classRequest,message):
-        if self.successStatus :
-            if classRequest == Constant.NOTHING :
-                classPortion = Constant.NOTHING
-            else :
-                classPortion = f'{classRequest.__name__} '
-            print(f'{Constant.SUCCESS}{classPortion}{message}')
+        if 'True' == self.successStatus :
+            log.success(classRequest,message)
 
     def failure(self,classRequest,message,exception):
-        if self.failureStatus :
-            if classRequest == Constant.NOTHING :
-                classPortion = Constant.NOTHING
-            else :
-                classPortion = f'{classRequest.__name__} '
-            if exception == Constant.NOTHING :
-                errorPortion = Constant.NOTHING
-            else :
-                errorPortion = f'. Cause: {str(exception)}'
-            print(f'{Constant.FAILURE}{classPortion}{message}{errorPortion}')
+        if 'True' == self.failureStatus :
+            log.failure(classRequest,message,exception)
 
     def setting(self,classRequest,message):
-        if self.settingStatus :
-            if classRequest == Constant.NOTHING :
-                classPortion = Constant.NOTHING
-            else :
-                classPortion = f'{classRequest.__name__} '
-                print(f'{Constant.SETTING}{classPortion}{message}')
-
-def searchTreeList(search,tree) :
-    def keepSearching(search,history,tree,treeList):
-        if dict == type(tree) :
-            for key in tree.keys() :
-                newHistory = f'{history}.{key}'
-                if search and search in newHistory :
-                    treeList.append(newHistory)
-                keepSearching(search,newHistory,tree[key], treeList)
-        else :
-            log.debug(keepSearching,f'"{tree}" is not a dictionary')
-    treeList = []
-    keepSearching(search,'root',tree,treeList)
-    return treeList
+        if 'True' == self.settingStatus :
+            log.setting(classRequest,message)

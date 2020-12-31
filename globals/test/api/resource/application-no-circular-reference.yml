@@ -1,0 +1,3 @@
+print-status: True
+api:
+    name: Globals - no circular reference
