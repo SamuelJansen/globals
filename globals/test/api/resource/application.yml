@@ -138,3 +138,6 @@ handle:
         tuple: ()
 some:
     dictionary: { 'yolo': 'yes', 'another-yolo': 'no', 'another-yolo-again': { 'again?': 'yes'} }
+environment:
+    test: production
+    missing: ' not at all'

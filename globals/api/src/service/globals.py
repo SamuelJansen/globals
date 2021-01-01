@@ -1,9 +1,15 @@
 import os, sys, subprocess, site, importlib
 from pathlib import Path
 from python_helper import Constant as c
-from python_helper import log, StringHelper, SettingHelper, EnvironmentHelper
+from python_helper import log, StringHelper, SettingHelper, EnvironmentHelper, ObjectHelper
+
+IGNORE_MODULE_LIST = ['globals']
+IGNORE_REOURCE_LIST = ['Globals']
 
 class AttributeKey:
+
+    KW_KEY = 'key'
+    KW_VALUE = 'value'
 
     KW_API = 'api'
     KW_NAME = 'name'
@@ -33,25 +39,33 @@ class AttributeKey:
     def getKeyByClassNameAndKey(cls,key):
         return f'{cls.__name__}.{key}'
 
-def importResource(resourceName, resourceModuleName=None) :
-    if not resourceName in IGNORE_REOURCE_LIST :
-        resource = None
+def importModule(resourceModuleName, muteLogs=False, ignoreList=IGNORE_MODULE_LIST) :
+    if resourceModuleName not in ignoreList :
         module = None
-        if not resourceModuleName :
-            resourceModuleName = resourceName
         try :
             module = importlib.import_module(resourceModuleName)
         except Exception as exception:
-            log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module. Going for a second attempt')
+            if not muteLogs :
+                log.warning(importResource, f'Not possible to import "{resourceModuleName}" module. Going for a second attempt')
             try :
                 module = __import__(resourceModuleName)
             except :
-                log.error(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module in the second attempt either', exception)
+                if not muteLogs :
+                    log.error(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Returning "{module}" by default', exception)
+        return module
+
+def importResource(resourceName, resourceModuleName=None, muteLogs=False, ignoreList=IGNORE_REOURCE_LIST) :
+    if resourceName not in ignoreList :
+        if ObjectHelper.isEmpty(resourceModuleName) :
+            resourceModuleName = resourceName
+        module = importModule(resourceModuleName, muteLogs=False)
         if module :
+            resource = None
             try :
                 resource = getattr(module, resourceName)
             except Exception as exception :
-                log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module. cause: {str(exception)}')
+                if not muteLogs :
+                    log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module. cause: {str(exception)}')
             return resource
 
 class Globals:
@@ -84,8 +98,9 @@ class Globals:
 
     EXTENSION = 'yml'
     PYTHON_EXTENSION = 'py'
+    LOCAL_CONFIGURATION_FILE_NAME = f'local-config{c.DOT}{EXTENSION}'
 
-    ENCODING = 'utf-8'
+    ENCODING = c.ENCODING
     OVERRIDE = 'w+'
     READ = 'r'
 
@@ -153,9 +168,6 @@ class Globals:
     FAILURE =   '[FAILURE] '
     SETTING =   '[SETTING] '
 
-    OPEN_SETTING_INJECTION = '${'
-    CLOSE_SETTING_INJECTION = '}'
-
     DEFAULT_LOG_STATUS = False
     DEFAULT_SUCCESS_STATUS = False
     DEFAULT_SETTING_STATUS = False
@@ -167,7 +179,7 @@ class Globals:
     APPLICATION = 'application'
 
     def __init__(self, filePath,
-        settingsFileName=APPLICATION,
+        settingsFileName = APPLICATION,
         logStatus = DEFAULT_LOG_STATUS,
         successStatus = DEFAULT_SUCCESS_STATUS,
         settingStatus = DEFAULT_SETTING_STATUS,
@@ -183,40 +195,27 @@ class Globals:
         clear = lambda: os.system('cls')
         ###- clear() # or simply os.system('cls')
 
-        self.filePath = filePath
-        self.settingsFileName = self.getSettingsFileName(settingsFileName)
-        self.logStatus = EnvironmentHelper.setEnvironmentValue(log.LOG, logStatus, default=Globals.DEFAULT_LOG_STATUS)
-        self.successStatus = EnvironmentHelper.setEnvironmentValue(log.SUCCESS, successStatus, default=Globals.DEFAULT_SUCCESS_STATUS)
-        self.settingStatus = EnvironmentHelper.setEnvironmentValue(log.SETTING, settingStatus, default=Globals.DEFAULT_SETTING_STATUS)
-        self.debugStatus = EnvironmentHelper.setEnvironmentValue(log.DEBUG, debugStatus, default=Globals.DEFAULT_DEBUG_STATUS)
-        self.warningStatus = EnvironmentHelper.setEnvironmentValue(log.WARNING, warningStatus, default=Globals.DEFAULT_WARNING_STATUS)
-        self.failureStatus = EnvironmentHelper.setEnvironmentValue(log.FAILURE, failureStatus, default=Globals.DEFAULT_FAILURE_STATUS)
-        self.errorStatus = EnvironmentHelper.setEnvironmentValue(log.ERROR, errorStatus, default=Globals.DEFAULT_ERROR_STATUS)
-        log.loadSettings()
-        self.printRootPathStatus = printRootPathStatus
-        self.globalsEverything = globalsEverything
-        basicSettingsAsDictionary = {
-            'activeEnvironment' : self.activeEnvironment,
-            'successStatus' : self.successStatus,
-            'settingStatus' : self.settingStatus,
-            'debugStatus' : self.debugStatus,
-            'warningStatus' : self.warningStatus,
-            'failureStatus' : self.failureStatus,
-            'errorStatus' : self.errorStatus,
-            'logStatus' : self.logStatus,
-            'globalsEverything' : self.globalsEverything,
-            'printRootPathStatus' : self.printRootPathStatus
-        }
-        self.setting(self.__class__,f'Basic settings: {StringHelper.prettyPython(basicSettingsAsDictionary, tabCount=1)}')
-        self.debug(f'{self.__class__.__name__}.instance.filePath = {self.filePath}')
-        self.debug(f'{self.__class__.__name__}.filePath = {__file__}')
+        self.loadLocalConfiguration(
+            filePath,
+            settingsFileName,
+            logStatus,
+            successStatus,
+            settingStatus,
+            debugStatus,
+            warningStatus,
+            failureStatus,
+            errorStatus,
+            printRootPathStatus,
+            globalsEverything
+        )
 
         self.charactereFilterList = Globals.CHARACTERE_FILTER
         self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
-        self.encoding = self.getEncoding(encoding)
+        self.encoding = encoding
 
         self.buildApplicationPath()
 
+        self.defaultSettingTree = self.getDefaultSettingTree()
         self.settingTree = self.getSettingTree()
         self.staticPackage = self.getStaticPackagePath()
         self.apiName = self.getApiName()
@@ -244,8 +243,71 @@ class Globals:
         self.rootPathTree = {}
         self.update()
 
+    def loadLocalConfiguration(
+        self,
+        filePath,
+        settingsFileName,
+        logStatus,
+        successStatus,
+        settingStatus,
+        debugStatus,
+        warningStatus,
+        failureStatus,
+        errorStatus,
+        printRootPathStatus,
+        globalsEverything
+    ) :
+        self.filePath = filePath
+        self.logStatus = EnvironmentHelper.setEnvironmentValue(log.LOG, logStatus, default=Globals.DEFAULT_LOG_STATUS)
+        self.successStatus = EnvironmentHelper.setEnvironmentValue(log.SUCCESS, successStatus, default=Globals.DEFAULT_SUCCESS_STATUS)
+        self.settingStatus = EnvironmentHelper.setEnvironmentValue(log.SETTING, settingStatus, default=Globals.DEFAULT_SETTING_STATUS)
+        self.debugStatus = EnvironmentHelper.setEnvironmentValue(log.DEBUG, debugStatus, default=Globals.DEFAULT_DEBUG_STATUS)
+        self.warningStatus = EnvironmentHelper.setEnvironmentValue(log.WARNING, warningStatus, default=Globals.DEFAULT_WARNING_STATUS)
+        self.failureStatus = EnvironmentHelper.setEnvironmentValue(log.FAILURE, failureStatus, default=Globals.DEFAULT_FAILURE_STATUS)
+        self.errorStatus = EnvironmentHelper.setEnvironmentValue(log.ERROR, errorStatus, default=Globals.DEFAULT_ERROR_STATUS)
+        self.localConfiguration = {}
+        try :
+            self.localConfiguration = self.getSettingTree(settingFilePath=Globals.LOCAL_CONFIGURATION_FILE_NAME,settingTree=None)
+        except Exception as exception :
+            log.log(self.__class__,f'Failed to load {Globals.LOCAL_CONFIGURATION_FILE_NAME} settings', exception=exception)
+        keyQuery = SettingHelper.querySetting(AttributeKey.KW_KEY,self.localConfiguration)
+        keyValueQuery = {}
+        for key,value in keyQuery.items() :
+            environmentInjection = SettingHelper.getSetting(key[:-4], self.localConfiguration)
+            if (
+                ObjectHelper.isDictionary(environmentInjection) and
+                AttributeKey.KW_KEY in environmentInjection and
+                AttributeKey.KW_VALUE in environmentInjection and
+                2 == len(environmentInjection)
+            ):
+                EnvironmentHelper.setEnvironmentValue(environmentInjection[AttributeKey.KW_KEY], environmentInjection[AttributeKey.KW_VALUE])
+        log.loadSettings()
+        self.settingsFileName = self.getSettingsFileName(settingsFileName)
+        self.printRootPathStatus = printRootPathStatus
+        self.globalsEverything = globalsEverything
+        self.ignoreModuleList = IGNORE_MODULE_LIST
+        self.ignoreResourceList = IGNORE_REOURCE_LIST
+        if SettingHelper.getSetting('print-status', self.localConfiguration) :
+            SettingHelper.printSettings(self.localConfiguration,"Local Configuration")
+        basicSettingsAsDictionary = {
+            'activeEnvironment' : self.activeEnvironment,
+            'settingsFileName' : self.settingsFileName,
+            'successStatus' : self.successStatus,
+            'settingStatus' : self.settingStatus,
+            'debugStatus' : self.debugStatus,
+            'warningStatus' : self.warningStatus,
+            'failureStatus' : self.failureStatus,
+            'errorStatus' : self.errorStatus,
+            'logStatus' : self.logStatus,
+            'globalsEverything' : self.globalsEverything,
+            'printRootPathStatus' : self.printRootPathStatus
+        }
+        self.setting(self.__class__,f'Basic settings: {StringHelper.prettyPython(basicSettingsAsDictionary, tabCount=1)}')
+        self.debug(f'{self.__class__.__name__}.instance.filePath = {self.filePath}')
+        self.debug(f'{self.__class__.__name__}.filePath = {__file__}')
+
     def getSettingsFileName(self, settingsFileName) :
-        self.mainSettingsFileName = settingsFileName
+        self.defaultSettingFileName = settingsFileName
         self.activeEnvironment = SettingHelper.getActiveEnvironment()
         if SettingHelper.DEFAULT_ENVIRONMENT == self.activeEnvironment :
             return settingsFileName
@@ -393,16 +455,6 @@ class Globals:
                 except : pass
         return node
 
-    def lineAproved(self,settingLine) :
-        approved = True
-        if c.NEW_LINE == settingLine  :
-            approved = False
-        if c.HASH_TAG in settingLine :
-            filteredSettingLine = self.filterString(settingLine)
-            if None == filteredSettingLine or c.NOTHING == filteredSettingLine or c.NEW_LINE == filteredSettingLine :
-                approved = False
-        return approved
-
     def overrideApiTree(self,apiName,package=None):
         if package :
             actualPackage = package + self.OS_SEPARATOR
@@ -411,9 +463,13 @@ class Globals:
         self.apiName = apiName
         self.apiPackage = package
         self.apiPath = f'{self.apisPath}{actualPackage}'
+        self.defaultSettingTree = self.getDefaultSettingTree()
         settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.settingsFileName}.{Globals.EXTENSION}'
         self.settingTree = self.getSettingTree(settingFilePath=settingFilePath,settingTree=self.settingTree)
 
+    def getDefaultSettingTree(self) :
+        defaultSettingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.defaultSettingFileName}.{Globals.EXTENSION}'
+        return self.getSettingTree(settingFilePath=defaultSettingFilePath)
 
     def getSettingTree(self,settingFilePath=None,settingTree=None) :
         if not settingFilePath :
@@ -436,7 +492,10 @@ class Globals:
     def getSetting(self,nodeKey,settingTree=None) :
         if not settingTree :
             settingTree = self.settingTree
-        return SettingHelper.getSetting(nodeKey,self.settingTree)
+        settingValue = SettingHelper.getSetting(nodeKey,self.settingTree)
+        if ObjectHelper.isEmpty(settingValue) or {} == settingValue :
+            return SettingHelper.getSetting(nodeKey,self.defaultSettingTree)
+        return settingValue
 
     def accessTree(self,nodeKey,tree) :
         return SettingHelper.getSetting(nodeKey,tree)
@@ -554,6 +613,10 @@ class Globals:
             return encoding
         else :
             return c.ENCODING
+
+    def log(self,message,exception=None):
+        if 'True' == self.logStatus :
+            log.log(self.__class__,message,exception=exception)
 
     def debug(self,message):
         if 'True' == self.debugStatus :

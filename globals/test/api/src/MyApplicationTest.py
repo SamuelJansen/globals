@@ -1,5 +1,6 @@
-from globals.api.src.service.globals import Globals
-from python_helper import EnvironmentVariable, SettingHelper, StringHelper, log
+from globals import Globals
+import globals
+from python_helper import EnvironmentVariable, SettingHelper, log, ObjectHelper
 from python_helper import Constant as c
 
 LOG_HELPER_SETTINGS = {
@@ -12,6 +13,17 @@ LOG_HELPER_SETTINGS = {
     log.FAILURE : False,
     log.ERROR : False
 }
+
+# LOG_HELPER_SETTINGS = {
+#     log.LOG : True,
+#     log.SUCCESS : True,
+#     log.SETTING : True,
+#     log.DEBUG : True,
+#     log.WARNING : True,
+#     log.WRAPPER : True,
+#     log.FAILURE : True,
+#     log.ERROR : True
+# }
 
 @EnvironmentVariable(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
@@ -112,21 +124,18 @@ def myConfigurationTests_basicVariableDefinitions() :
     assert [] == globalsInstance.getSetting('handle.empty.list')
     assert {} == globalsInstance.getSetting('handle.empty.dictionary-or-set')
     assert (()) == globalsInstance.getSetting('handle.empty.tuple')
+    assert 'local' == globalsInstance.getSetting('environment.test')
+    assert 'not at all' == globalsInstance.getSetting('environment.missing')
 
 @EnvironmentVariable(environmentVariables={
+    'MY_CONFIGURATION_KEY' : 'my configuration value injected through environmnet variable',
     SettingHelper.ACTIVE_ENVIRONMENT : None,
     **LOG_HELPER_SETTINGS
 })
 def myConfigurationTests_whenEnvironmentVariableIsPresent() :
     # Arrange
-    enveironmentKey = 'MY_CONFIGURATION_KEY'
-    enveironmentValue = 'my configuration value injected through environmnet variable'
-    environmentVariables = {enveironmentKey : enveironmentValue}
-    @EnvironmentVariable(environmentVariables=environmentVariables)
-    def initialiseGlobals() :
-        return Globals(__file__)
-    globalsInstance = initialiseGlobals()
-    expected = enveironmentValue
+    globalsInstance = Globals(__file__)
+    expected = 'my configuration value injected through environmnet variable'
 
     # Act
     toAssert = globalsInstance.getSetting('my.configuration')
@@ -170,6 +179,44 @@ def myConfigurationTests_musHandleSettingsWithNoSelfOrCircularReference() :
 
     # Act
     toAssert = globalsInstance.getSetting('api.name')
+    print(toAssert)
 
     # Assert
     assert expected == toAssert
+
+
+@EnvironmentVariable(environmentVariables={
+    SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+    **LOG_HELPER_SETTINGS
+})
+def importResourceAndModule_withSuccess() :
+    # Arrange
+    SOME_VALUE = 'some value'
+    globalsInstance = Globals(__file__
+        , debugStatus = True
+        , warningStatus = True
+        , errorStatus = True
+        , successStatus = True
+        , failureStatus = True
+        , settingStatus = True
+        , encoding = 'utf-8'
+        , printRootPathStatus = False
+        , globalsEverything = False
+    )
+
+    # Act
+    myServiceClass = globals.importResource('MyService', muteLogs=True)
+    myOtherServiceClass = globals.importResource('MyOtherService', resourceModuleName='MyService', muteLogs=True)
+    myServiceModule = globals.importModule('MyService', muteLogs=True)
+    globalsInstance.ignoreResourceList += ['MyIgnorableService']
+    myIgnorableServiceClass = globals.importResource('MyIgnorableService', muteLogs=True)
+    myOtherIgnorableServiceClass = globals.importResource('MyOtherIgnorableService', resourceModuleName='MyIgnorableService', muteLogs=True)
+    myOtherServiceModule = globals.importModule('MyIgnorableService', muteLogs=True)
+
+    # Assert
+    assert f'service value: {SOME_VALUE}' == myServiceClass().getServiceValue(SOME_VALUE)
+    assert f'other service value: {SOME_VALUE}' == myOtherServiceClass().getServiceValue(SOME_VALUE)
+    assert ObjectHelper.isNotNone(myServiceModule)
+    assert ObjectHelper.isNone(myIgnorableServiceClass)
+    assert ObjectHelper.isNone(myOtherIgnorableServiceClass)
+    assert ObjectHelper.isNotNone(myOtherServiceModule)
