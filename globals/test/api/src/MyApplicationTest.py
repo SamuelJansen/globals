@@ -32,12 +32,13 @@ LOG_HELPER_SETTINGS = {
 def startMyApplicationTest() :
     # Act
     Globals(__file__
+        , loadLocalConfig = False
         , logStatus = False
         , debugStatus = True
         , warningStatus = True
         , errorStatus = True
         , successStatus = True
-        , failureStatus = True
+        , failureStatus = False
         , settingStatus = True
         , encoding = 'utf-8'
         , printRootPathStatus = False
@@ -54,12 +55,14 @@ def startMyApplicationTest() :
 def myConfigurationTests_basicVariableDefinitions() :
     # Arrange and Act
     globalsInstance = Globals(__file__
+        , loadLocalConfig = False
         , debugStatus = True
         , warningStatus = True
         , errorStatus = True
         , successStatus = True
-        , failureStatus = True
+        , failureStatus = False
         , settingStatus = True
+        , logStatus = False
         , encoding = 'utf-8'
         , printRootPathStatus = False
         , globalsEverything = False
@@ -126,6 +129,10 @@ def myConfigurationTests_basicVariableDefinitions() :
     assert (()) == globalsInstance.getSetting('handle.empty.tuple')
     assert 'local' == globalsInstance.getSetting('environment.test')
     assert 'not at all' == globalsInstance.getSetting('environment.missing')
+    assert 'ABCD -- 222233444 -- EFGH' == globalsInstance.getSetting('some-not-string-selfreference.integer')
+    assert 'ABCD -- 2.3 -- EFGH' == globalsInstance.getSetting('some-not-string-selfreference.float')
+    assert 'ABCD -- True -- EFGH' == globalsInstance.getSetting('some-not-string-selfreference.boolean')
+
 
 @EnvironmentVariable(environmentVariables={
     'MY_CONFIGURATION_KEY' : 'my configuration value injected through environmnet variable',
@@ -134,7 +141,7 @@ def myConfigurationTests_basicVariableDefinitions() :
 })
 def myConfigurationTests_whenEnvironmentVariableIsPresent() :
     # Arrange
-    globalsInstance = Globals(__file__)
+    globalsInstance = Globals(__file__, loadLocalConfig = False)
     expected = 'my configuration value injected through environmnet variable'
 
     # Act
@@ -149,7 +156,7 @@ def myConfigurationTests_whenEnvironmentVariableIsPresent() :
 })
 def myConfigurationTests_whenEnvironmentVariableIsNotPresentAndIsSettingKeyReferencedAndSettingKeyAlreadyIsDefined() :
     # Arrange
-    globalsInstance = Globals(__file__)
+    globalsInstance = Globals(__file__, loadLocalConfig = False)
     expected = globalsInstance.getSetting('my.self-reference-key')
 
     # Act
@@ -165,17 +172,19 @@ def myConfigurationTests_whenEnvironmentVariableIsNotPresentAndIsSettingKeyRefer
 def myConfigurationTests_musHandleSettingsWithNoSelfOrCircularReference() :
     # Arrange
     globalsInstance = Globals(__file__
+        , loadLocalConfig = False
         , debugStatus = True
         , warningStatus = True
         , errorStatus = True
         , successStatus = True
-        , failureStatus = True
+        , failureStatus = False
         , settingStatus = True
+        , logStatus = False
         , encoding = 'utf-8'
         , printRootPathStatus = False
         , globalsEverything = False
     )
-    expected = 'Globals - no circular reference'
+    expected = 'Globals - no self reference'
 
     # Act
     toAssert = globalsInstance.getSetting('api.name')
@@ -183,7 +192,6 @@ def myConfigurationTests_musHandleSettingsWithNoSelfOrCircularReference() :
 
     # Assert
     assert expected == toAssert
-
 
 @EnvironmentVariable(environmentVariables={
     SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
@@ -193,12 +201,14 @@ def importResourceAndModule_withSuccess() :
     # Arrange
     SOME_VALUE = 'some value'
     globalsInstance = Globals(__file__
+        , loadLocalConfig = False
         , debugStatus = True
         , warningStatus = True
         , errorStatus = True
         , successStatus = True
-        , failureStatus = True
+        , failureStatus = False
         , settingStatus = True
+        , logStatus = False
         , encoding = 'utf-8'
         , printRootPathStatus = False
         , globalsEverything = False
@@ -220,3 +230,40 @@ def importResourceAndModule_withSuccess() :
     assert ObjectHelper.isNone(myIgnorableServiceClass)
     assert ObjectHelper.isNone(myOtherIgnorableServiceClass)
     assert ObjectHelper.isNotNone(myOtherServiceModule)
+
+
+@EnvironmentVariable(environmentVariables={
+    SettingHelper.ACTIVE_ENVIRONMENT : 'missing_setting_file',
+    **LOG_HELPER_SETTINGS
+})
+def shouldNotHandleMissingApplicationEnvironment() :
+    # Arrange
+    exception = None
+    globalsInstance = None
+
+    # Act
+    try :
+        globalsInstance = Globals(__file__, loadLocalConfig = False)
+    except Exception as ext :
+        exception = ext
+        exceptionMessage = str(exception)
+
+    # Assert
+    assert ObjectHelper.isNone(globalsInstance)
+    assert ObjectHelper.isNotNone(exception)
+    assert 'No such file or directory:' in exceptionMessage
+    assert 'application-missing_setting_file' in exceptionMessage
+
+@EnvironmentVariable(environmentVariables={
+    SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+    **LOG_HELPER_SETTINGS
+})
+def mustLoadLocalConfiguration() :
+    # Arrange
+    LOCAL_CONFIG_VALUE = 'local config setting value'
+
+    # Act
+    globalsInstance = Globals(__file__)
+
+    # Assert
+    assert LOCAL_CONFIG_VALUE == globalsInstance.getSetting('local.config.setting-key')

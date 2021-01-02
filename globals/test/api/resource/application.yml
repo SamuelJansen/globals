@@ -1,4 +1,4 @@
-print-status: True
+print-status: False
 api:
     name: Globals
     extension: yml
@@ -12,19 +12,6 @@ api:
     git:
         url: https://github.com/SamuelJansen/
         extension: git
-    info:
-        host: my-host.com
-        schemes: [https]
-        title: Globals module
-        version: 0.0.1
-        description: This is globals test
-        terms-of-service: http://swagger.io/terms/
-        contact:
-            name: Samuel Jansen
-            email: samuel.jansenn@gmail.com
-        license:
-            name: Apache 2.0 / MIT License
-            url: http://www.apache.org/licenses/LICENSE-2.0.html
 python:
     version: 3.9
 
@@ -141,3 +128,8 @@ some:
 environment:
     test: production
     missing: ' not at all'
+
+some-not-string-selfreference:
+    integer: ABCD -- ${handle.integer} -- EFGH
+    float: ABCD -- ${handle.float} -- EFGH
+    boolean: ABCD -- ${handle.boolean} -- EFGH

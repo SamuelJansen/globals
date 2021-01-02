@@ -179,6 +179,7 @@ class Globals:
     APPLICATION = 'application'
 
     def __init__(self, filePath,
+        loadLocalConfig = True,
         settingsFileName = APPLICATION,
         logStatus = DEFAULT_LOG_STATUS,
         successStatus = DEFAULT_SUCCESS_STATUS,
@@ -197,6 +198,7 @@ class Globals:
 
         self.loadLocalConfiguration(
             filePath,
+            loadLocalConfig,
             settingsFileName,
             logStatus,
             successStatus,
@@ -246,6 +248,7 @@ class Globals:
     def loadLocalConfiguration(
         self,
         filePath,
+        loadLocalConfig,
         settingsFileName,
         logStatus,
         successStatus,
@@ -258,29 +261,31 @@ class Globals:
         globalsEverything
     ) :
         self.filePath = filePath
-        self.logStatus = EnvironmentHelper.setEnvironmentValue(log.LOG, logStatus, default=Globals.DEFAULT_LOG_STATUS)
-        self.successStatus = EnvironmentHelper.setEnvironmentValue(log.SUCCESS, successStatus, default=Globals.DEFAULT_SUCCESS_STATUS)
-        self.settingStatus = EnvironmentHelper.setEnvironmentValue(log.SETTING, settingStatus, default=Globals.DEFAULT_SETTING_STATUS)
-        self.debugStatus = EnvironmentHelper.setEnvironmentValue(log.DEBUG, debugStatus, default=Globals.DEFAULT_DEBUG_STATUS)
-        self.warningStatus = EnvironmentHelper.setEnvironmentValue(log.WARNING, warningStatus, default=Globals.DEFAULT_WARNING_STATUS)
-        self.failureStatus = EnvironmentHelper.setEnvironmentValue(log.FAILURE, failureStatus, default=Globals.DEFAULT_FAILURE_STATUS)
-        self.errorStatus = EnvironmentHelper.setEnvironmentValue(log.ERROR, errorStatus, default=Globals.DEFAULT_ERROR_STATUS)
+        self.logStatus = EnvironmentHelper.updateEnvironmentValue(log.LOG, logStatus, default=Globals.DEFAULT_LOG_STATUS)
+        self.successStatus = EnvironmentHelper.updateEnvironmentValue(log.SUCCESS, successStatus, default=Globals.DEFAULT_SUCCESS_STATUS)
+        self.settingStatus = EnvironmentHelper.updateEnvironmentValue(log.SETTING, settingStatus, default=Globals.DEFAULT_SETTING_STATUS)
+        self.debugStatus = EnvironmentHelper.updateEnvironmentValue(log.DEBUG, debugStatus, default=Globals.DEFAULT_DEBUG_STATUS)
+        self.warningStatus = EnvironmentHelper.updateEnvironmentValue(log.WARNING, warningStatus, default=Globals.DEFAULT_WARNING_STATUS)
+        self.failureStatus = EnvironmentHelper.updateEnvironmentValue(log.FAILURE, failureStatus, default=Globals.DEFAULT_FAILURE_STATUS)
+        self.errorStatus = EnvironmentHelper.updateEnvironmentValue(log.ERROR, errorStatus, default=Globals.DEFAULT_ERROR_STATUS)
+        self.loadLocalConfig = loadLocalConfig
         self.localConfiguration = {}
-        try :
-            self.localConfiguration = self.getSettingTree(settingFilePath=Globals.LOCAL_CONFIGURATION_FILE_NAME,settingTree=None)
-        except Exception as exception :
-            log.log(self.__class__,f'Failed to load {Globals.LOCAL_CONFIGURATION_FILE_NAME} settings', exception=exception)
-        keyQuery = SettingHelper.querySetting(AttributeKey.KW_KEY,self.localConfiguration)
-        keyValueQuery = {}
-        for key,value in keyQuery.items() :
-            environmentInjection = SettingHelper.getSetting(key[:-4], self.localConfiguration)
-            if (
-                ObjectHelper.isDictionary(environmentInjection) and
-                AttributeKey.KW_KEY in environmentInjection and
-                AttributeKey.KW_VALUE in environmentInjection and
-                2 == len(environmentInjection)
-            ):
-                EnvironmentHelper.setEnvironmentValue(environmentInjection[AttributeKey.KW_KEY], environmentInjection[AttributeKey.KW_VALUE])
+        if self.loadLocalConfig :
+            try :
+                self.localConfiguration = self.getSettingTree(settingFilePath=Globals.LOCAL_CONFIGURATION_FILE_NAME,settingTree=None)
+            except Exception as exception :
+                log.log(self.__class__,f'Failed to load {Globals.LOCAL_CONFIGURATION_FILE_NAME} settings', exception=exception)
+            keyQuery = SettingHelper.querySetting(AttributeKey.KW_KEY,self.localConfiguration)
+            keyValueQuery = {}
+            for key,value in keyQuery.items() :
+                environmentInjection = SettingHelper.getSetting(key[:-4], self.localConfiguration)
+                if (
+                    ObjectHelper.isDictionary(environmentInjection) and
+                    AttributeKey.KW_KEY in environmentInjection and
+                    AttributeKey.KW_VALUE in environmentInjection and
+                    2 == len(environmentInjection)
+                ):
+                    EnvironmentHelper.updateEnvironmentValue(environmentInjection[AttributeKey.KW_KEY], environmentInjection[AttributeKey.KW_VALUE])
         log.loadSettings()
         self.settingsFileName = self.getSettingsFileName(settingsFileName)
         self.printRootPathStatus = printRootPathStatus
@@ -292,6 +297,7 @@ class Globals:
         basicSettingsAsDictionary = {
             'activeEnvironment' : self.activeEnvironment,
             'settingsFileName' : self.settingsFileName,
+            'defaultSettingFileName' : self.defaultSettingFileName,
             'successStatus' : self.successStatus,
             'settingStatus' : self.settingStatus,
             'debugStatus' : self.debugStatus,
@@ -302,7 +308,7 @@ class Globals:
             'globalsEverything' : self.globalsEverything,
             'printRootPathStatus' : self.printRootPathStatus
         }
-        self.setting(self.__class__,f'Basic settings: {StringHelper.prettyPython(basicSettingsAsDictionary, tabCount=1)}')
+        log.prettyJson(self.__class__, f'Basic settings', basicSettingsAsDictionary)
         self.debug(f'{self.__class__.__name__}.instance.filePath = {self.filePath}')
         self.debug(f'{self.__class__.__name__}.filePath = {__file__}')
 
