@@ -1,3 +1,5 @@
+print-status: True
+
 local:
     config:
         setting-key: local config setting value

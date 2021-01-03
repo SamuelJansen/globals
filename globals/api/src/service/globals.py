@@ -3,8 +3,8 @@ from pathlib import Path
 from python_helper import Constant as c
 from python_helper import log, StringHelper, SettingHelper, EnvironmentHelper, ObjectHelper
 
-IGNORE_MODULE_LIST = ['globals']
-IGNORE_REOURCE_LIST = ['Globals']
+IGNORE_MODULE_LIST = []
+IGNORE_REOURCE_LIST = []
 
 class AttributeKey:
 
@@ -274,7 +274,7 @@ class Globals:
             try :
                 self.localConfiguration = self.getSettingTree(settingFilePath=Globals.LOCAL_CONFIGURATION_FILE_NAME,settingTree=None)
             except Exception as exception :
-                log.log(self.__class__,f'Failed to load {Globals.LOCAL_CONFIGURATION_FILE_NAME} settings', exception=exception)
+                log.setting(self.__class__,f'Failed to load {Globals.LOCAL_CONFIGURATION_FILE_NAME} settings', exception=exception)
             keyQuery = SettingHelper.querySetting(AttributeKey.KW_KEY,self.localConfiguration)
             keyValueQuery = {}
             for key,value in keyQuery.items() :
@@ -308,7 +308,7 @@ class Globals:
             'globalsEverything' : self.globalsEverything,
             'printRootPathStatus' : self.printRootPathStatus
         }
-        log.prettyJson(self.__class__, f'Basic settings', basicSettingsAsDictionary)
+        log.prettyJson(self.__class__, f'Basic settings', basicSettingsAsDictionary, logLevel=log.SETTING)
         self.debug(f'{self.__class__.__name__}.instance.filePath = {self.filePath}')
         self.debug(f'{self.__class__.__name__}.filePath = {__file__}')
 
@@ -321,16 +321,29 @@ class Globals:
             return f'{settingsFileName}{c.DASH}{self.activeEnvironment}'
 
     def buildApplicationPath(self):
-        if self.filePath :
+        self.log(f'{self.__class__.__name__}{c.DOT}filePath: {self.filePath}')
+        if ObjectHelper.isNotEmpty(self.filePath) :
             self.currentPath = f'{str(Path(self.filePath).parent.absolute())}{self.OS_SEPARATOR}'
         else :
             self.currentPath = f'{str(Path(__file__).parent.absolute())}{self.OS_SEPARATOR}'
+        self.log(f'{self.__class__.__name__}{c.DOT}currentPath: {self.currentPath}')
+
         self.localPath = str(Path.home())
         if not self.localPath[-1] == str(self.OS_SEPARATOR) :
             self.localPath = f'{self.localPath}{self.OS_SEPARATOR}'
+        self.log(f'{self.__class__.__name__}{c.DOT}localPath: {self.localPath}')
 
         self.baseApiPath = Globals.BASE_API_PATH
+        # apiPath = None
+        # try :
+        #     apiPath = self.baseApiPath.join(self.currentPath.split(self.baseApiPath)[:-2])
+        # except :
+        #     apiPath = self.currentPath.split(self.baseApiPath)[0]
+        # if apiPath.replace('\\', '').startswith(self.baseApiPath.replace('\\', '')) :
+        #     apiPath = self.currentPath.split(self.baseApiPath)[0]
+        # self.apiPath = apiPath
         self.apiPath = self.currentPath.split(self.baseApiPath)[0]
+        self.log(f'{self.__class__.__name__}{c.DOT}apiPath: {self.apiPath}')
 
         lastLocalPathPackage = self.localPath.split(self.OS_SEPARATOR)[-2]
         firstBaseApiPath = self.baseApiPath.split(self.OS_SEPARATOR)[0]
@@ -344,14 +357,19 @@ class Globals:
                 break
             else :
                 self.apiPackage = currentPackage
+        self.log(f'{self.__class__.__name__}{c.DOT}apiPackage: {self.apiPackage}')
 
-        if self.apiPackage != c.NOTHING :
+
+        if StringHelper.isNotBlank(self.apiPackage) :
             if len(self.currentPath.split(self.localPath)[1].split(self.apiPackage)) > 1:
                 self.apisRoot = self.currentPath.split(self.localPath)[1].split(self.apiPackage)[0]
             self.apisPath = f'{self.currentPath.split(self.apiPackage)[0]}'
         else :
             self.apisRoot = c.NOTHING
             self.apisPath = c.NOTHING
+        self.log(f'{self.__class__.__name__}{c.DOT}apisRoot: {self.apisRoot}')
+        self.log(f'{self.__class__.__name__}{c.DOT}apisPath: {self.apisPath}')
+
 
     def getApiPath(self,apiPackageName):
         if not apiPackageName == c.NOTHING :
@@ -480,17 +498,17 @@ class Globals:
     def getSettingTree(self,settingFilePath=None,settingTree=None) :
         if not settingFilePath :
             settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.settingsFileName}.{Globals.EXTENSION}'
-        return SettingHelper.getSettingTree(settingFilePath)
+        settingTree = None
+        try :
+            settingTree = SettingHelper.getSettingTree(settingFilePath, fallbackSettingTree=self.defaultSettingTree)
+        except :
+            settingTree = SettingHelper.getSettingTree(settingFilePath)
+        return settingTree
 
     def addTree(self,settingFilePath):
         newSetting = self.getSettingTree(settingFilePath=settingFilePath)
         for settingKey,settingValue in newSetting.items() :
             self.settingTree[settingKey] = settingValue
-
-    def concatenateTree(self,settingFilePath,tree):
-        newSetting = self.getSettingTree(settingFilePath=settingFilePath)
-        for settingKey in newSetting :
-            tree[settingKey] = newSetting[settingKey]
 
     def getApiSetting(self,nodeKey):
         return self.getSetting(nodeKey)
@@ -582,18 +600,6 @@ class Globals:
             self.failure(self.__class__,'Not possible to get api extenion. Returning default estension', exception)
         return extension
 
-    def getSettingFromSettingFilePathAndKeyPair(self,path,settingKey) :
-        self.debug(f'''Getting {settingKey} from {path}''')
-        with open(path,c.READ,encoding=c.ENCODING) as settingsFile :
-            allSettingLines = settingsFile.readlines()
-        for line, settingLine in enumerate(allSettingLines) :
-            depth = self.getDepth(settingLine)
-            setingKeyLine = self.getAttributeKey(settingLine)
-            if settingKey == setingKeyLine :
-                settingValue = self.getAttibuteValue(settingLine)
-                self.debug(f'''{c.TAB}key : value --> {settingKey} : {settingValue}''')
-                return settingValue
-
     def getStaticPackagePath(self) :
         staticPackageList = site.getsitepackages()
         self.debug(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
@@ -611,9 +617,6 @@ class Globals:
         self.debug(f'Static package: "{staticPackage}"')
         return staticPackage
 
-    def searchTreeList(self,search,tree):
-        return searchTreeList(search,tree)
-
     def getEncoding(self, encoding) :
         if encoding :
             return encoding
@@ -621,29 +624,29 @@ class Globals:
             return c.ENCODING
 
     def log(self,message,exception=None):
-        if 'True' == self.logStatus :
+        if c.TRUE == self.logStatus :
             log.log(self.__class__,message,exception=exception)
 
     def debug(self,message):
-        if 'True' == self.debugStatus :
+        if c.TRUE == self.debugStatus :
             log.debug(self.__class__,message)
 
     def warning(self,message):
-        if 'True' == self.warningStatus :
+        if c.TRUE == self.warningStatus :
             log.warning(self.__class__,message)
 
     def error(self,classRequest,message,exception):
-        if 'True' == self.errorStatus :
+        if c.TRUE == self.errorStatus :
             log.error(classRequest,message,exception)
 
     def success(self,classRequest,message):
-        if 'True' == self.successStatus :
+        if c.TRUE == self.successStatus :
             log.success(classRequest,message)
 
     def failure(self,classRequest,message,exception):
-        if 'True' == self.failureStatus :
+        if c.TRUE == self.failureStatus :
             log.failure(classRequest,message,exception)
 
     def setting(self,classRequest,message):
-        if 'True' == self.settingStatus :
+        if c.TRUE == self.settingStatus :
             log.setting(classRequest,message)

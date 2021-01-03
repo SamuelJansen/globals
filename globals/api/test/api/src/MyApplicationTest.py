@@ -3,27 +3,27 @@ import globals
 from python_helper import EnvironmentVariable, SettingHelper, log, ObjectHelper
 from python_helper import Constant as c
 
-LOG_HELPER_SETTINGS = {
-    log.LOG : False,
-    log.SUCCESS : False,
-    log.SETTING : False,
-    log.DEBUG : False,
-    log.WARNING : False,
-    log.WRAPPER : False,
-    log.FAILURE : False,
-    log.ERROR : False
-}
-
 # LOG_HELPER_SETTINGS = {
-#     log.LOG : True,
-#     log.SUCCESS : True,
-#     log.SETTING : True,
-#     log.DEBUG : True,
-#     log.WARNING : True,
-#     log.WRAPPER : True,
-#     log.FAILURE : True,
-#     log.ERROR : True
+#     log.LOG : False,
+#     log.SUCCESS : False,
+#     log.SETTING : False,
+#     log.DEBUG : False,
+#     log.WARNING : False,
+#     log.WRAPPER : False,
+#     log.FAILURE : False,
+#     log.ERROR : False
 # }
+
+LOG_HELPER_SETTINGS = {
+    log.LOG : True,
+    log.SUCCESS : True,
+    log.SETTING : True,
+    log.DEBUG : True,
+    log.WARNING : True,
+    log.WRAPPER : True,
+    log.FAILURE : True,
+    log.ERROR : True
+}
 
 @EnvironmentVariable(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
@@ -33,12 +33,12 @@ def startMyApplicationTest() :
     # Act
     Globals(__file__
         , loadLocalConfig = False
-        , logStatus = False
+        , logStatus = True
         , debugStatus = True
         , warningStatus = True
         , errorStatus = True
         , successStatus = True
-        , failureStatus = False
+        , failureStatus = True
         , settingStatus = True
         , encoding = 'utf-8'
         , printRootPathStatus = False
@@ -255,7 +255,7 @@ def shouldNotHandleMissingApplicationEnvironment() :
     assert 'application-missing_setting_file' in exceptionMessage
 
 @EnvironmentVariable(environmentVariables={
-    SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+    # SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
     **LOG_HELPER_SETTINGS
 })
 def mustLoadLocalConfiguration() :
@@ -267,3 +267,4 @@ def mustLoadLocalConfiguration() :
 
     # Assert
     assert LOCAL_CONFIG_VALUE == globalsInstance.getSetting('local.config.setting-key')
+    assert True == globalsInstance.getSetting('print-status')
