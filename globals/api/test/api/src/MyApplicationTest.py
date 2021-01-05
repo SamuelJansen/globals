@@ -1,7 +1,20 @@
-from globals import Globals
 import globals
-from python_helper import EnvironmentVariable, SettingHelper, log, ObjectHelper
+from python_helper import Test, SettingHelper, log, ObjectHelper
 from python_helper import Constant as c
+
+def runBefore() :
+    globals.GlobalsManager.eraseGlobalsInstance()
+
+def runAfter() :
+    globals.GlobalsManager.eraseGlobalsInstance()
+
+RESULTS = {}
+
+TEST_KWARGS = {
+    'callBefore' : runBefore,
+    'callAfter' : runAfter,
+    'returns' : RESULTS
+}
 
 # LOG_HELPER_SETTINGS = {
 #     log.LOG : False,
@@ -11,29 +24,33 @@ from python_helper import Constant as c
 #     log.WARNING : False,
 #     log.WRAPPER : False,
 #     log.FAILURE : False,
-#     log.ERROR : False
+#     log.ERROR : False,
+#     log.TEST : False
 # }
 
 LOG_HELPER_SETTINGS = {
-    log.LOG : True,
+    log.LOG : False,
     log.SUCCESS : True,
     log.SETTING : True,
     log.DEBUG : True,
     log.WARNING : True,
     log.WRAPPER : True,
     log.FAILURE : True,
-    log.ERROR : True
+    log.ERROR : True,
+    log.TEST : True
 }
 
-@EnvironmentVariable(environmentVariables={
+@Test(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
         **LOG_HELPER_SETTINGS
-})
+    },
+    **TEST_KWARGS
+)
 def startMyApplicationTest() :
     # Act
-    Globals(__file__
+    globals.newGlobalsInstance(__file__
         , loadLocalConfig = False
-        , logStatus = True
+        , logStatus = False
         , debugStatus = True
         , warningStatus = True
         , errorStatus = True
@@ -45,16 +62,18 @@ def startMyApplicationTest() :
         , globalsEverything = False
         )
 
-@EnvironmentVariable(environmentVariables={
-    SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
-    'MY_COMPLEX_ENV' : ' -- my complex value -- ',
-    'LATE_VALUE' : '-- late environment value --',
-    'ONLY_ENVIRONMENT_VARIABLE' : 'only environment variable value',
-    **LOG_HELPER_SETTINGS
-})
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        'MY_COMPLEX_ENV' : ' -- my complex value -- ',
+        'LATE_VALUE' : '-- late environment value --',
+        'ONLY_ENVIRONMENT_VARIABLE' : 'only environment variable value',
+        **LOG_HELPER_SETTINGS
+    },
+    **TEST_KWARGS
+)
 def myConfigurationTests_basicVariableDefinitions() :
     # Arrange and Act
-    globalsInstance = Globals(__file__
+    globalsInstance = globals.newGlobalsInstance(__file__
         , loadLocalConfig = False
         , debugStatus = True
         , warningStatus = True
@@ -134,29 +153,34 @@ def myConfigurationTests_basicVariableDefinitions() :
     assert 'ABCD -- True -- EFGH' == globalsInstance.getSetting('some-not-string-selfreference.boolean')
 
 
-@EnvironmentVariable(environmentVariables={
-    'MY_CONFIGURATION_KEY' : 'my configuration value injected through environmnet variable',
-    SettingHelper.ACTIVE_ENVIRONMENT : None,
-    **LOG_HELPER_SETTINGS
-})
+@Test(environmentVariables={
+        'MY_CONFIGURATION_KEY' : 'my configuration value injected through environmnet variable',
+        SettingHelper.ACTIVE_ENVIRONMENT : None,
+        **LOG_HELPER_SETTINGS
+    },
+    **TEST_KWARGS
+)
 def myConfigurationTests_whenEnvironmentVariableIsPresent() :
     # Arrange
-    globalsInstance = Globals(__file__, loadLocalConfig = False)
+    globalsInstance = globals.newGlobalsInstance(__file__, loadLocalConfig = False)
     expected = 'my configuration value injected through environmnet variable'
 
     # Act
     toAssert = globalsInstance.getSetting('my.configuration')
+    print(f"globalsInstance.getSetting('my.configuration'): {globalsInstance.getSetting('my.configuration')}")
 
     # Assert
     assert expected == toAssert
 
-@EnvironmentVariable(environmentVariables={
-    SettingHelper.ACTIVE_ENVIRONMENT : None,
-    **LOG_HELPER_SETTINGS
-})
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : None,
+        **LOG_HELPER_SETTINGS
+    },
+    **TEST_KWARGS
+)
 def myConfigurationTests_whenEnvironmentVariableIsNotPresentAndIsSettingKeyReferencedAndSettingKeyAlreadyIsDefined() :
     # Arrange
-    globalsInstance = Globals(__file__, loadLocalConfig = False)
+    globalsInstance = globals.newGlobalsInstance(__file__, loadLocalConfig = False)
     expected = globalsInstance.getSetting('my.self-reference-key')
 
     # Act
@@ -165,13 +189,15 @@ def myConfigurationTests_whenEnvironmentVariableIsNotPresentAndIsSettingKeyRefer
     # Assert
     assert expected == toAssert
 
-@EnvironmentVariable(environmentVariables={
-    SettingHelper.ACTIVE_ENVIRONMENT : 'no-circular-reference',
-    **LOG_HELPER_SETTINGS
-})
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : 'no-circular-reference',
+        **LOG_HELPER_SETTINGS
+    },
+    **TEST_KWARGS
+)
 def myConfigurationTests_musHandleSettingsWithNoSelfOrCircularReference() :
     # Arrange
-    globalsInstance = Globals(__file__
+    globalsInstance = globals.newGlobalsInstance(__file__
         , loadLocalConfig = False
         , debugStatus = True
         , warningStatus = True
@@ -193,14 +219,16 @@ def myConfigurationTests_musHandleSettingsWithNoSelfOrCircularReference() :
     # Assert
     assert expected == toAssert
 
-@EnvironmentVariable(environmentVariables={
-    SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
-    **LOG_HELPER_SETTINGS
-})
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **LOG_HELPER_SETTINGS
+    },
+    **TEST_KWARGS
+)
 def importResourceAndModule_withSuccess() :
     # Arrange
     SOME_VALUE = 'some value'
-    globalsInstance = Globals(__file__
+    globalsInstance = globals.newGlobalsInstance(__file__
         , loadLocalConfig = False
         , debugStatus = True
         , warningStatus = True
@@ -232,10 +260,12 @@ def importResourceAndModule_withSuccess() :
     assert ObjectHelper.isNotNone(myOtherServiceModule)
 
 
-@EnvironmentVariable(environmentVariables={
-    SettingHelper.ACTIVE_ENVIRONMENT : 'missing_setting_file',
-    **LOG_HELPER_SETTINGS
-})
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : 'missing_setting_file',
+        **LOG_HELPER_SETTINGS
+    },
+    **TEST_KWARGS
+)
 def shouldNotHandleMissingApplicationEnvironment() :
     # Arrange
     exception = None
@@ -243,7 +273,7 @@ def shouldNotHandleMissingApplicationEnvironment() :
 
     # Act
     try :
-        globalsInstance = Globals(__file__, loadLocalConfig = False)
+        globalsInstance = globals.newGlobalsInstance(__file__, loadLocalConfig = False)
     except Exception as ext :
         exception = ext
         exceptionMessage = str(exception)
@@ -254,17 +284,22 @@ def shouldNotHandleMissingApplicationEnvironment() :
     assert 'No such file or directory:' in exceptionMessage
     assert 'application-missing_setting_file' in exceptionMessage
 
-@EnvironmentVariable(environmentVariables={
-    # SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
-    **LOG_HELPER_SETTINGS
-})
+@Test(environmentVariables={
+        # SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **LOG_HELPER_SETTINGS
+    },
+    **TEST_KWARGS
+)
 def mustLoadLocalConfiguration() :
     # Arrange
     LOCAL_CONFIG_VALUE = 'local config setting value'
 
     # Act
-    globalsInstance = Globals(__file__)
+    globalsInstance = globals.newGlobalsInstance(__file__)
+    globalsInstance.printTree(globalsInstance.settingTree, '')
+
 
     # Assert
     assert LOCAL_CONFIG_VALUE == globalsInstance.getSetting('local.config.setting-key')
     assert True == globalsInstance.getSetting('print-status')
+    assert 'Globals' == globalsInstance.getSetting('api.name')
