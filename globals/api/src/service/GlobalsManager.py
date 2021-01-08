@@ -22,6 +22,9 @@ IGNORE_REOURCE_LIST = []
 class Globals:
 
     OS_SEPARATOR = EnvironmentHelper.OS_SEPARATOR
+    ENCODING = c.ENCODING
+    OVERRIDE = c.OVERRIDE
+    READ = c.READ
 
     ### There are 'places' where backslash is not much wellcome
     ### Having it stored into a variable helps a lot
@@ -328,7 +331,7 @@ class Globals:
     def makeApisAvaliable(self,apisPath):
         if self.globalsEverything :
             try :
-                apiPackageList = EnvironmentHelper.OS.listdir(apisPath)
+                apiPackageList = EnvironmentHelper.listDirectoryContent(apisPath)
                 for apiPackage in apiPackageList :
                     if not apiPackage in list(self.apiTree.keys()) :
                         self.apiTree[apiPackage] = self.makePathTreeVisible(f'{apisPath}{apiPackage}')
@@ -340,7 +343,7 @@ class Globals:
     def spotRootPath(self,rootPath) :
         if self.printRootPathStatus :
             try :
-                apiPackageList = EnvironmentHelper.OS.listdir(rootPath)
+                apiPackageList = EnvironmentHelper.listDirectoryContent(rootPath)
                 for apiPackage in apiPackageList :
                     self.rootPathTree[apiPackage] = self.addNode(f'{rootPath}{apiPackage}')
                 if self.debugStatus :
@@ -350,7 +353,7 @@ class Globals:
 
     def giveLocalVisibilityToFrameworkApis(self,apiPackageNameList):
         if apiPackageNameList :
-            localPackageNameList = EnvironmentHelper.OS.listdir(self.apisPath)
+            localPackageNameList = EnvironmentHelper.listDirectoryContent(self.apisPath)
             for packageName in localPackageNameList :
                 if packageName not in self.apiTree.keys() and packageName in apiPackageNameList :
                     packagePath = f'{self.apisPath}{packageName}'
@@ -363,7 +366,7 @@ class Globals:
 
     def makePathTreeVisible(self,path):
         node = {}
-        nodeSons = EnvironmentHelper.OS.listdir(path)
+        nodeSons = EnvironmentHelper.listDirectoryContent(path)
         for nodeSon in nodeSons :
             if self.nodeIsValid(nodeSon) :
                 nodeSonPath = f'{path}{self.OS_SEPARATOR}{nodeSon}'
@@ -377,7 +380,7 @@ class Globals:
     def addNode(self,nodePath):
         node = {}
         try :
-            nodeSons = EnvironmentHelper.OS.listdir(nodePath)
+            nodeSons = EnvironmentHelper.listDirectoryContent(nodePath)
             for nodeSon in nodeSons :
                 nodeSonPath = f'{nodePath}{self.OS_SEPARATOR}{nodeSon}'
                 try :
@@ -399,7 +402,7 @@ class Globals:
 
     def getPathTreeFromPath(self,path):
         node = {}
-        nodeSons = EnvironmentHelper.OS.listdir(path)
+        nodeSons = EnvironmentHelper.listDirectoryContent(path)
         for nodeSon in nodeSons :
             if self.nodeIsValid(nodeSon) :
                 nodeSonPath = f'{path}{self.OS_SEPARATOR}{nodeSon}'
