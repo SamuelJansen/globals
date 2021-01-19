@@ -13,6 +13,7 @@ DEFAULT_DEBUG_STATUS = False
 DEFAULT_WARNING_STATUS = False
 DEFAULT_FAILURE_STATUS = False
 DEFAULT_ERROR_STATUS = False
+DEFAULT_TEST_STATUS = False
 
 APPLICATION = 'application'
 
@@ -26,52 +27,20 @@ class Globals:
     OVERRIDE = c.OVERRIDE
     READ = c.READ
 
-    ### There are 'places' where backslash is not much wellcome
-    ### Having it stored into a variable helps a lot
-    TAB_UNITS = 4
-    SPACE = ''' '''
-    TAB = TAB_UNITS * SPACE
-    BACK_SLASH = '''\\'''
-    SLASH = '''/'''
-    HASH_TAG = '''#'''
-    COLON = ''':'''
-    COMA = ''','''
-    SPACE = ''' '''
-    DOT = '''.'''
-    NEW_LINE = '''\n'''
-    BAR_N = '''\\n'''
-    NOTHING = ''''''
-    SINGLE_QUOTE = """'"""
-    DOUBLE_QUOTE = '''"'''
-    TRIPLE_SINGLE_QUOTE = """'''"""
-    TRIPLE_DOUBLE_QUOTE = '''"""'''
-    DASH = '''-'''
-    SPACE_DASH_SPACE = ''' - '''
-    UNDERSCORE = '''_'''
-    COLON_SPACE = ': '
-
-    EXTENSION = 'yml'
     PYTHON_EXTENSION = 'py'
+    EXTENSION = 'yml'
     LOCAL_CONFIGURATION_FILE_NAME = f'local-config{c.DOT}{EXTENSION}'
-
-    OVERRIDE = 'w+'
-    READ = 'r'
 
     API_BACK_SLASH = f'api{OS_SEPARATOR}'
     SRC_BACK_SLASH = f'src{OS_SEPARATOR}'
     BASE_API_PATH = f'{API_BACK_SLASH}{SRC_BACK_SLASH}'
 
-    GLOBALS_BACK_SLASH = f'globals{OS_SEPARATOR}'
-    FRAMEWORK_BACK_SLASH = f'framework{OS_SEPARATOR}'
-    SERVICE_BACK_SLASH = f'service{OS_SEPARATOR}'
     RESOURCE_BACK_SLASH = f'resource{OS_SEPARATOR}'
     REPOSITORY_BACK_SLASH = f'repository{OS_SEPARATOR}'
     DEPENDENCY_BACK_SLASH = f'dependency{OS_SEPARATOR}'
 
-    LOCAL_GLOBALS_API_PATH = f'{SERVICE_BACK_SLASH}{FRAMEWORK_BACK_SLASH}{GLOBALS_BACK_SLASH}'
-
     TOKEN_PIP_USER = '__TOKEN_PIP_USER__'
-    KW_SPACE_PIP_USER = f'{c.SPACE}--user'
+    SPACE_PIP_USER = f'{c.SPACE}--user'
     PIP_INSTALL = f'python -m pip install --upgrade{TOKEN_PIP_USER} --force-reinstall'
     UPDATE_PIP_INSTALL = f'python -m pip install --upgrade{TOKEN_PIP_USER} pip'
 
@@ -86,8 +55,6 @@ class Globals:
         '__pycache__',
         '__init__',
         '__main__',
-        'image',
-        'audio',
         '.heroku',
         '.profile.d'
     ]
@@ -114,13 +81,6 @@ class Globals:
     TOKEN_PYTHON_VERSION = '__TOKEN_PYTHON_VERSION__'
     HEROKU_PYTHON = f'{OS_SEPARATOR}lib{OS_SEPARATOR}python{TOKEN_PYTHON_VERSION}{OS_SEPARATOR}site-packages'
 
-    DEBUG =     '[DEBUG  ] '
-    ERROR =     '[ERROR  ] '
-    WARNING =   '[WARNING] '
-    SUCCESS =   '[SUCCESS] '
-    FAILURE =   '[FAILURE] '
-    SETTING =   '[SETTING] '
-
     def __init__(self, filePath,
         loadLocalConfig = True,
         settingsFileName = APPLICATION,
@@ -131,14 +91,20 @@ class Globals:
         warningStatus = DEFAULT_WARNING_STATUS,
         failureStatus = DEFAULT_FAILURE_STATUS,
         errorStatus = DEFAULT_ERROR_STATUS,
+        testStatus = DEFAULT_TEST_STATUS,
         encoding = c.ENCODING,
         printRootPathStatus = False,
         globalsEverything = False
     ):
 
         if globalsInstanceIsNone() :
+
+            self.filePath = filePath
+            self.charactereFilterList = Globals.CHARACTERE_FILTER
+            self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
+            self.encoding = encoding
+
             self.loadLocalConfiguration(
-                filePath,
                 loadLocalConfig,
                 settingsFileName,
                 logStatus,
@@ -148,13 +114,13 @@ class Globals:
                 warningStatus,
                 failureStatus,
                 errorStatus,
+                testStatus,
                 printRootPathStatus,
                 globalsEverything
             )
 
-            self.charactereFilterList = Globals.CHARACTERE_FILTER
-            self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
-            self.encoding = encoding
+            self.setting(f'{self.__class__.__name__}{c.DOT}filePath = {self.filePath}')
+            self.setting(f'__file__ = {__file__}')
 
             self.buildApplicationPath()
 
@@ -188,7 +154,6 @@ class Globals:
 
     def loadLocalConfiguration(
         self,
-        filePath,
         loadLocalConfig,
         settingsFileName,
         logStatus,
@@ -198,10 +163,10 @@ class Globals:
         warningStatus,
         failureStatus,
         errorStatus,
+        testStatus,
         printRootPathStatus,
         globalsEverything
     ) :
-        self.filePath = filePath
         self.logStatus = EnvironmentHelper.update(log.LOG, logStatus, default=DEFAULT_LOG_STATUS)
         self.successStatus = EnvironmentHelper.update(log.SUCCESS, successStatus, default=DEFAULT_SUCCESS_STATUS)
         self.settingStatus = EnvironmentHelper.update(log.SETTING, settingStatus, default=DEFAULT_SETTING_STATUS)
@@ -209,13 +174,14 @@ class Globals:
         self.warningStatus = EnvironmentHelper.update(log.WARNING, warningStatus, default=DEFAULT_WARNING_STATUS)
         self.failureStatus = EnvironmentHelper.update(log.FAILURE, failureStatus, default=DEFAULT_FAILURE_STATUS)
         self.errorStatus = EnvironmentHelper.update(log.ERROR, errorStatus, default=DEFAULT_ERROR_STATUS)
+        self.testStatus = EnvironmentHelper.update(log.TEST, testStatus, default=DEFAULT_TEST_STATUS)
         self.loadLocalConfig = loadLocalConfig
         self.localConfiguration = {}
         if self.loadLocalConfig :
             try :
                 self.localConfiguration = self.getSettingTree(settingFilePath=Globals.LOCAL_CONFIGURATION_FILE_NAME,settingTree=None)
             except Exception as exception :
-                log.setting(self.__class__,f'Failed to load {Globals.LOCAL_CONFIGURATION_FILE_NAME} settings', exception=exception)
+                log.log(self.__class__,f'Failed to load {Globals.LOCAL_CONFIGURATION_FILE_NAME} settings', exception=exception)
             keyQuery = SettingHelper.querySetting(AttributeKey.KW_KEY,self.localConfiguration)
             keyValueQuery = {}
             for key,value in keyQuery.items() :
@@ -250,8 +216,6 @@ class Globals:
             'printRootPathStatus' : self.printRootPathStatus
         }
         log.prettyPython(self.__class__, f'Basic settings', basicSettingsAsDictionary, logLevel=log.SETTING)
-        self.debug(f'{self.__class__.__name__}{c.DOT}filePath = {self.filePath}')
-        self.debug(f'__file__ = {__file__}')
 
     def getSettingsFileName(self, settingsFileName) :
         self.defaultSettingFileName = settingsFileName
@@ -324,8 +288,8 @@ class Globals:
             apiPath = self.getApiPath(apiPackageName)
             self.apiTree[apiPackageName] = self.makePathTreeVisible(self.getApiPath(apiPackageName))
         except Exception as exception :
-            self.error(self.__class__,f'Not possible to make {apiPackageName} api avaliable',exception)
-        if self.debugStatus :
+            self.error(f'Not possible to make {apiPackageName} api avaliable',exception)
+        if self.printStatus :
             self.printTree(self.apiTree,'Api tree')
 
     def makeApisAvaliable(self,apisPath):
@@ -335,10 +299,10 @@ class Globals:
                 for apiPackage in apiPackageList :
                     if not apiPackage in list(self.apiTree.keys()) :
                         self.apiTree[apiPackage] = self.makePathTreeVisible(f'{apisPath}{apiPackage}')
-                if self.debugStatus :
+                if self.printStatus :
                     self.printTree(self.apiTree,f'{c.DEBUG}Api tree (globalsEverithing is active)')
             except Exception as exception :
-                self.error(self.__class__,f'Not possible to run makeApisAvaliable({apisPath}) rotine',exception)
+                self.error(f'Not possible to run makeApisAvaliable({apisPath}) rotine',exception)
 
     def spotRootPath(self,rootPath) :
         if self.printRootPathStatus :
@@ -346,10 +310,10 @@ class Globals:
                 apiPackageList = EnvironmentHelper.listDirectoryContent(rootPath)
                 for apiPackage in apiPackageList :
                     self.rootPathTree[apiPackage] = self.addNode(f'{rootPath}{apiPackage}')
-                if self.debugStatus :
+                if self.printStatus :
                     self.printTree(self.rootPathTree,f'{c.DEBUG}Root tree (printRootPathStatus is active)')
             except Exception as exception :
-                self.error(self.__class__,f'Not possible to run spotRootPath({rootPath}) rotine',exception)
+                self.error(f'Not possible to run spotRootPath({rootPath}) rotine',exception)
 
     def giveLocalVisibilityToFrameworkApis(self,apiPackageNameList):
         if apiPackageNameList :
@@ -361,7 +325,7 @@ class Globals:
                         self.apiTree[packageName] = self.makePathTreeVisible(packagePath)
                     except :
                         self.apiTree[packageName] = c.NOTHING
-            if self.debugStatus :
+            if self.printStatus :
                 self.printTree(self.apiTree,f'{c.DEBUG}Api tree')
 
     def makePathTreeVisible(self,path):
@@ -388,7 +352,7 @@ class Globals:
                 except :
                     node[nodeSon] = c.NOTHING
         except Exception as exception :
-            self.error(self.__class__,f'Not possible to run addNode({nodePath}) rotine',exception)
+            self.error(f'Not possible to run addNode({nodePath}) rotine',exception)
         return node
 
     def nodeIsValid(self,node):
@@ -456,8 +420,8 @@ class Globals:
     def accessTree(self,nodeKey,tree) :
         return SettingHelper.getSetting(nodeKey,tree)
 
-    def printTree(self,tree,name,depth=0):
-        SettingHelper.printSettings(tree,name)
+    def printTree(self,tree,name,depth=1):
+        SettingHelper.printSettings(tree, name, depth=depth)
 
     def updateDependencies(self):
         try :
@@ -498,14 +462,14 @@ class Globals:
                 return f'{logResponse}{LOG_SUCCESS}'
             else :
                 return f'{logResponse}{response}'
-        commandFirstTry = command.replace(self.TOKEN_PIP_USER,self.KW_SPACE_PIP_USER)
+        commandFirstTry = command.replace(self.TOKEN_PIP_USER,self.SPACE_PIP_USER)
         self.debug(getCommandLog(LOG_FIRST_TRY,commandFirstTry))
         responseFirstTry = KW_DIDNT_RUN
         try :
             responseFirstTry = subprocess.Popen(commandFirstTry).wait()
             self.debug(getResponseLog(LOG_FIRST_TRY,commandFirstTry,responseFirstTry))
         except Exception as exceptionFirstTry :
-            self.error(self.__class__,f'{commonExceptionMessage}',exceptionFirstTry)
+            self.error(f'{commonExceptionMessage}',exceptionFirstTry)
         if KW_DIDNT_RUN == responseFirstTry or 1 == responseFirstTry :
             commandSecondTry = command.replace(self.TOKEN_PIP_USER,c.NOTHING)
             self.debug(getCommandLog(LOG_SECOND_TRY,commandSecondTry))
@@ -514,7 +478,7 @@ class Globals:
                 responseSecondTry = subprocess.Popen(commandSecondTry).wait()
                 self.debug(getResponseLog(LOG_SECOND_TRY,commandSecondTry,responseSecondTry))
             except Exception as exceptionSecondTry :
-                self.error(self.__class__,f'{commonExceptionMessage}',exceptionSecondTry)
+                self.error(f'{commonExceptionMessage}',exceptionSecondTry)
             if KW_DIDNT_RUN == responseFirstTry and KW_DIDNT_RUN == responseSecondTry :
                 log.error(self.__class__,f'Not possible to run {commandFirstTry}',Exception(f'Both attempt failed'))
 
@@ -522,19 +486,19 @@ class Globals:
         try :
             return self.getSetting(AttributeKey.API_NAME)
         except Exception as exception :
-            self.failure(self.__class__,'Not possible to get api name', exception)
+            self.failure('Not possible to get api name', exception)
 
     def getExtension(self):
         extension = Globals.EXTENSION
         try :
             extension = self.getSetting(AttributeKey.API_EXTENSION)
         except Exception as exception :
-            self.failure(self.__class__,'Not possible to get api extenion. Returning default estension', exception)
+            self.failure('Not possible to get api extenion. Returning default estension', exception)
         return extension
 
     def getStaticPackagePath(self) :
         staticPackageList = site.getsitepackages()
-        self.debug(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
+        self.log(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
         staticPackage = str(staticPackageList[0])
         staticPackage = staticPackage.replace(f'{c.BACK_SLASH}{c.BACK_SLASH}',Globals.OS_SEPARATOR)
         staticPackage = staticPackage.replace(c.BACK_SLASH,Globals.OS_SEPARATOR)
@@ -546,7 +510,7 @@ class Globals:
         if staticPackage.endswith(herokuPythonLibPath) :
             staticPackage = staticPackage.replace(herokuPythonLibPath,c.NOTHING)
         staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
-        self.debug(f'Static package: "{staticPackage}"')
+        self.setting(f'Static package: "{staticPackage}"')
         return staticPackage
 
     def log(self,message,exception=None):
@@ -561,29 +525,29 @@ class Globals:
         if c.TRUE == self.warningStatus :
             log.warning(self.__class__,message)
 
-    def error(self,classRequest,message,exception):
+    def error(self,message,exception):
         if c.TRUE == self.errorStatus :
-            log.error(classRequest,message,exception)
+            log.error(self.__class__,message,exception)
 
-    def success(self,classRequest,message):
+    def success(self,message):
         if c.TRUE == self.successStatus :
-            log.success(classRequest,message)
+            log.success(self.__class__,message)
 
-    def failure(self,classRequest,message,exception):
+    def failure(self,message,exception):
         if c.TRUE == self.failureStatus :
-            log.failure(classRequest,message,exception)
+            log.failure(self.__class__,message,exception)
 
-    def setting(self,classRequest,message):
+    def setting(self,message):
         if c.TRUE == self.settingStatus :
-            log.setting(classRequest,message)
+            log.setting(self.__class__,message)
 
 def newGlobalsInstance(*args, **kwargs) :
     global GLOBALS
     if globalsInstanceIsNone() :
         GLOBALS = Globals(*args, **kwargs)
-        log.debug(newGlobalsInstance, f'Returning new {GLOBALS} globals instance')
+        log.setting(newGlobalsInstance, f'Returning new {GLOBALS} globals instance')
     else :
-        log.debug(updateGlobalsInstance, f'Returning existing {GLOBALS} globals instance')
+        log.setting(updateGlobalsInstance, f'Returning existing {GLOBALS} globals instance')
     return GLOBALS
 
 def getGlobalsInstance() :
@@ -594,9 +558,9 @@ def updateGlobalsInstance(globalsInstance) :
     global GLOBALS
     if ObjectHelper.isNone(GLOBALS) :
         GLOBALS = globalsInstance
-        log.debug(updateGlobalsInstance, f'Updatting {GLOBALS} globals instance')
+        log.setting(updateGlobalsInstance, f'Updatting {GLOBALS} globals instance')
     else :
-        log.debug(updateGlobalsInstance, f'Returning existing {GLOBALS} globals instance')
+        log.setting(updateGlobalsInstance, f'Returning existing {GLOBALS} globals instance')
     return GLOBALS
 
 def eraseGlobalsInstance() :
