@@ -185,14 +185,16 @@ class Globals:
             keyQuery = SettingHelper.querySetting(AttributeKey.KW_KEY,self.localConfiguration)
             keyValueQuery = {}
             for key,value in keyQuery.items() :
-                environmentInjection = SettingHelper.getSetting(key[:-4], self.localConfiguration)
-                if (
-                    ObjectHelper.isDictionary(environmentInjection) and
-                    AttributeKey.KW_KEY in environmentInjection and
-                    AttributeKey.KW_VALUE in environmentInjection and
-                    2 == len(environmentInjection)
-                ):
-                    EnvironmentHelper.update(environmentInjection[AttributeKey.KW_KEY], environmentInjection[AttributeKey.KW_VALUE])
+                KW_DOT_KEY = f'{c.DOT}{AttributeKey.KW_KEY}'
+                if key.endswith(KW_DOT_KEY) :
+                    environmentInjection = SettingHelper.getSetting(key[:-len(KW_DOT_KEY)], self.localConfiguration)
+                    if (
+                        ObjectHelper.isDictionary(environmentInjection) and
+                        AttributeKey.KW_KEY in environmentInjection and
+                        AttributeKey.KW_VALUE in environmentInjection and
+                        2 == len(environmentInjection)
+                    ):
+                        EnvironmentHelper.update(environmentInjection[AttributeKey.KW_KEY], environmentInjection[AttributeKey.KW_VALUE])
         log.loadSettings()
         self.settingsFileName = self.getSettingsFileName(settingsFileName)
         self.printRootPathStatus = printRootPathStatus
@@ -201,21 +203,21 @@ class Globals:
         self.ignoreResourceList = IGNORE_REOURCE_LIST
         if SettingHelper.getSetting('print-status', self.localConfiguration) :
             SettingHelper.printSettings(self.localConfiguration,"Local Configuration")
-        basicSettingsAsDictionary = {
-            'activeEnvironment' : self.activeEnvironment,
-            'settingsFileName' : self.settingsFileName,
-            'defaultSettingFileName' : self.defaultSettingFileName,
-            'successStatus' : self.successStatus,
-            'settingStatus' : self.settingStatus,
-            'debugStatus' : self.debugStatus,
-            'warningStatus' : self.warningStatus,
-            'failureStatus' : self.failureStatus,
-            'errorStatus' : self.errorStatus,
-            'logStatus' : self.logStatus,
-            'globalsEverything' : self.globalsEverything,
-            'printRootPathStatus' : self.printRootPathStatus
-        }
-        log.prettyPython(self.__class__, f'Basic settings', basicSettingsAsDictionary, logLevel=log.SETTING)
+            basicSettingsAsDictionary = {
+                'activeEnvironment' : self.activeEnvironment,
+                'settingsFileName' : self.settingsFileName,
+                'defaultSettingFileName' : self.defaultSettingFileName,
+                'successStatus' : self.successStatus,
+                'settingStatus' : self.settingStatus,
+                'debugStatus' : self.debugStatus,
+                'warningStatus' : self.warningStatus,
+                'failureStatus' : self.failureStatus,
+                'errorStatus' : self.errorStatus,
+                'logStatus' : self.logStatus,
+                'globalsEverything' : self.globalsEverything,
+                'printRootPathStatus' : self.printRootPathStatus
+            }
+            log.prettyPython(self.__class__, f'Basic settings', basicSettingsAsDictionary, logLevel=log.SETTING)
 
     def getSettingsFileName(self, settingsFileName) :
         self.defaultSettingFileName = settingsFileName

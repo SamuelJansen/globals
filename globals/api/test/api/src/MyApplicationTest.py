@@ -16,29 +16,29 @@ TEST_KWARGS = {
     'returns' : RESULTS
 }
 
-# LOG_HELPER_SETTINGS = {
-#     log.LOG : False,
-#     log.SUCCESS : False,
-#     log.SETTING : False,
-#     log.DEBUG : False,
-#     log.WARNING : False,
-#     log.WRAPPER : False,
-#     log.FAILURE : False,
-#     log.ERROR : False,
-#     log.TEST : False
-# }
-
 LOG_HELPER_SETTINGS = {
     log.LOG : False,
-    log.SUCCESS : True,
-    log.SETTING : True,
-    log.DEBUG : True,
-    log.WARNING : True,
-    log.WRAPPER : True,
-    log.FAILURE : True,
-    log.ERROR : True,
-    log.TEST : True
+    log.SUCCESS : False,
+    log.SETTING : False,
+    log.DEBUG : False,
+    log.WARNING : False,
+    log.WRAPPER : False,
+    log.FAILURE : False,
+    log.ERROR : False,
+    log.TEST : False
 }
+
+# LOG_HELPER_SETTINGS = {
+#     log.LOG : False,
+#     log.SUCCESS : True,
+#     log.SETTING : True,
+#     log.DEBUG : True,
+#     log.WARNING : True,
+#     log.WRAPPER : True,
+#     log.FAILURE : True,
+#     log.ERROR : True,
+#     log.TEST : True
+# }
 
 @Test(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
@@ -285,7 +285,6 @@ def shouldNotHandleMissingApplicationEnvironment() :
     assert 'application-missing_setting_file' in exceptionMessage
 
 @Test(environmentVariables={
-        # SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
         **LOG_HELPER_SETTINGS
     },
     **TEST_KWARGS
@@ -296,7 +295,7 @@ def mustLoadLocalConfiguration() :
 
     # Act
     globalsInstance = globals.newGlobalsInstance(__file__)
-    globalsInstance.printTree(globalsInstance.settingTree, '')
+    # globalsInstance.printTree(globalsInstance.settingTree, 'Must Load Local Configuration setting tree')
 
 
     # Assert

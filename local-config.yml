@@ -1,0 +1,4 @@
+print-status: True
+active-environment :
+    key : ACTIVE_ENVIRONMENT
+    value : local-config
