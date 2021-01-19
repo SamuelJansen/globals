@@ -167,7 +167,6 @@ def myConfigurationTests_whenEnvironmentVariableIsPresent() :
 
     # Act
     toAssert = globalsInstance.getSetting('my.configuration')
-    print(f"globalsInstance.getSetting('my.configuration'): {globalsInstance.getSetting('my.configuration')}")
 
     # Assert
     assert expected == toAssert

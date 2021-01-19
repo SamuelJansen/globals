@@ -119,8 +119,8 @@ class Globals:
                 globalsEverything
             )
 
-            self.setting(f'{self.__class__.__name__}{c.DOT}filePath = {self.filePath}')
-            self.setting(f'__file__ = {__file__}')
+            self.setting(f'{self.__class__.__name__}{c.DOT}filePath: {self.filePath}')
+            self.setting(f'__file__: {__file__}')
 
             self.buildApplicationPath()
 
@@ -134,17 +134,17 @@ class Globals:
             self.apiNameList = self.getSetting(AttributeKey.GLOBALS_API_LIST)
 
             if self.printStatus :
-                print(f'''            {self.__class__.__name__} = {self}
-                {self.__class__.__name__}.staticPackage =   {self.staticPackage}
-                {self.__class__.__name__}.currentPath =     {self.currentPath}
-                {self.__class__.__name__}.localPath =       {self.localPath}
-                {self.__class__.__name__}.baseApiPath =     {self.baseApiPath}
-                {self.__class__.__name__}.apiPath =         {self.apiPath}
-                {self.__class__.__name__}.apisRoot =        {self.apisRoot}
-                {self.__class__.__name__}.apisPath =        {self.apisPath}
-                {self.__class__.__name__}.apiPackage =      {self.apiPackage}
-                {self.__class__.__name__}.apiName =         {self.apiName}
-                {self.__class__.__name__}.extension =       {self.extension}\n''')
+                print(f'''            {self.__class__.__name__}: {self}
+                {self.__class__.__name__}.staticPackage:    {self.staticPackage}
+                {self.__class__.__name__}.currentPath:      {self.currentPath}
+                {self.__class__.__name__}.localPath:        {self.localPath}
+                {self.__class__.__name__}.baseApiPath:      {self.baseApiPath}
+                {self.__class__.__name__}.apiPath:          {self.apiPath}
+                {self.__class__.__name__}.apisRoot:         {self.apisRoot}
+                {self.__class__.__name__}.apisPath:         {self.apisPath}
+                {self.__class__.__name__}.apiPackage:       {self.apiPackage}
+                {self.__class__.__name__}.apiName:          {self.apiName}
+                {self.__class__.__name__}.extension:        {self.extension}\n''')
 
                 self.printTree(self.settingTree,f'{self.__class__.__name__} settings tree')
 
