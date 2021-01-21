@@ -1,5 +1,5 @@
 import globals
-from python_helper import Test, SettingHelper, log, ObjectHelper
+from python_helper import Test, SettingHelper, log, ObjectHelper, EnvironmentHelper
 from python_helper import Constant as c
 
 def runBefore() :
@@ -16,29 +16,29 @@ TEST_KWARGS = {
     'returns' : RESULTS
 }
 
-LOG_HELPER_SETTINGS = {
-    log.LOG : False,
-    log.SUCCESS : False,
-    log.SETTING : False,
-    log.DEBUG : False,
-    log.WARNING : False,
-    log.WRAPPER : False,
-    log.FAILURE : False,
-    log.ERROR : False,
-    log.TEST : False
-}
-
 # LOG_HELPER_SETTINGS = {
 #     log.LOG : False,
-#     log.SUCCESS : True,
-#     log.SETTING : True,
-#     log.DEBUG : True,
-#     log.WARNING : True,
-#     log.WRAPPER : True,
-#     log.FAILURE : True,
-#     log.ERROR : True,
-#     log.TEST : True
+#     log.SUCCESS : False,
+#     log.SETTING : False,
+#     log.DEBUG : False,
+#     log.WARNING : False,
+#     log.WRAPPER : False,
+#     log.FAILURE : False,
+#     log.ERROR : False,
+#     log.TEST : False
 # }
+
+LOG_HELPER_SETTINGS = {
+    log.LOG : False,
+    log.SUCCESS : True,
+    log.SETTING : True,
+    log.DEBUG : True,
+    log.WARNING : True,
+    log.WRAPPER : True,
+    log.FAILURE : True,
+    log.ERROR : True,
+    log.TEST : True
+}
 
 @Test(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
@@ -109,21 +109,22 @@ def myConfigurationTests_basicVariableDefinitions() :
     assert 'delayed assignment value' == globalsInstance.getSetting('some-reference.much.before-its-assignment')
     assert "'''  value  ''' with spaces" == globalsInstance.getSetting('some-key.with-an-enter-in-between-the-previous-one')
     assert f"""Hi
-        every
-    one""".replace('\t',c.TAB) == globalsInstance.getSetting('long.string')
+                every
+            one""".replace('\t',c.TAB) == globalsInstance.getSetting('long.string')
     assert f"""Hi
-    every
-    one
-    this
-    is
-    the
-    deepest
-    long
-                string
-    here""".replace('\t',c.TAB) == globalsInstance.getSetting('deepest.long.string.ever.long.string')
+                            every
+                            one
+                            this
+                            is
+                            the
+                            deepest
+                            long
+                                        string
+                            here""".replace('\t',c.TAB) == globalsInstance.getSetting('deepest.long.string.ever.long.string')
     assert f"""me
-    being
-    fshds""".replace('\t',c.TAB) == globalsInstance.getSetting('not.idented.long.string')
+                    being
+        not
+                    fshds""".replace('\t',c.TAB) == globalsInstance.getSetting('not.idented.long.string')
     assert 'abcdefg' == globalsInstance.getSetting('it.contains.one-setting-injection')
     assert 'abcdefghijklm' == globalsInstance.getSetting('it.contains.two-consecutive-setting-injection')
     assert 'abcdefghijklm' == globalsInstance.getSetting('it.contains.one-inside-of-the-other-setting-injection')
@@ -213,7 +214,6 @@ def myConfigurationTests_musHandleSettingsWithNoSelfOrCircularReference() :
 
     # Act
     toAssert = globalsInstance.getSetting('api.name')
-    print(toAssert)
 
     # Assert
     assert expected == toAssert
@@ -291,13 +291,283 @@ def shouldNotHandleMissingApplicationEnvironment() :
 def mustLoadLocalConfiguration() :
     # Arrange
     LOCAL_CONFIG_VALUE = 'local config setting value'
+    FIRST_LONG_STRING = '''"""Hi
+                every
+            one
+            """'''
+    SECOND_LONG_STRING = '''"""Hi
+                            every
+                            one
+                            this
+                            is
+                            the
+                            deepest
+                            long
+                                        string
+                            here
+                            """'''
+    THIRD_LONG_STRING = '''"""
+                    me
+                    being
+        not
+                    fshds
+                    """'''
+    expected = {
+        'print-status': True,
+        'local': {
+            'config': {
+                'setting-key': 'local config setting value'
+            }
+        },
+        'database': {
+            'dialect': 'a:b$c:d',
+            'username': 'e:f?g:h',
+            'password': 'i:j!k:l',
+            'host': 'm:n*o:p',
+            'port': '[q:r:s:t]',
+            'schema': '(u:v:w:x)'
+        },
+        'environment': {
+            'database': {
+                'key': 'DATABASE_URL',
+                'value': 'a:b$c:d://e:f?g:h:i:j!k:l@m:n*o:p:[q:r:s:t]/(u:v:w:x)'
+            },
+            'test': 'production',
+            'missing': 'not at all'
+        },
+        'server': {
+            'scheme': 'https',
+            'host': 'host',
+            'servlet': {
+                'context-path': '/test-api'
+            },
+            'port': 5050
+        },
+        'api': {
+            'host-0': 'https://host',
+            'host-1': 'https://host/test-api',
+            'host-2': 'https://host:5050/test-api',
+            'name': 'Globals',
+            'extension': 'yml',
+            'dependency': {
+                'update': False,
+                'list': {
+                    'web': [
+                        'Popen',
+                        'Path'
+                    ],
+                    'local': []
+                }
+            },
+            'list': [
+                'Globals'
+            ],
+            'language': 'EN-US',
+            'git': {
+                'url': 'https://github.com/SamuelJansen/',
+                'extension': 'git'
+            }
+        },
+        'swagger': {
+            'host': 'host',
+            'info': {
+                'title': 'TestApi',
+                'version': '0.0.1',
+                'description': 'description',
+                'terms-of-service': 'http://swagger.io/terms/',
+                'contact': {
+                    'name': 'Samuel Jansen',
+                    'email': 'samuel.jansenn@gmail.com'
+                },
+                'license': {
+                    'name': 'Apache 2.0 / MIT License',
+                    'url': 'http://www.apache.org/licenses/LICENSE-2.0.html'
+                }
+            },
+            'schemes': [
+                'https'
+            ]
+        },
+        'python': {
+            'version': 3.9
+        },
+        'some-reference': {
+            'much': {
+                'before-its-assignment': 'delayed assignment value'
+            },
+            'before-its-assignment': 'delayed assignment value'
+        },
+        'other': {
+            'root': {
+                'key': 'other root value'
+            }
+        },
+        'my': {
+            'self-reference-key': 'self reference value',
+            'other': {
+                'self-reference-key': {
+                    'as-well': 'other self reference value as well'
+                },
+                'repeated': {
+                    'self-reference-key': {
+                        'as-well': 'other repeated self reference value as well'
+                    }
+                }
+            },
+            'configuration-without-environment-variable-key': 'my default value',
+            'configuration-without-environment-variable-key-with-value-surrounded-by-single-quotes': 'my default value',
+            'configuration-without-environment-variable-key-and-space-after-colon': 'my default value',
+            'own': {
+                'very': {
+                    'deep': {
+                        'configuration': 'other root value'
+                    }
+                },
+                'configuration': 'self reference value'
+            },
+            'other-with-other-name': {
+                'self-reference-key': {
+                    'as-well': 'other self reference value as well'
+                },
+                'configuration': 'self reference value',
+                'configuration-as-well': 'other self reference value as well',
+                'configuration-repeated-as-well': 'other repeated self reference value as well'
+            },
+            'override-case': {
+                'overrider': 'overrider configuration'
+            },
+            'configuration': 'self reference value'
+        },
+        'long': {
+            'string': FIRST_LONG_STRING
+        },
+        'deepest': {
+            'long': {
+                'string': {
+                    'ever': {
+                        'long': {
+                            'string': SECOND_LONG_STRING
+                        }
+                    }
+                }
+            }
+        },
+        'not': {
+            'idented': {
+                'long': {
+                    'string': THIRD_LONG_STRING
+                }
+            }
+        },
+        'new-key': 'new value',
+        'my-list': {
+            'numbers': [
+                1,
+                2,
+                3,
+                4
+            ],
+            'simple-strings': [
+                'a',
+                'b',
+                'c',
+                'd'
+            ],
+            'complex': [
+                2,
+                'b',
+                'c',
+                'd',
+                1,
+                2,
+                True,
+                True
+            ],
+            'with-elemets-surrounded-by-all-sorts-of-quotes': [
+                'a',
+                'b',
+                'c',
+                'd',
+                'e',
+                'f'
+            ]
+        },
+        'specific-for': {
+            'previous-assignment': 'delayed assignment value'
+        },
+        'some-key': {
+            'with-an-enter-in-between-the-previous-one': "'''  value  ''' with spaces"
+        },
+        'it': {
+            'contains': {
+                'some-composed-key': {
+                    'pointing-to': {
+                        'a-late-value': 'abcd-- late value ----abcd---- late value ----abcd--efg',
+                        'a-late-value-with-an-environment-variable-in-between': 'abcdit.contains.late-value--abcd--it.contains.late-value--abcd--efg'
+                    }
+                },
+                'late-value': '-- late value --',
+                'environment-variable': {
+                    'only': {
+                        'surrounded-by-default-values': 'ABCD --  -- EFGH',
+                        'in-between-default-values': '''ABCD -- "some value followed by: "\' and some following default value\' -- EFGH'''
+                    }
+                },
+                'refference': {
+                    'to-a-late-definition': 'ABCD -- very late definiton value -- EFGH'
+                },
+                'one-setting-injection': 'abcdefg',
+                'two-consecutive-setting-injection': 'abcdefghijklm',
+                'one-inside-of-the-other-setting-injection': 'abcdefghijklm',
+                'one-setting-injection-with-environment-variable': 'ABCDefgEFG',
+                'one-inside-of-the-other-setting-injection-with-environment-variable': 'ABCDEFGEFGHIJKLMNOP',
+                'two-consecutive-setting-injection-with-missing-environment-variable': 'abcdefghijklm'
+            }
+        },
+        'very-late': {
+            'definition': 'very late definiton value'
+        },
+        'handle': {
+            'late': {
+                'integer': 222233444,
+                'float': 2.3,
+                'boolean': True
+            },
+            'integer': 222233444,
+            'float': 2.3,
+            'boolean': True,
+            'empty': {
+                'list': [],
+                'dictionary-or-set': {},
+                'tuple': ()
+            }
+        },
+        'some': {
+            'dictionary': {
+                'yolo': 'yes',
+                'another-yolo': 'no',
+                'another-yolo-again': '',
+                f'''{'{'}{" 'again?'"}''': f'''{"'yes' "}{'}'}'''
+            }
+        },
+        'some-not-string-selfreference': {
+            'integer': 'ABCD -- 222233444 -- EFGH',
+            'float': 'ABCD -- 2.3 -- EFGH',
+            'boolean': 'ABCD -- True -- EFGH'
+        }
+    }
 
     # Act
     globalsInstance = globals.newGlobalsInstance(__file__)
     # globalsInstance.printTree(globalsInstance.settingTree, 'Must Load Local Configuration setting tree')
 
-
     # Assert
     assert LOCAL_CONFIG_VALUE == globalsInstance.getSetting('local.config.setting-key')
     assert True == globalsInstance.getSetting('print-status')
     assert 'Globals' == globalsInstance.getSetting('api.name')
+    assert "a:b$c:d://e:f?g:h:i:j!k:l@m:n*o:p:[q:r:s:t]/(u:v:w:x)" == globalsInstance.getSetting('environment.database.value')
+    assert expected['long']['string'] == globalsInstance.settingTree['long']['string']
+    assert expected['deepest']['long']['string']['ever']['long']['string'] == globalsInstance.settingTree['deepest']['long']['string']['ever']['long']['string']
+    assert expected['not']['idented']['long']['string'] == globalsInstance.settingTree['not']['idented']['long']['string']
+    assert ObjectHelper.equal(expected['some']['dictionary'], globalsInstance.settingTree['some']['dictionary'])
+    assert ObjectHelper.equal(expected, globalsInstance.settingTree, ignoreKeyList = [])

@@ -1,0 +1,42 @@
+print-status: True
+local:
+    config:
+        setting-key: local config setting value
+database:
+    dialect: ${DATABASE_DIALECT:a:b$c:d}
+    username: ${DATABASE_USERNAME:e:f?g:h}
+    password: ${DATABASE_PASSWORD:i:j!k:l}
+    host: ${DATABASE_HOST:m:n*o:p}
+    port: ${DATABASE_PORT:[q:r:s:t]}
+    schema: ${DATABASE_SCHEMA:(u:v:w:x)}
+environment:
+    database:
+        key: DATABASE_URL
+        value: ${database.dialect}://${database.username}:${database.password}@${database.host}:${database.port}/${database.schema}
+
+server:
+    scheme: https
+    host: host
+    servlet:
+        context-path: /test-api
+    port: 5050
+
+api:
+    host-0: ${server.scheme}://${server.host}
+    host-1: ${server.scheme}://${server.host}${server.servlet.context-path}
+    host-2: ${server.scheme}://${server.host}:${server.port}${server.servlet.context-path}
+
+swagger:
+    host: ${server.host}
+    schemes: [${server.scheme}]
+    info:
+        title: TestApi
+        version: 0.0.1
+        description: description
+        terms-of-service: http://swagger.io/terms/
+        contact:
+            name: Samuel Jansen
+            email: samuel.jansenn@gmail.com
+        license:
+            name: Apache 2.0 / MIT License
+            url: http://www.apache.org/licenses/LICENSE-2.0.html

@@ -398,9 +398,9 @@ class Globals:
             settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.settingsFileName}.{Globals.EXTENSION}'
         settingTree = None
         try :
-            settingTree = SettingHelper.getSettingTree(settingFilePath, fallbackSettingTree=self.defaultSettingTree)
+            settingTree = SettingHelper.getSettingTree(settingFilePath, keepDepthInLongString=True, fallbackSettingTree=self.defaultSettingTree)
         except :
-            settingTree = SettingHelper.getSettingTree(settingFilePath)
+            settingTree = SettingHelper.getSettingTree(settingFilePath, keepDepthInLongString=True)
         return settingTree
 
     def addTree(self,settingFilePath):
