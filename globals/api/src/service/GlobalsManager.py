@@ -548,43 +548,53 @@ class Globals:
         if c.TRUE == self.settingStatus :
             log.setting(self.__class__,message)
 
-def newGlobalsInstance(*args, **kwargs) :
+def newGlobalsInstance(*args, muteLogs=False, **kwargs) :
     global GLOBALS
-    if globalsInstanceIsNone() :
+    if globalsInstanceIsNone(muteLogs=muteLogs) :
         GLOBALS = Globals(*args, **kwargs)
-        log.setting(newGlobalsInstance, f'Returning new {GLOBALS} globals instance')
+        if not muteLogs :
+            log.setting(newGlobalsInstance, f'Returning new {GLOBALS} globals instance')
     else :
-        log.setting(updateGlobalsInstance, f'Returning existing {GLOBALS} globals instance')
+        if not muteLogs :
+            log.setting(newGlobalsInstance, f'Returning existing {GLOBALS} globals instance')
     return GLOBALS
 
-def getGlobalsInstance() :
+def getGlobalsInstance(muteLogs=False) :
     global GLOBALS
     return GLOBALS
 
-def updateGlobalsInstance(globalsInstance) :
+def updateGlobalsInstance(globalsInstance, muteLogs=False) :
     global GLOBALS
-    if globalsInstanceIsNone() :
+    if globalsInstanceIsNone(muteLogs=muteLogs) :
+        oldGlobals = str(GLOBALS)
         GLOBALS = globalsInstance
-        log.setting(updateGlobalsInstance, f'Updatting {GLOBALS} globals instance')
+        if not muteLogs :
+            log.setting(updateGlobalsInstance, f'Replacing {oldGlobals} globals instance by {GLOBALS} globals instance')
     else :
-        log.setting(updateGlobalsInstance, f'Returning existing {GLOBALS} globals instance')
+        if not muteLogs :
+            log.setting(updateGlobalsInstance, f'Returning existing {GLOBALS} globals instance')
     return GLOBALS
 
-def hardUpdateGlobalsInstance(globalsInstance) :
+def hardUpdateGlobalsInstance(globalsInstance, muteLogs=False) :
     global GLOBALS
+    oldGlobals = str(GLOBALS)
     GLOBALS = globalsInstance
-    log.setting(updateGlobalsInstance, f'Updatting {GLOBALS} globals instance')
+    if not muteLogs :
+        log.setting(hardUpdateGlobalsInstance, f'Hard replacing {oldGlobals} globals instance by {GLOBALS} globals instance')
     return GLOBALS
 
-def eraseGlobalsInstance() :
+def eraseGlobalsInstance(muteLogs=False) :
     global GLOBALS
+    oldGlobals = str(GLOBALS)
     GLOBALS = None
+    if not muteLogs :
+        log.setting(eraseGlobalsInstance, f'Erasing {oldGlobals} globals instance. It is now {GLOBALS}')
 
-def globalsInstanceIsNone():
-    return ObjectHelper.isNone(getGlobalsInstance())
+def globalsInstanceIsNone(muteLogs=False):
+    return ObjectHelper.isNone(getGlobalsInstance(muteLogs=muteLogs))
 
-def globalsInstanceIsNotNone():
-    return not globalsInstanceIsNone()
+def globalsInstanceIsNotNone(muteLogs=False):
+    return not globalsInstanceIsNone(muteLogs=muteLogs)
 
 class AttributeKey:
 
@@ -649,17 +659,17 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, ignore
             return resource
 
 def runBeforeTest(instanceList, logLevel=log.LOG, muteLogs=True) :
-    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
-    instanceList.append(getGlobalsInstance())
-    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
-    eraseGlobalsInstance()
-    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
+    log.prettyPython(runBeforeTest, f'{getGlobalsInstance(muteLogs=muteLogs)} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
+    instanceList.append(getGlobalsInstance(muteLogs=muteLogs))
+    log.prettyPython(runBeforeTest, f'{getGlobalsInstance(muteLogs=muteLogs)} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
+    eraseGlobalsInstance(muteLogs=muteLogs)
+    log.prettyPython(runBeforeTest, f'{getGlobalsInstance(muteLogs=muteLogs)} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
 
 def runAfterTest(instanceList, logLevel=log.LOG, muteLogs=True) :
-    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
+    log.prettyPython(runAfterTest, f'{getGlobalsInstance(muteLogs=muteLogs)} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
     previousGlobalsInstance = instanceList.pop()
-    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
-    eraseGlobalsInstance()
-    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
-    hardUpdateGlobalsInstance(previousGlobalsInstance)
-    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
+    log.prettyPython(runAfterTest, f'{previousGlobalsInstance} previous globals instance in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
+    eraseGlobalsInstance(muteLogs=muteLogs)
+    log.prettyPython(runAfterTest, f'{getGlobalsInstance(muteLogs=muteLogs)} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
+    hardUpdateGlobalsInstance(previousGlobalsInstance, muteLogs=muteLogs)
+    log.prettyPython(runAfterTest, f'{getGlobalsInstance(muteLogs=muteLogs)} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
