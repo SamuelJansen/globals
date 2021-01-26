@@ -6,7 +6,7 @@ TestHelper.run(
     testStatus = False,
     logStatus = True,
     logResult = True,
-    inspectGlobals = False
+    inspectGlobals = True
 )
 # TestHelper.run(
 #     __file__,
