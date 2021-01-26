@@ -7,5 +7,8 @@ from globals.api.src.service.GlobalsManager import (
     getGlobalsInstance,
     globalsInstanceIsNone,
     updateGlobalsInstance,
-    eraseGlobalsInstance
+    hardUpdateGlobalsInstance,
+    eraseGlobalsInstance,
+    runBeforeTest,
+    runAfterTest
 )

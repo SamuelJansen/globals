@@ -12,6 +12,7 @@ DEFAULT_SETTING_STATUS = False
 DEFAULT_DEBUG_STATUS = False
 DEFAULT_WARNING_STATUS = False
 DEFAULT_FAILURE_STATUS = False
+DEFAULT_WRAPPER_STATUS = False
 DEFAULT_ERROR_STATUS = False
 DEFAULT_TEST_STATUS = False
 
@@ -90,6 +91,7 @@ class Globals:
         debugStatus = DEFAULT_DEBUG_STATUS,
         warningStatus = DEFAULT_WARNING_STATUS,
         failureStatus = DEFAULT_FAILURE_STATUS,
+        wrapperStatus = DEFAULT_WRAPPER_STATUS,
         errorStatus = DEFAULT_ERROR_STATUS,
         testStatus = DEFAULT_TEST_STATUS,
         encoding = c.ENCODING,
@@ -113,6 +115,7 @@ class Globals:
                 debugStatus,
                 warningStatus,
                 failureStatus,
+                wrapperStatus,
                 errorStatus,
                 testStatus,
                 printRootPathStatus,
@@ -162,6 +165,7 @@ class Globals:
         debugStatus,
         warningStatus,
         failureStatus,
+        wrapperStatus,
         errorStatus,
         testStatus,
         printRootPathStatus,
@@ -173,6 +177,7 @@ class Globals:
         self.debugStatus = EnvironmentHelper.update(log.DEBUG, debugStatus, default=DEFAULT_DEBUG_STATUS)
         self.warningStatus = EnvironmentHelper.update(log.WARNING, warningStatus, default=DEFAULT_WARNING_STATUS)
         self.failureStatus = EnvironmentHelper.update(log.FAILURE, failureStatus, default=DEFAULT_FAILURE_STATUS)
+        self.wrapperStatus = EnvironmentHelper.update(log.WRAPPER, wrapperStatus, default=DEFAULT_WRAPPER_STATUS)
         self.errorStatus = EnvironmentHelper.update(log.ERROR, errorStatus, default=DEFAULT_ERROR_STATUS)
         self.testStatus = EnvironmentHelper.update(log.TEST, testStatus, default=DEFAULT_TEST_STATUS)
         self.loadLocalConfig = loadLocalConfig
@@ -201,7 +206,7 @@ class Globals:
         self.globalsEverything = globalsEverything
         self.ignoreModuleList = IGNORE_MODULE_LIST
         self.ignoreResourceList = IGNORE_REOURCE_LIST
-        if SettingHelper.getSetting('print-status', self.localConfiguration) :
+        if ObjectHelper.isNotEmpty(self.localConfiguration) and SettingHelper.getSetting('print-status', self.localConfiguration) :
             SettingHelper.printSettings(self.localConfiguration,"Local Configuration")
             basicSettingsAsDictionary = {
                 'activeEnvironment' : self.activeEnvironment,
@@ -558,11 +563,17 @@ def getGlobalsInstance() :
 
 def updateGlobalsInstance(globalsInstance) :
     global GLOBALS
-    if ObjectHelper.isNone(GLOBALS) :
+    if globalsInstanceIsNone() :
         GLOBALS = globalsInstance
         log.setting(updateGlobalsInstance, f'Updatting {GLOBALS} globals instance')
     else :
         log.setting(updateGlobalsInstance, f'Returning existing {GLOBALS} globals instance')
+    return GLOBALS
+
+def hardUpdateGlobalsInstance(globalsInstance) :
+    global GLOBALS
+    GLOBALS = globalsInstance
+    log.setting(updateGlobalsInstance, f'Updatting {GLOBALS} globals instance')
     return GLOBALS
 
 def eraseGlobalsInstance() :
@@ -636,3 +647,19 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, ignore
                 if not muteLogs :
                     log.error(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
             return resource
+
+def runBeforeTest(instanceList) :
+    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+    instanceList.append(getGlobalsInstance())
+    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+    eraseGlobalsInstance()
+    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+
+def runAfterTest(instanceList) :
+    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+    previousGlobalsInstance = instanceList.pop()
+    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+    eraseGlobalsInstance()
+    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+    hardUpdateGlobalsInstance(previousGlobalsInstance)
+    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)

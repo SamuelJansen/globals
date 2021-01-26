@@ -1,0 +1,16 @@
+print-status: True
+api:
+    name: Globals
+    extension: yml
+    dependency:
+        update: False
+        list:
+            web: [Popen,Path]
+            local: []
+    list: [Globals]
+    language: EN-US
+    git:
+        url: https://github.com/SamuelJansen/
+        extension: git
+python:
+    version: 3.9

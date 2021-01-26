@@ -2,43 +2,41 @@ import globals
 from python_helper import Test, SettingHelper, log, ObjectHelper, EnvironmentHelper
 from python_helper import Constant as c
 
-def runBefore() :
-    globals.GlobalsManager.eraseGlobalsInstance()
-
-def runAfter() :
-    globals.GlobalsManager.eraseGlobalsInstance()
+globalsInstanceList = []
 
 RESULTS = {}
 
 TEST_KWARGS = {
-    'callBefore' : runBefore,
-    'callAfter' : runAfter,
+    'callBefore' : globals.runBeforeTest,
+    'argsOfCallBefore' : [globalsInstanceList],
+    'callAfter' : globals.runAfterTest,
+    'argsOfCallAfter' : [globalsInstanceList],
     'returns' : RESULTS
+}
+
+LOG_HELPER_SETTINGS = {
+    log.LOG : False,
+    log.SUCCESS : False,
+    log.SETTING : False,
+    log.DEBUG : False,
+    log.WARNING : False,
+    log.WRAPPER : False,
+    log.FAILURE : False,
+    log.ERROR : False,
+    log.TEST : False
 }
 
 # LOG_HELPER_SETTINGS = {
 #     log.LOG : False,
-#     log.SUCCESS : False,
-#     log.SETTING : False,
-#     log.DEBUG : False,
-#     log.WARNING : False,
-#     log.WRAPPER : False,
-#     log.FAILURE : False,
-#     log.ERROR : False,
-#     log.TEST : False
+#     log.SUCCESS : True,
+#     log.SETTING : True,
+#     log.DEBUG : True,
+#     log.WARNING : True,
+#     log.WRAPPER : True,
+#     log.FAILURE : True,
+#     log.ERROR : True,
+#     log.TEST : True
 # }
-
-LOG_HELPER_SETTINGS = {
-    log.LOG : False,
-    log.SUCCESS : True,
-    log.SETTING : True,
-    log.DEBUG : True,
-    log.WARNING : True,
-    log.WRAPPER : True,
-    log.FAILURE : True,
-    log.ERROR : True,
-    log.TEST : True
-}
 
 @Test(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,

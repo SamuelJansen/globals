@@ -1,10 +1,2 @@
-from globals.api.test.api.src import MyApplicationTest
-
-MyApplicationTest.startMyApplicationTest()
-MyApplicationTest.myConfigurationTests_whenEnvironmentVariableIsPresent()
-MyApplicationTest.myConfigurationTests_whenEnvironmentVariableIsNotPresentAndIsSettingKeyReferencedAndSettingKeyAlreadyIsDefined()
-MyApplicationTest.myConfigurationTests_basicVariableDefinitions()
-MyApplicationTest.myConfigurationTests_musHandleSettingsWithNoSelfOrCircularReference()
-MyApplicationTest.importResourceAndModule_withSuccess()
-MyApplicationTest.shouldNotHandleMissingApplicationEnvironment()
-MyApplicationTest.mustLoadLocalConfiguration()
+from python_helper import TestHelper
+TestHelper.run(__file__)
