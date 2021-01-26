@@ -648,18 +648,18 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, ignore
                     log.error(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
             return resource
 
-def runBeforeTest(instanceList) :
-    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+def runBeforeTest(instanceList, logLevel=log.LOG, muteLogs=True) :
+    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
     instanceList.append(getGlobalsInstance())
-    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
     eraseGlobalsInstance()
-    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+    log.prettyPython(runBeforeTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
 
-def runAfterTest(instanceList) :
-    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+def runAfterTest(instanceList, logLevel=log.LOG, muteLogs=True) :
+    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
     previousGlobalsInstance = instanceList.pop()
-    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
     eraseGlobalsInstance()
-    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
     hardUpdateGlobalsInstance(previousGlobalsInstance)
-    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, logLevel=log.LOG)
+    log.prettyPython(runAfterTest, f'{getGlobalsInstance()} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
