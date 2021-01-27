@@ -1,5 +1,5 @@
 from python_helper import TestHelper
-# TestHelper.run(__file__, inspectGlobals=False)
+TestHelper.run(__file__, inspectGlobals=False)
 TestHelper.run(
     __file__,
     times = 2,
@@ -8,13 +8,13 @@ TestHelper.run(
     logResult = True,
     inspectGlobals = True
 )
-# TestHelper.run(
-#     __file__,
-#     times = 10,
-#     runOnly = [
-#         'MyApplicationTest.startMyApplicationTest'
-#         ],
-#     testStatus = False,
-#     logStatus = False,
-#     logResult = False
-# )
+TestHelper.run(
+    __file__,
+    times = 10,
+    runOnly = [
+        'MyApplicationTest.startMyApplicationTest'
+        ],
+    testStatus = False,
+    logStatus = False,
+    logResult = False
+)
