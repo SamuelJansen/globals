@@ -1,0 +1,10 @@
+print-status: False
+
+server:
+    host-and-port: ${server.host}:${server.port}
+    scheme: http
+    host: localhost
+
+
+has-it:
+    here: ${has-it.or-not}

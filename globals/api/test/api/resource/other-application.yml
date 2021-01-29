@@ -1,0 +1,135 @@
+print-status: False
+api:
+    name: Globals
+    extension: yml
+    dependency:
+        update: False
+        list:
+            web: [Popen,Path]
+            local: []
+    list: [Globals]
+    language: EN-US
+    git:
+        url: https://github.com/SamuelJansen/
+        extension: git
+python:
+    version: 3.9
+
+some-reference:
+    much:
+        before-its-assignment: ${some-reference.before-its-assignment}
+    before-its-assignment: ${:${specific-for.previous-assignment}}
+other:
+    root:
+        key: '  other root value'
+my:
+    self-reference-key: self reference value
+    other:
+        self-reference-key:
+            as-well: other self reference value as well
+        repeated:
+            self-reference-key:
+                as-well: other repeated self reference value as well
+    configuration-without-environment-variable-key: ${:my default value}
+    configuration-without-environment-variable-key-with-value-surrounded-by-single-quotes: ${:'my default value'}
+    configuration-without-environment-variable-key-and-space-after-colon: ${: my default value}
+    configuration: ${MY_CONFIGURATION_KEY:${my.self-reference-key}}
+    own:
+        configuration: ${MY_OWN_CONFIGURATION_KEY:${my.self-reference-key}}
+        very:
+            deep:
+                configuration: ${MY_OWN_VERY_DEEP_CONFIGURATION_KEY:${other.root.key}}
+    other-with-other-name:
+        self-reference-key:
+            as-well: other self reference value as well
+        configuration: ${MY_OTHER_CONFIGURATION_KEY:${my.self-reference-key}}
+        configuration-as-well: ${MY_OTHER_CONFIGURATION_KEY:${my.other.self-reference-key.as-well}}
+        configuration-repeated-as-well: ${MY_OTHER_CONFIGURATION_KEY:${my.other.repeated.self-reference-key.as-well}}
+    override-case:
+        overridden: overridden configuration
+    override-case:
+        overrider: overrider configuration
+long:
+    string: """Hi
+            every
+        one
+        """
+deepest:
+    long:
+        string:
+            ever:
+                long:
+                    string: """Hi
+                        every
+                        one
+                        this
+                        is
+                        the
+                        deepest
+                        long
+                                    string
+                        here
+                        """
+not:
+    idented:
+        long:
+            string: """
+                me
+                being
+    not
+                fshds
+                """
+new-key: '"'''"""new value"""'''"'
+my-list:
+    numbers: [1,2,3,4]
+    simple-strings: [a,b,c,d]
+    complex: [2,b,c,d,1,"2",True,'True']
+    with-elemets-surrounded-by-all-sorts-of-quotes: ['a','''b''',"c","""d""",     'e'    ,"f"]
+specific-for:
+    previous-assignment: delayed assignment value
+
+some-key:
+    with-an-enter-in-between-the-previous-one: '''  value  ''' with spaces
+it:
+    contains:
+        one-setting-injection: abcd${:efg}
+        two-consecutive-setting-injection: abcd${:efg}hij${:klm}
+        one-inside-of-the-other-setting-injection: abcd${:efgh${:ijk}lm}
+        one-setting-injection-with-environment-variable: ABCD${MY_COMPLEX_ENV:efg}EFG
+        one-inside-of-the-other-setting-injection-with-environment-variable: ABCD${:EFG${:EFG${MY_COMPLEX_ENV:}HIJ}KLM}NOP
+        two-consecutive-setting-injection-with-missing-environment-variable: abcd${MISSING:efg}hij${MISSING:klm}
+        some-composed-key:
+            pointing-to:
+                a-late-value: abcd${:${it.contains.late-value}--abcd--${it.contains.late-value}--abcd--}efg
+                a-late-value-with-an-environment-variable-in-between: abcd${:${LATE_VALUE:it.contains.late-value}--abcd--${:it.contains.late-value}--abcd--}efg
+        late-value: -- late value --
+        environment-variable:
+            only: ${ONLY_ENVIRONMENT_VARIABLE:}
+            surrounded-by-default-values: ABCD -- ${ONLY_ENVIRONMENT_VARIABLE:} -- EFGH
+            in-between-default-values: ABCD -- ${NOT_EXISTING_ENV_KEY:"some value followed by: "${ONLY_ENVIRONMENT_VARIABLE:}' and some following default value'} -- EFGH
+        refference:
+            to-a-late-definition: ABCD -- ${very-late.definition} -- EFGH
+very-late:
+    definition: very late definiton value
+handle:
+    late:
+        integer: ${handle.integer}
+        float: ${handle.float}
+        boolean: ${handle.boolean}
+    integer: 222233444
+    float: 2.3
+    boolean: True
+    empty:
+        list: []
+        dictionary-or-set: {}
+        tuple: ()
+some:
+    dictionary: { 'yolo': 'yes', 'another-yolo': 'no', 'another-yolo-again': { 'again?': 'yes' } }
+environment:
+    test: production
+    missing: ' not at all'
+
+some-not-string-selfreference:
+    integer: ABCD -- ${handle.integer} -- EFGH
+    float: ABCD -- ${handle.float} -- EFGH
+    boolean: ABCD -- ${handle.boolean} -- EFGH

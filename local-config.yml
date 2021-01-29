@@ -1,4 +1,4 @@
 print-status: False
 active-environment :
     key : ACTIVE_ENVIRONMENT
-    value : refferenced-by-local-config
+    value : local

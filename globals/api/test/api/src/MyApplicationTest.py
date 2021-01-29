@@ -2,18 +2,6 @@ import globals
 from python_helper import Test, SettingHelper, log, ObjectHelper, EnvironmentHelper
 from python_helper import Constant as c
 
-globalsInstanceList = []
-
-RESULTS = {}
-
-TEST_KWARGS = {
-    'callBefore' : globals.runBeforeTest,
-    'argsOfCallBefore' : [globalsInstanceList],
-    'callAfter' : globals.runAfterTest,
-    'argsOfCallAfter' : [globalsInstanceList],
-    'returns' : RESULTS
-}
-
 LOG_HELPER_SETTINGS = {
     log.LOG : False,
     log.SUCCESS : False,
@@ -41,8 +29,7 @@ LOG_HELPER_SETTINGS = {
 @Test(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
         **LOG_HELPER_SETTINGS
-    },
-    **TEST_KWARGS
+    }
 )
 def startMyApplicationTest() :
     # Act
@@ -66,8 +53,7 @@ def startMyApplicationTest() :
         'LATE_VALUE' : '-- late environment value --',
         'ONLY_ENVIRONMENT_VARIABLE' : 'only environment variable value',
         **LOG_HELPER_SETTINGS
-    },
-    **TEST_KWARGS
+    }
 )
 def myConfigurationTests_basicVariableDefinitions() :
     # Arrange and Act
@@ -156,8 +142,7 @@ def myConfigurationTests_basicVariableDefinitions() :
         'MY_CONFIGURATION_KEY' : 'my configuration value injected through environmnet variable',
         SettingHelper.ACTIVE_ENVIRONMENT : None,
         **LOG_HELPER_SETTINGS
-    },
-    **TEST_KWARGS
+    }
 )
 def myConfigurationTests_whenEnvironmentVariableIsPresent() :
     # Arrange
@@ -173,8 +158,7 @@ def myConfigurationTests_whenEnvironmentVariableIsPresent() :
 @Test(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : None,
         **LOG_HELPER_SETTINGS
-    },
-    **TEST_KWARGS
+    }
 )
 def myConfigurationTests_whenEnvironmentVariableIsNotPresentAndIsSettingKeyReferencedAndSettingKeyAlreadyIsDefined() :
     # Arrange
@@ -190,19 +174,18 @@ def myConfigurationTests_whenEnvironmentVariableIsNotPresentAndIsSettingKeyRefer
 @Test(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : 'no-circular-reference',
         **LOG_HELPER_SETTINGS
-    },
-    **TEST_KWARGS
+    }
 )
 def myConfigurationTests_musHandleSettingsWithNoSelfOrCircularReference() :
     # Arrange
     globalsInstance = globals.newGlobalsInstance(__file__
         , loadLocalConfig = False
-        , debugStatus = True
-        , warningStatus = True
-        , errorStatus = True
-        , successStatus = True
+        , debugStatus = False
+        , warningStatus = False
+        , errorStatus = False
+        , successStatus = False
         , failureStatus = False
-        , settingStatus = True
+        , settingStatus = False
         , logStatus = False
         , encoding = 'utf-8'
         , printRootPathStatus = False
@@ -219,8 +202,7 @@ def myConfigurationTests_musHandleSettingsWithNoSelfOrCircularReference() :
 @Test(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
         **LOG_HELPER_SETTINGS
-    },
-    **TEST_KWARGS
+    }
 )
 def importResourceAndModule_withSuccess() :
     # Arrange
@@ -260,8 +242,7 @@ def importResourceAndModule_withSuccess() :
 @Test(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : 'missing_setting_file',
         **LOG_HELPER_SETTINGS
-    },
-    **TEST_KWARGS
+    }
 )
 def shouldNotHandleMissingApplicationEnvironment() :
     # Arrange
@@ -282,9 +263,11 @@ def shouldNotHandleMissingApplicationEnvironment() :
     assert 'application-missing_setting_file' in exceptionMessage
 
 @Test(environmentVariables={
+        'MY_COMPLEX_ENV' : ' -- my complex value -- ',
+        'LATE_VALUE' : '-- late environment value --',
+        'ONLY_ENVIRONMENT_VARIABLE' : 'only environment variable value',
         **LOG_HELPER_SETTINGS
-    },
-    **TEST_KWARGS
+    }
 )
 def mustLoadLocalConfiguration() :
     # Arrange
@@ -501,15 +484,14 @@ def mustLoadLocalConfiguration() :
                 'some-composed-key': {
                     'pointing-to': {
                         'a-late-value': 'abcd-- late value ----abcd---- late value ----abcd--efg',
-                        'a-late-value-with-an-environment-variable-in-between': 'abcdit.contains.late-value--abcd--it.contains.late-value--abcd--efg'
+                        'a-late-value-with-an-environment-variable-in-between': 'abcd-- late environment value ----abcd--it.contains.late-value--abcd--efg'
                     }
                 },
                 'late-value': '-- late value --',
                 'environment-variable': {
-                    'only': {
-                        'surrounded-by-default-values': 'ABCD --  -- EFGH',
-                        'in-between-default-values': '''ABCD -- "some value followed by: "\' and some following default value\' -- EFGH'''
-                    }
+                    'only': 'only environment variable value',
+                    'surrounded-by-default-values': 'ABCD -- only environment variable value -- EFGH',
+                    'in-between-default-values': """ABCD -- "some value followed by: "only environment variable value' and some following default value' -- EFGH"""
                 },
                 'refference': {
                     'to-a-late-definition': 'ABCD -- very late definiton value -- EFGH'
@@ -517,8 +499,8 @@ def mustLoadLocalConfiguration() :
                 'one-setting-injection': 'abcdefg',
                 'two-consecutive-setting-injection': 'abcdefghijklm',
                 'one-inside-of-the-other-setting-injection': 'abcdefghijklm',
-                'one-setting-injection-with-environment-variable': 'ABCDefgEFG',
-                'one-inside-of-the-other-setting-injection-with-environment-variable': 'ABCDEFGEFGHIJKLMNOP',
+                'one-setting-injection-with-environment-variable': 'ABCD-- my complex value --EFG',
+                'one-inside-of-the-other-setting-injection-with-environment-variable': 'ABCDEFGEFG-- my complex value --HIJKLMNOP',
                 'two-consecutive-setting-injection-with-missing-environment-variable': 'abcdefghijklm'
             }
         },
@@ -556,8 +538,9 @@ def mustLoadLocalConfiguration() :
     }
 
     # Act
-    globalsInstance = globals.newGlobalsInstance(__file__)
-    # globalsInstance.printTree(globalsInstance.settingTree, 'Must Load Local Configuration setting tree')
+    globalsInstance = globals.newGlobalsInstance(__file__, settingStatus=True, settingsFileName='other-application')
+    # globalsInstance.printTree(globalsInstance.settingTree, 'settingTree')
+    # globalsInstance.printTree(globalsInstance.defaultSettingTree, 'defaultSettingTree')
 
     # Assert
     assert LOCAL_CONFIG_VALUE == globalsInstance.getSetting('local.config.setting-key')
@@ -569,3 +552,80 @@ def mustLoadLocalConfiguration() :
     assert expected['not']['idented']['long']['string'] == globalsInstance.settingTree['not']['idented']['long']['string']
     assert ObjectHelper.equal(expected['some']['dictionary'], globalsInstance.settingTree['some']['dictionary'])
     assert ObjectHelper.equal(expected, globalsInstance.settingTree, ignoreKeyList = [])
+
+@Test(environmentVariables={
+        **LOG_HELPER_SETTINGS
+    }
+)
+def mustLoadLocalConfiguration_correctly() :
+    # Arrange
+    expected = {
+        'print-status': False,
+        'server': {
+            'scheme': 'http',
+            'host': 'localhost',
+            'host-and-port': 'localhost:5050',
+            'port': 5050,
+            'servlet': {
+                'context-path': '/test-api'
+            }
+        },
+        'has-it': {
+            'or-not': '?',
+            'here': '?'
+        },
+        'flask-specific-port': 'flask run --host=0.0.0.0 --port=5001',
+        'api': {
+            'name': 'TestApi',
+            'extension': 'yml',
+            'dependency': {
+                'update': False,
+                'list': {
+                    'web': [
+                        'globals',
+                        'python_helper',
+                        'Popen',
+                        'Path',
+                        'numpy',
+                        'pywin32',
+                        'sqlalchemy'
+                    ]
+                }
+            },
+            'git': {
+                'force-upgrade-command': 'pip install --upgrade --force python_framework'
+            },
+            'static-package': 'AppData\Local\Programs\Python\Python38-32\statics',
+            'list': []
+        },
+        'swagger': {
+            'info': {
+                'title': 'TestApi',
+                'version': '0.0.1',
+                'description': 'description',
+                'terms-of-service': 'http://swagger.io/terms/',
+                'contact': {
+                    'name': 'Samuel Jansen',
+                    'email': 'samuel.jansenn@gmail.com'
+                },
+                'license': {
+                    'name': 'Apache 2.0 / MIT License',
+                    'url': 'http://www.apache.org/licenses/LICENSE-2.0.html'
+                }
+            },
+            'host': 'localhost:5050',
+            'schemes': [
+                'http'
+            ]
+        },
+        'python': {
+            'version': 3.9
+        }
+    }
+
+    # Act
+    globalsInstance = globals.newGlobalsInstance(__file__, debugStatus=True, settingsFileName='fallback-priority')
+    log.prettyJson(mustLoadLocalConfiguration_correctly, 'Must Load Local Configuration setting tree', globalsInstance.settingTree, logLevel=log.DEBUG)
+
+    # Assert
+    assert ObjectHelper.equal(expected, globalsInstance.settingTree)

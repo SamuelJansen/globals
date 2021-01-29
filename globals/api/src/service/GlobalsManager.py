@@ -398,13 +398,20 @@ class Globals:
         defaultSettingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.defaultSettingFileName}.{Globals.EXTENSION}'
         return self.getSettingTree(settingFilePath=defaultSettingFilePath)
 
-    def getSettingTree(self,settingFilePath=None,settingTree=None) :
+    def getSettingTree(self,settingFilePath=None,defaultSettingFilePath=None,settingTree=None) :
+        if not defaultSettingFilePath :
+            try :
+                defaultSettingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.defaultSettingFileName}.{Globals.EXTENSION}'
+            except :
+                pass
         if not settingFilePath :
             settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.settingsFileName}.{Globals.EXTENSION}'
         settingTree = None
         try :
-            settingTree = SettingHelper.getSettingTree(settingFilePath, keepDepthInLongString=True, fallbackSettingTree=self.defaultSettingTree)
-        except :
+            # settingTree = SettingHelper.getSettingTree(settingFilePath, defaultSettingFileName=defaultSettingFileName, fallbackSettingTree=self.defaultSettingTree, keepDepthInLongString=True)
+            settingTree = SettingHelper.getSettingTree(settingFilePath, fallbackSettingFilePath=defaultSettingFilePath, fallbackSettingTree=self.defaultSettingTree, keepDepthInLongString=True)
+        except Exception as exception :
+            log.failure(self.getSettingTree, f'Failde to load setting tree from "{settingFilePath}" file setting path and "{defaultSettingFilePath}" default setting file path. Only setting file path will be loadded now', exception)
             settingTree = SettingHelper.getSettingTree(settingFilePath, keepDepthInLongString=True)
         return settingTree
 
