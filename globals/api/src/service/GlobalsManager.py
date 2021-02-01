@@ -193,6 +193,7 @@ class Globals:
         self.globalsEverything = globalsEverything
         self.ignoreModuleList = IGNORE_MODULE_LIST
         self.ignoreResourceList = IGNORE_REOURCE_LIST
+        self.activeEnvironment = SettingHelper.getActiveEnvironment()
         if ObjectHelper.isNotEmpty(self.localConfiguration) and SettingHelper.getSetting('print-status', self.localConfiguration) :
             SettingHelper.printSettings(self.localConfiguration,"Local Configuration")
             basicSettingsAsDictionary = {
@@ -211,7 +212,6 @@ class Globals:
 
     def getSettingsFileName(self, settingsFileName) :
         self.defaultSettingFileName = settingsFileName
-        self.activeEnvironment = SettingHelper.getActiveEnvironment()
         if SettingHelper.DEFAULT_ENVIRONMENT == self.activeEnvironment :
             return settingsFileName
         else :
