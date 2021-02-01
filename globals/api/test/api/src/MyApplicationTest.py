@@ -244,7 +244,7 @@ def importResourceAndModule_withSuccess() :
         **LOG_HELPER_SETTINGS
     }
 )
-def shouldNotHandleMissingApplicationEnvironment() :
+def shouldNotHandleMissingEnvironmentSettings() :
     # Arrange
     exception = None
     globalsInstance = None
@@ -254,13 +254,14 @@ def shouldNotHandleMissingApplicationEnvironment() :
         globalsInstance = globals.newGlobalsInstance(__file__, loadLocalConfig = False)
     except Exception as ext :
         exception = ext
-        exceptionMessage = str(exception)
 
     # Assert
     assert ObjectHelper.isNone(globalsInstance)
     assert ObjectHelper.isNotNone(exception)
-    assert 'No such file or directory:' in exceptionMessage
-    assert 'application-missing_setting_file' in exceptionMessage
+    assert 'missing_setting_file' == EnvironmentHelper.get(SettingHelper.ACTIVE_ENVIRONMENT)
+    assert 'missing_setting_file' == SettingHelper.getActiveEnvironment()
+    assert str(exception).startswith('The "')
+    assert str(exception).endswith('globals\\globals\\api\\test\\api\\resource\\application-missing_setting_file.yml" setting file path was not found')
 
 @Test(environmentVariables={
         'MY_COMPLEX_ENV' : ' -- my complex value -- ',
@@ -625,7 +626,7 @@ def mustLoadLocalConfiguration_correctly() :
 
     # Act
     globalsInstance = globals.newGlobalsInstance(__file__, debugStatus=True, settingsFileName='fallback-priority')
-    log.prettyJson(mustLoadLocalConfiguration_correctly, 'Must Load Local Configuration setting tree', globalsInstance.settingTree, logLevel=log.DEBUG)
+    # log.prettyJson(mustLoadLocalConfiguration_correctly, 'Must Load Local Configuration setting tree', globalsInstance.settingTree, logLevel=log.DEBUG)
 
     # Assert
     assert ObjectHelper.equal(expected, globalsInstance.settingTree)

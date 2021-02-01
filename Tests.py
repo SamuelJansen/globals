@@ -27,3 +27,13 @@ TestHelper.run(__file__, inspectGlobals=False)
 #     logStatus = False,
 #     logResult = False
 # )
+# TestHelper.run(
+#     __file__,
+#     runOnly = [
+#         'MyApplicationTest.shouldNotHandleMissingEnvironmentSettings'
+#         ],
+#     testStatus = False,
+#     logStatus = False,
+#     logResult = True,
+#     inspectGlobals = True
+# )

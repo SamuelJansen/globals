@@ -108,7 +108,6 @@ class Globals:
 
             self.loadLocalConfiguration(
                 loadLocalConfig,
-                settingsFileName,
                 logStatus,
                 successStatus,
                 settingStatus,
@@ -126,39 +125,28 @@ class Globals:
             self.setting(f'__file__: {__file__}')
 
             self.buildApplicationPath()
-
-            self.defaultSettingTree = self.getDefaultSettingTree()
-            self.settingTree = self.getSettingTree()
-            self.staticPackage = self.getStaticPackagePath()
-            self.apiName = self.getApiName()
-            self.extension = self.getExtension()
-
-            self.printStatus = self.getSetting(AttributeKey.PRINT_STATUS)
-            self.apiNameList = self.getSetting(AttributeKey.GLOBALS_API_LIST)
-
-            if self.printStatus :
-                print(f'''            {self.__class__.__name__}: {self}
-                {self.__class__.__name__}.staticPackage:    {self.staticPackage}
-                {self.__class__.__name__}.currentPath:      {self.currentPath}
-                {self.__class__.__name__}.localPath:        {self.localPath}
-                {self.__class__.__name__}.baseApiPath:      {self.baseApiPath}
-                {self.__class__.__name__}.apiPath:          {self.apiPath}
-                {self.__class__.__name__}.apisRoot:         {self.apisRoot}
-                {self.__class__.__name__}.apisPath:         {self.apisPath}
-                {self.__class__.__name__}.apiPackage:       {self.apiPackage}
-                {self.__class__.__name__}.apiName:          {self.apiName}
-                {self.__class__.__name__}.extension:        {self.extension}\n''')
-
-                self.printTree(self.settingTree,f'{self.__class__.__name__} settings tree')
-
-            self.updateDependencyStatus = self.getSetting(AttributeKey.DEPENDENCY_UPDATE)
-            self.rootPathTree = {}
+            self.loadSettings(settingsFileName)
             self.update()
+
+    def loadSettings(self, settingsFileName) :
+        self.settingsFileName = self.getSettingsFileName(settingsFileName)
+        self.defaultSettingTree = self.getDefaultSettingTree()
+        self.settingTree = self.getEnvironmentSettingTree(defaultSettingFilePath=self.defaultSettingFilePath)
+
+        self.staticPackage = self.getStaticPackagePath()
+        self.apiName = self.getApiName()
+        self.apiNameList = self.getSetting(AttributeKey.GLOBALS_API_LIST)
+
+        self.extension = self.getExtension()
+        self.printStatus = self.getSetting(AttributeKey.PRINT_STATUS)
+        self.printStatusOnScreen()
+
+        self.updateDependencyStatus = self.getSetting(AttributeKey.DEPENDENCY_UPDATE)
+        self.rootPathTree = {}
 
     def loadLocalConfiguration(
         self,
         loadLocalConfig,
-        settingsFileName,
         logStatus,
         successStatus,
         settingStatus,
@@ -201,7 +189,6 @@ class Globals:
                     ):
                         EnvironmentHelper.update(environmentInjection[AttributeKey.KW_KEY], environmentInjection[AttributeKey.KW_VALUE])
         log.loadSettings()
-        self.settingsFileName = self.getSettingsFileName(settingsFileName)
         self.printRootPathStatus = printRootPathStatus
         self.globalsEverything = globalsEverything
         self.ignoreModuleList = IGNORE_MODULE_LIST
@@ -210,8 +197,6 @@ class Globals:
             SettingHelper.printSettings(self.localConfiguration,"Local Configuration")
             basicSettingsAsDictionary = {
                 'activeEnvironment' : self.activeEnvironment,
-                'settingsFileName' : self.settingsFileName,
-                'defaultSettingFileName' : self.defaultSettingFileName,
                 'successStatus' : self.successStatus,
                 'settingStatus' : self.settingStatus,
                 'debugStatus' : self.debugStatus,
@@ -391,28 +376,32 @@ class Globals:
         self.apiPackage = package
         self.apiPath = f'{self.apisPath}{actualPackage}'
         self.defaultSettingTree = self.getDefaultSettingTree()
-        settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.settingsFileName}.{Globals.EXTENSION}'
-        self.settingTree = self.getSettingTree(settingFilePath=settingFilePath,settingTree=self.settingTree)
+        self.settingTree = self.getEnvironmentSettingTree(defaultSettingFilePath=self.defaultSettingFilePath, settingTree=self.settingTree)
 
     def getDefaultSettingTree(self) :
-        defaultSettingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.defaultSettingFileName}.{Globals.EXTENSION}'
-        return self.getSettingTree(settingFilePath=defaultSettingFilePath)
+        self.defaultSettingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.defaultSettingFileName}.{Globals.EXTENSION}'
+        return self.getSettingTree(settingFilePath=self.defaultSettingFilePath)
 
-    def getSettingTree(self,settingFilePath=None,defaultSettingFilePath=None,settingTree=None) :
-        if not defaultSettingFilePath :
-            try :
-                defaultSettingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.defaultSettingFileName}.{Globals.EXTENSION}'
-            except :
-                pass
-        if not settingFilePath :
-            settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.settingsFileName}.{Globals.EXTENSION}'
-        settingTree = None
+    def getEnvironmentSettingTree(self, defaultSettingFilePath=None, settingTree=None) :
+        self.settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.settingsFileName}.{Globals.EXTENSION}'
+        return self.getSettingTree(settingFilePath=self.settingFilePath, defaultSettingFilePath=defaultSettingFilePath, settingTree=settingTree)
+
+    def getSettingTree(self, settingFilePath=None, defaultSettingFilePath=None, settingTree=None) :
+        if ObjectHelper.isNone(settingFilePath) or StringHelper.isBlank(settingFilePath) or not EnvironmentHelper.OS.path.isfile(settingFilePath) :
+            raise Exception(f'The "{settingFilePath}" setting file path was not found')
+        fallbackSettingFilePath = defaultSettingFilePath if not settingFilePath == defaultSettingFilePath else None
+        settingTree = {}
         try :
-            # settingTree = SettingHelper.getSettingTree(settingFilePath, defaultSettingFileName=defaultSettingFileName, fallbackSettingTree=self.defaultSettingTree, keepDepthInLongString=True)
-            settingTree = SettingHelper.getSettingTree(settingFilePath, fallbackSettingFilePath=defaultSettingFilePath, fallbackSettingTree=self.defaultSettingTree, keepDepthInLongString=True)
+            settingTree = SettingHelper.getSettingTree(settingFilePath, fallbackSettingFilePath=fallbackSettingFilePath, fallbackSettingTree=settingTree, keepDepthInLongString=True)
         except Exception as exception :
-            log.failure(self.getSettingTree, f'Failde to load setting tree from "{settingFilePath}" file setting path and "{defaultSettingFilePath}" default setting file path. Only setting file path will be loadded now', exception)
-            settingTree = SettingHelper.getSettingTree(settingFilePath, keepDepthInLongString=True)
+            if ObjectHelper.isNone(fallbackSettingFilePath) :
+                self.error(f'Failed to load setting tree from "{settingFilePath}" setting file path. Returning {settingTree} by default', exception)
+            else :
+                self.failure(f'Failed to load setting tree from "{settingFilePath}" setting file path and "{fallbackSettingFilePath}" default setting file path. Only setting file path will be loadded now', exception)
+                try :
+                    settingTree = SettingHelper.getSettingTree(settingFilePath, keepDepthInLongString=True)
+                except Exception as exception :
+                    self.failure(f'Failed to load setting tree from "{settingFilePath}" setting file path as well. Returning {settingTree} by default', exception)
         return settingTree
 
     def addTree(self,settingFilePath):
@@ -555,6 +544,23 @@ class Globals:
         if c.TRUE == self.settingStatus :
             log.setting(self.__class__,message)
 
+    def printStatusOnScreen(self) :
+        if self.printStatus :
+            print(f'''            {self.__class__.__name__}: {self}
+            {self.__class__.__name__}.staticPackage: ---------- {self.staticPackage}
+            {self.__class__.__name__}.currentPath: ------------ {self.currentPath}
+            {self.__class__.__name__}.localPath: -------------- {self.localPath}
+            {self.__class__.__name__}.baseApiPath: ------------ {self.baseApiPath}
+            {self.__class__.__name__}.apiPath: ---------------- {self.apiPath}
+            {self.__class__.__name__}.apisRoot: --------------- {self.apisRoot}
+            {self.__class__.__name__}.apisPath: --------------- {self.apisPath}
+            {self.__class__.__name__}.apiPackage: ------------- {self.apiPackage}
+            {self.__class__.__name__}.apiName: ---------------- {self.apiName}
+            {self.__class__.__name__}.extension: -------------- {self.extension}
+            {self.__class__.__name__}.settingFilePath: -------- {self.settingFilePath}
+            {self.__class__.__name__}.defaultSettingFilePath: - {self.defaultSettingFilePath}\n''')
+            self.printTree(self.settingTree,f'{self.__class__.__name__} settings tree')
+
 def newGlobalsInstance(*args, muteLogs=False, **kwargs) :
     global GLOBALS
     if globalsInstanceIsNone(muteLogs=muteLogs) :
@@ -648,7 +654,7 @@ def importModule(resourceModuleName, muteLogs=False, ignoreList=IGNORE_MODULE_LI
                 module = __import__(resourceModuleName)
             except :
                 if not muteLogs :
-                    log.error(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Returning "{module}" by default', exception)
+                    log.failure(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Returning "{module}" by default', exception)
         return module
 
 def importResource(resourceName, resourceModuleName=None, muteLogs=False, ignoreList=IGNORE_REOURCE_LIST) :
@@ -662,7 +668,7 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, ignore
                 resource = getattr(module, resourceName)
             except Exception as exception :
                 if not muteLogs :
-                    log.error(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
+                    log.failure(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
             return resource
 
 def runBeforeTest(instanceList, logLevel=log.LOG, muteLogs=True) :
