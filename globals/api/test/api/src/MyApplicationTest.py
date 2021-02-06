@@ -551,8 +551,8 @@ def mustLoadLocalConfiguration() :
     assert expected['long']['string'] == globalsInstance.settingTree['long']['string']
     assert expected['deepest']['long']['string']['ever']['long']['string'] == globalsInstance.settingTree['deepest']['long']['string']['ever']['long']['string']
     assert expected['not']['idented']['long']['string'] == globalsInstance.settingTree['not']['idented']['long']['string']
-    assert ObjectHelper.equal(expected['some']['dictionary'], globalsInstance.settingTree['some']['dictionary'])
-    assert ObjectHelper.equal(expected, globalsInstance.settingTree, ignoreKeyList = [])
+    assert ObjectHelper.equals(expected['some']['dictionary'], globalsInstance.settingTree['some']['dictionary'])
+    assert ObjectHelper.equals(expected, globalsInstance.settingTree, ignoreKeyList = [])
 
 @Test(environmentVariables={
         **LOG_HELPER_SETTINGS
@@ -629,4 +629,4 @@ def mustLoadLocalConfiguration_correctly() :
     # log.prettyJson(mustLoadLocalConfiguration_correctly, 'Must Load Local Configuration setting tree', globalsInstance.settingTree, logLevel=log.DEBUG)
 
     # Assert
-    assert ObjectHelper.equal(expected, globalsInstance.settingTree)
+    assert ObjectHelper.equals(expected, globalsInstance.settingTree)
