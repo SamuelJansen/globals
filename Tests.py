@@ -37,3 +37,9 @@ TestHelper.run(__file__, inspectGlobals=False)
 #     logResult = True,
 #     inspectGlobals = True
 # )
+# TestHelper.run(
+#     __file__,
+#     runOnly = [
+#         'MyApplicationTest.importResourceAndModule_withSuccess'
+#     ]
+# )

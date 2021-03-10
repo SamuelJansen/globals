@@ -1,7 +1,7 @@
 import subprocess, site, importlib
 from pathlib import Path
 from python_helper import Constant as c
-from python_helper import log, StringHelper, SettingHelper, EnvironmentHelper, ObjectHelper
+from python_helper import log, StringHelper, SettingHelper, EnvironmentHelper, ObjectHelper, ReflectionHelper
 
 global GLOBALS
 GLOBALS = None
@@ -642,6 +642,18 @@ class AttributeKey:
     def getKeyByClassNameAndKey(cls,key):
         return f'{cls.__name__}.{key}'
 
+def getResourceNameList(resourceNameList) :
+    return resourceNameList if ObjectHelper.isList(resourceNameList) else [resourceNameList]
+
+def getResourceName(resourceName) :
+    return resourceName if not c.DOT in resourceName else getResourceNameList(resourceName.split(c.DOT))[0]
+
+def getInnerResourceNameList(resourceName, resourceModuleName) :
+    if not resourceName == resourceModuleName :
+        resourceNameList = getResourceNameList(resourceName.split(c.DOT))
+        return [resourceNameList[0]] if 1 == len(resourceNameList) or resourceNameList[1] is None else resourceNameList
+    return [resourceName]
+
 def importModule(resourceModuleName, muteLogs=False, ignoreList=IGNORE_MODULE_LIST) :
     if resourceModuleName not in ignoreList :
         module = None
@@ -658,14 +670,17 @@ def importModule(resourceModuleName, muteLogs=False, ignoreList=IGNORE_MODULE_LI
         return module
 
 def importResource(resourceName, resourceModuleName=None, muteLogs=False, ignoreList=IGNORE_REOURCE_LIST) :
-    if resourceName not in ignoreList :
-        if ObjectHelper.isEmpty(resourceModuleName) :
-            resourceModuleName = resourceName
-        module = importModule(resourceModuleName, muteLogs=False)
+    innerResourceName = getResourceName(resourceName)
+    if innerResourceName not in ignoreList :
+        if ObjectHelper.isNone(resourceModuleName) :
+            resourceModuleName = innerResourceName
+        module = importModule(resourceModuleName, muteLogs=muteLogs)
         if module :
             resource = None
             try :
-                resource = getattr(module, resourceName)
+                resource = module
+                for name in getInnerResourceNameList(resourceName, resourceModuleName) :
+                    resource = ReflectionHelper.getAttributeOrMethod(resource, name)
             except Exception as exception :
                 if not muteLogs :
                     log.failure(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
