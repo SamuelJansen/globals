@@ -500,9 +500,11 @@ class Globals:
         return extension
 
     def getStaticPackagePath(self) :
-        staticPackageList = site.getsitepackages()
-        self.log(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
-        staticPackage = str(staticPackageList[0])
+        # staticPackageList = site.getsitepackages()
+        # self.log(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
+        # staticPackage = str(staticPackageList[0])
+        staticPackage = str(site.getusersitepackages())
+        self.log(f'Static package (before handlings): "{staticPackage}"')
         staticPackage = staticPackage.replace(f'{c.BACK_SLASH}{c.BACK_SLASH}',Globals.OS_SEPARATOR)
         staticPackage = staticPackage.replace(c.BACK_SLASH,Globals.OS_SEPARATOR)
         staticPackage = staticPackage.replace(f'{c.SLASH}{c.SLASH}',Globals.OS_SEPARATOR)
@@ -513,7 +515,7 @@ class Globals:
         if staticPackage.endswith(herokuPythonLibPath) :
             staticPackage = staticPackage.replace(herokuPythonLibPath,c.NOTHING)
         staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
-        self.setting(f'Static package: "{staticPackage}"')
+        self.setting(f'Static package (after handlings): "{staticPackage}"')
         return staticPackage
 
     def log(self,message,exception=None):
