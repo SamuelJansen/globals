@@ -136,7 +136,10 @@ def myConfigurationTests_basicVariableDefinitions() :
     assert 'ABCD -- 222233444 -- EFGH' == globalsInstance.getSetting('some-not-string-selfreference.integer')
     assert 'ABCD -- 2.3 -- EFGH' == globalsInstance.getSetting('some-not-string-selfreference.float')
     assert 'ABCD -- True -- EFGH' == globalsInstance.getSetting('some-not-string-selfreference.boolean')
-
+    assert ObjectHelper.equals('/my/static/folder', globalsInstance.settingTree['python']['static-package'])
+    print(globalsInstance.getSetting(globals.AttributeKey.PYTHON_STATIC_PACKAGE))
+    assert ObjectHelper.equals('/my/static/folder', globalsInstance.getSetting(globals.AttributeKey.PYTHON_STATIC_PACKAGE))
+    assert ObjectHelper.equals('/my/static/folder', globalsInstance.getStaticPackagePath())
 
 @Test(environmentVariables={
         'MY_CONFIGURATION_KEY' : 'my configuration value injected through environmnet variable',
@@ -554,6 +557,8 @@ def mustLoadLocalConfiguration() :
             'boolean': 'ABCD -- True -- EFGH'
         }
     }
+
+
 
     # Act
     globalsInstance = globals.newGlobalsInstance(__file__, settingStatus=True, settingsFileName='other-application')

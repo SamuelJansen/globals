@@ -10,5 +10,6 @@ from globals.api.src.service.GlobalsManager import (
     hardUpdateGlobalsInstance,
     eraseGlobalsInstance,
     runBeforeTest,
-    runAfterTest
+    runAfterTest,
+    AttributeKey
 )

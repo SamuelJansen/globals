@@ -379,11 +379,11 @@ class Globals:
         self.settingTree = self.getEnvironmentSettingTree(defaultSettingFilePath=self.defaultSettingFilePath, settingTree=self.settingTree)
 
     def getDefaultSettingTree(self) :
-        self.defaultSettingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.defaultSettingFileName}.{Globals.EXTENSION}'
+        self.defaultSettingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.defaultSettingFileName}{c.DOT}{Globals.EXTENSION}'
         return self.getSettingTree(settingFilePath=self.defaultSettingFilePath)
 
     def getEnvironmentSettingTree(self, defaultSettingFilePath=None, settingTree=None) :
-        self.settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.settingsFileName}.{Globals.EXTENSION}'
+        self.settingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.settingsFileName}{c.DOT}{Globals.EXTENSION}'
         return self.getSettingTree(settingFilePath=self.settingFilePath, defaultSettingFilePath=defaultSettingFilePath, settingTree=settingTree)
 
     def getSettingTree(self, settingFilePath=None, defaultSettingFilePath=None, settingTree=None) :
@@ -500,22 +500,28 @@ class Globals:
         return extension
 
     def getStaticPackagePath(self) :
-        # staticPackageList = site.getsitepackages()
-        # self.log(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
-        # staticPackage = str(staticPackageList[0])
-        staticPackage = str(site.getusersitepackages())
-        self.log(f'Static package (before handlings): "{staticPackage}"')
-        staticPackage = staticPackage.replace(f'{c.BACK_SLASH}{c.BACK_SLASH}',Globals.OS_SEPARATOR)
-        staticPackage = staticPackage.replace(c.BACK_SLASH,Globals.OS_SEPARATOR)
-        staticPackage = staticPackage.replace(f'{c.SLASH}{c.SLASH}',Globals.OS_SEPARATOR)
-        staticPackage = staticPackage.replace(c.SLASH,Globals.OS_SEPARATOR)
-        if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
-            staticPackage = staticPackage[:-1]
-        herokuPythonLibPath = Globals.HEROKU_PYTHON.replace(Globals.TOKEN_PYTHON_VERSION, str(self.getSetting(AttributeKey.PYTHON_VERSION)))
-        if staticPackage.endswith(herokuPythonLibPath) :
-            staticPackage = staticPackage.replace(herokuPythonLibPath,c.NOTHING)
-        staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
-        self.setting(f'Static package (after handlings): "{staticPackage}"')
+        staticPackage = self.getSetting(AttributeKey.PYTHON_STATIC_PACKAGE)
+        if ObjectHelper.isNone(staticPackage) :
+            if EnvironmentHelper.isLinux() == 'linux' :
+                staticPackage = str(site.getusersitepackages())
+                self.log(f'Static package (before handlings): "{staticPackage}"')
+            else :
+                staticPackageList = site.getsitepackages()
+                self.log(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
+                staticPackage = str(staticPackageList[0])
+            staticPackage = staticPackage.replace(f'{c.BACK_SLASH}{c.BACK_SLASH}',Globals.OS_SEPARATOR)
+            staticPackage = staticPackage.replace(c.BACK_SLASH,Globals.OS_SEPARATOR)
+            staticPackage = staticPackage.replace(f'{c.SLASH}{c.SLASH}',Globals.OS_SEPARATOR)
+            staticPackage = staticPackage.replace(c.SLASH,Globals.OS_SEPARATOR)
+            if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
+                staticPackage = staticPackage[:-1]
+            herokuPythonLibPath = Globals.HEROKU_PYTHON.replace(Globals.TOKEN_PYTHON_VERSION, str(self.getSetting(AttributeKey.PYTHON_VERSION)))
+            if staticPackage.endswith(herokuPythonLibPath) :
+                staticPackage = staticPackage.replace(herokuPythonLibPath,c.NOTHING)
+            staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
+            self.setting(f'Static package (after handlings): "{staticPackage}"')
+        else :
+            self.setting(f'Static package (taken from application-env.yml): "{staticPackage}"')
         return staticPackage
 
     def log(self,message,exception=None):
@@ -626,23 +632,25 @@ class AttributeKey:
     KW_UPDATE = 'update'
     KW_RESOURCE = 'resource'
 
-    GLOBALS_API_LIST = f'{KW_API}.{KW_LIST}'
+    GLOBALS_API_LIST = f'{KW_API}{c.DOT}{KW_LIST}'
 
-    API_NAME = f'{KW_API}.{KW_NAME}'
-    API_EXTENSION = f'{KW_API}.{KW_EXTENSION}'
+    API_NAME = f'{KW_API}{c.DOT}{KW_NAME}'
+    API_EXTENSION = f'{KW_API}{c.DOT}{KW_EXTENSION}'
     UPDATE_GLOBALS = f'{KW_UPDATE}-globals'
     PRINT_STATUS = 'print-status'
-    DEPENDENCY_UPDATE = f'{KW_API}.{KW_DEPENDENCY}.{KW_UPDATE}'
-    DEPENDENCY_LIST_WEB = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}.{KW_WEB}'
-    DEPENDENCY_LIST_LOCAL = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}.{KW_LOCAL}'
-    DEPENDENCY_RESOURCE_LIST = f'{KW_API}.{KW_DEPENDENCY}.{KW_LIST}.{KW_LOCAL}'
-    PYTHON_VERSION = 'python.version'
+    DEPENDENCY_UPDATE = f'{KW_API}{c.DOT}{KW_DEPENDENCY}{c.DOT}{KW_UPDATE}'
+    DEPENDENCY_LIST_WEB = f'{KW_API}{c.DOT}{KW_DEPENDENCY}{c.DOT}{KW_LIST}{c.DOT}{KW_WEB}'
+    DEPENDENCY_LIST_LOCAL = f'{KW_API}{c.DOT}{KW_DEPENDENCY}{c.DOT}{KW_LIST}{c.DOT}{KW_LOCAL}'
+    DEPENDENCY_RESOURCE_LIST = f'{KW_API}{c.DOT}{KW_DEPENDENCY}{c.DOT}{KW_LIST}{c.DOT}{KW_LOCAL}'
+    PYTHON = 'python'
+    PYTHON_VERSION = f'{PYTHON}{c.DOT}version'
+    PYTHON_STATIC_PACKAGE = f'{PYTHON}{c.DOT}static-package'
 
     def getKey(api,key):
-        return f'{Globals.__name__}.{key}'
+        return f'{Globals.__name__}{c.DOT}{key}'
 
     def getKeyByClassNameAndKey(cls,key):
-        return f'{cls.__name__}.{key}'
+        return f'{cls.__name__}{c.DOT}{key}'
 
 def getResourceNameList(resourceNameList) :
     return resourceNameList if ObjectHelper.isList(resourceNameList) else [resourceNameList]
