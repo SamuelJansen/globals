@@ -502,7 +502,7 @@ class Globals:
     def getStaticPackagePath(self) :
         staticPackage = self.getSetting(AttributeKey.PYTHON_STATIC_PACKAGE)
         if ObjectHelper.isNone(staticPackage) :
-            if EnvironmentHelper.isLinux() == 'linux' :
+            if EnvironmentHelper.isLinux() :
                 staticPackage = str(site.getusersitepackages())
                 self.log(f'Static package (before handlings): "{staticPackage}"')
             else :
