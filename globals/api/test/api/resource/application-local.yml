@@ -1,4 +1,4 @@
 print-status: False
 environment:
     test: local
-    missing:
+    missing: ${SOME_MISSINE_ENVIRONMENT_VALUE_HERE:}

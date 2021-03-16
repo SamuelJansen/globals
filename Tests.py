@@ -40,6 +40,6 @@ TestHelper.run(__file__, inspectGlobals=False)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
-#         'MyApplicationTest.importResourceAndModule_withSuccess'
+#         'MyApplicationTest.myConfigurationTests_basicVariableDefinitions'
 #     ]
 # )

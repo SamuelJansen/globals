@@ -60,16 +60,17 @@ def myConfigurationTests_basicVariableDefinitions() :
     globalsInstance = globals.newGlobalsInstance(__file__
         , loadLocalConfig = False
         , debugStatus = True
-        , warningStatus = True
+        , warningStatus = False
         , errorStatus = True
         , successStatus = True
-        , failureStatus = False
+        , failureStatus = True
         , settingStatus = True
         , logStatus = False
         , encoding = 'utf-8'
         , printRootPathStatus = False
         , globalsEverything = False
         )
+    # log.prettyPython(myConfigurationTests_basicVariableDefinitions, 'settingTree', globalsInstance.settingTree, logLevel=log.DEBUG)
 
     # Assert
     assert 'self reference value' == globalsInstance.getSetting('my.self-reference-key')
@@ -137,7 +138,6 @@ def myConfigurationTests_basicVariableDefinitions() :
     assert 'ABCD -- 2.3 -- EFGH' == globalsInstance.getSetting('some-not-string-selfreference.float')
     assert 'ABCD -- True -- EFGH' == globalsInstance.getSetting('some-not-string-selfreference.boolean')
     assert ObjectHelper.equals('/my/static/folder', globalsInstance.settingTree['python']['static-package'])
-    print(globalsInstance.getSetting(globals.AttributeKey.PYTHON_STATIC_PACKAGE))
     assert ObjectHelper.equals('/my/static/folder', globalsInstance.getSetting(globals.AttributeKey.PYTHON_STATIC_PACKAGE))
     assert ObjectHelper.equals('/my/static/folder', globalsInstance.getStaticPackagePath())
 
