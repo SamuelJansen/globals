@@ -101,25 +101,23 @@ class Globals:
 
         if globalsInstanceIsNone() :
 
+            self.logStatus = EnvironmentHelper.update(log.LOG, logStatus, default=DEFAULT_LOG_STATUS)
+            self.successStatus = EnvironmentHelper.update(log.SUCCESS, successStatus, default=DEFAULT_SUCCESS_STATUS)
+            self.settingStatus = EnvironmentHelper.update(log.SETTING, settingStatus, default=DEFAULT_SETTING_STATUS)
+            self.debugStatus = EnvironmentHelper.update(log.DEBUG, debugStatus, default=DEFAULT_DEBUG_STATUS)
+            self.warningStatus = EnvironmentHelper.update(log.WARNING, warningStatus, default=DEFAULT_WARNING_STATUS)
+            self.failureStatus = EnvironmentHelper.update(log.FAILURE, failureStatus, default=DEFAULT_FAILURE_STATUS)
+            self.wrapperStatus = EnvironmentHelper.update(log.WRAPPER, wrapperStatus, default=DEFAULT_WRAPPER_STATUS)
+            self.errorStatus = EnvironmentHelper.update(log.ERROR, errorStatus, default=DEFAULT_ERROR_STATUS)
+            self.testStatus = EnvironmentHelper.update(log.TEST, testStatus, default=DEFAULT_TEST_STATUS)
+            log.loadSettings()
+
             self.filePath = filePath
             self.charactereFilterList = Globals.CHARACTERE_FILTER
             self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
             self.encoding = encoding
 
-            self.loadLocalConfiguration(
-                loadLocalConfig,
-                logStatus,
-                successStatus,
-                settingStatus,
-                debugStatus,
-                warningStatus,
-                failureStatus,
-                wrapperStatus,
-                errorStatus,
-                testStatus,
-                printRootPathStatus,
-                globalsEverything
-            )
+            self.loadLocalConfiguration(loadLocalConfig, printRootPathStatus, globalsEverything)
 
             self.setting(f'{self.__class__.__name__}{c.DOT}filePath: {self.filePath}')
             self.setting(f'__file__: {__file__}')
@@ -144,37 +142,14 @@ class Globals:
         self.updateDependencyStatus = self.getSetting(AttributeKey.DEPENDENCY_UPDATE)
         self.rootPathTree = {}
 
-    def loadLocalConfiguration(
-        self,
-        loadLocalConfig,
-        logStatus,
-        successStatus,
-        settingStatus,
-        debugStatus,
-        warningStatus,
-        failureStatus,
-        wrapperStatus,
-        errorStatus,
-        testStatus,
-        printRootPathStatus,
-        globalsEverything
-    ) :
-        self.logStatus = EnvironmentHelper.update(log.LOG, logStatus, default=DEFAULT_LOG_STATUS)
-        self.successStatus = EnvironmentHelper.update(log.SUCCESS, successStatus, default=DEFAULT_SUCCESS_STATUS)
-        self.settingStatus = EnvironmentHelper.update(log.SETTING, settingStatus, default=DEFAULT_SETTING_STATUS)
-        self.debugStatus = EnvironmentHelper.update(log.DEBUG, debugStatus, default=DEFAULT_DEBUG_STATUS)
-        self.warningStatus = EnvironmentHelper.update(log.WARNING, warningStatus, default=DEFAULT_WARNING_STATUS)
-        self.failureStatus = EnvironmentHelper.update(log.FAILURE, failureStatus, default=DEFAULT_FAILURE_STATUS)
-        self.wrapperStatus = EnvironmentHelper.update(log.WRAPPER, wrapperStatus, default=DEFAULT_WRAPPER_STATUS)
-        self.errorStatus = EnvironmentHelper.update(log.ERROR, errorStatus, default=DEFAULT_ERROR_STATUS)
-        self.testStatus = EnvironmentHelper.update(log.TEST, testStatus, default=DEFAULT_TEST_STATUS)
+    def loadLocalConfiguration(self, loadLocalConfig, printRootPathStatus, globalsEverything) :
         self.loadLocalConfig = loadLocalConfig
         self.localConfiguration = {}
         if self.loadLocalConfig :
             try :
                 self.localConfiguration = self.getSettingTree(settingFilePath=Globals.LOCAL_CONFIGURATION_FILE_NAME,settingTree=None)
             except Exception as exception :
-                log.log(self.__class__,f'Failed to load {Globals.LOCAL_CONFIGURATION_FILE_NAME} settings', exception=exception)
+                self.log(f'Failed to load {Globals.LOCAL_CONFIGURATION_FILE_NAME} settings', exception=exception)
             keyQuery = SettingHelper.querySetting(AttributeKey.KW_KEY,self.localConfiguration)
             keyValueQuery = {}
             for key,value in keyQuery.items() :
