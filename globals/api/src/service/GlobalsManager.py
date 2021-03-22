@@ -461,17 +461,19 @@ class Globals:
                 log.error(self.__class__,f'Not possible to run {commandFirstTry}',Exception(f'Both attempt failed'))
 
     def getApiName(self):
+        apiName = None
         try :
-            return self.getSetting(AttributeKey.API_NAME)
+            apiName = self.getSetting(AttributeKey.API_NAME)
         except Exception as exception :
-            self.failure('Not possible to get api name', exception)
+            self.warning(f'Not possible to get api name. Returning {apiName} by default', exception=exception)
+        return apiName
 
     def getExtension(self):
         extension = Globals.EXTENSION
         try :
             extension = self.getSetting(AttributeKey.API_EXTENSION)
         except Exception as exception :
-            self.failure('Not possible to get api extenion. Returning default estension', exception)
+            self.warning(f'Not possible to get api extenion. Returning {extension} by default', exception=exception)
         return extension
 
     def getStaticPackagePath(self) :
@@ -507,9 +509,9 @@ class Globals:
         if c.TRUE == self.debugStatus :
             log.debug(self.__class__,message)
 
-    def warning(self,message):
+    def warning(self, message, exception=None):
         if c.TRUE == self.warningStatus :
-            log.warning(self.__class__,message)
+            log.warning(self.__class__, message, exception=exception)
 
     def error(self,message,exception):
         if c.TRUE == self.errorStatus :
@@ -646,12 +648,12 @@ def importModule(resourceModuleName, muteLogs=False, ignoreList=IGNORE_MODULE_LI
             module = importlib.import_module(resourceModuleName)
         except Exception as exception:
             if not muteLogs :
-                log.warning(importResource, f'Not possible to import "{resourceModuleName}" module. Going for a second attempt', exception=exception)
+                log.log(importResource, f'Not possible to import "{resourceModuleName}" module. Going for a second attempt', exception=exception)
             try :
                 module = __import__(resourceModuleName)
             except :
                 if not muteLogs :
-                    log.failure(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Returning "{module}" by default', exception)
+                    log.warning(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Returning "{module}" by default', exception=exception)
         return module
 
 def importResource(resourceName, resourceModuleName=None, muteLogs=False, ignoreList=IGNORE_REOURCE_LIST) :
@@ -668,7 +670,7 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, ignore
                     resource = ReflectionHelper.getAttributeOrMethod(resource, name)
             except Exception as exception :
                 if not muteLogs :
-                    log.failure(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
+                    log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
             return resource
 
 def runBeforeTest(instanceList, logLevel=log.LOG, muteLogs=True) :
