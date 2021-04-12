@@ -233,7 +233,6 @@ class Globals:
         self.log(f'{self.__class__.__name__}{c.DOT}apisRoot: {self.apisRoot}')
         self.log(f'{self.__class__.__name__}{c.DOT}apisPath: {self.apisPath}')
 
-
     def getApiPath(self,apiPackageName):
         if not apiPackageName == c.NOTHING :
              return f'{self.localPath}{self.apisRoot}{apiPackageName}{self.OS_SEPARATOR}'###-'{self.baseApiPath}'
