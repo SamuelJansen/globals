@@ -640,11 +640,14 @@ def getInnerResourceNameList(resourceName, resourceModuleName) :
         return [resourceNameList[0]] if 1 == len(resourceNameList) or resourceNameList[1] is None else resourceNameList
     return [resourceName]
 
-def importModule(resourceModuleName, muteLogs=False, ignoreList=IGNORE_MODULE_LIST) :
+def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IGNORE_MODULE_LIST) :
     if resourceModuleName not in ignoreList :
         module = None
         try :
-            module = importlib.import_module(resourceModuleName)
+            if reload :
+                module = importlib.reload(resourceModuleName)
+            else :
+                module = importlib.import_module(resourceModuleName)
         except Exception as exception:
             if not muteLogs :
                 log.log(importResource, f'Not possible to import "{resourceModuleName}" module. Going for a second attempt', exception=exception)
@@ -655,12 +658,12 @@ def importModule(resourceModuleName, muteLogs=False, ignoreList=IGNORE_MODULE_LI
                     log.warning(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Returning "{module}" by default', exception=exception)
         return module
 
-def importResource(resourceName, resourceModuleName=None, muteLogs=False, ignoreList=IGNORE_REOURCE_LIST) :
+def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload=False, ignoreList=IGNORE_REOURCE_LIST) :
     innerResourceName = getResourceName(resourceName)
     if innerResourceName not in ignoreList :
         if ObjectHelper.isNone(resourceModuleName) :
             resourceModuleName = innerResourceName
-        module = importModule(resourceModuleName, muteLogs=muteLogs)
+        module = importModule(resourceModuleName, muteLogs=muteLogs, reload=reload)
         if module :
             resource = None
             try :
