@@ -24,7 +24,7 @@ setup(
     download_url = f'{url}archive/v{version}.tar.gz',
     keywords = ['global', 'python global package', 'python package manager', 'global package manager'],
     install_requires = [
-        'python_helper==0.3.0-04'
+        'python_helper==0.3.0-05'
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
