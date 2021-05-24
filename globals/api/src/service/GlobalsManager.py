@@ -279,7 +279,7 @@ class Globals:
                 if self.printStatus :
                     self.printTree(self.rootPathTree,f'{c.DEBUG}Root tree (printRootPathStatus is active)')
             except Exception as exception :
-                self.error(f'Not possible to run spotRootPath({rootPath}) rotine',exception)
+                self.failure(f'Not possible to run spotRootPath({rootPath}) rotine', exception)
 
     def giveLocalVisibilityToFrameworkApis(self,apiPackageNameList):
         if apiPackageNameList :
@@ -318,7 +318,7 @@ class Globals:
                 except :
                     node[nodeSon] = c.NOTHING
         except Exception as exception :
-            self.error(f'Not possible to run addNode({nodePath}) rotine',exception)
+            self.failure(f'Not possible to run addNode({nodePath}) rotine', exception, muteStackTrace=True)
         return node
 
     def nodeIsValid(self,node):
@@ -477,28 +477,37 @@ class Globals:
 
     def getStaticPackagePath(self) :
         staticPackage = self.getSetting(AttributeKey.PYTHON_STATIC_PACKAGE)
+        self.log(f'User static package: "{site.getusersitepackages()}"')
+        self.log(f'Static package list: {StringHelper.prettyJson(site.getsitepackages())}')
+        self.log(f'Static package (taken from application.yml): "{staticPackage}"')
         if ObjectHelper.isNone(staticPackage) :
-            if EnvironmentHelper.isLinux() :
-                staticPackage = str(site.getusersitepackages())
-                self.log(f'Static package (before handlings): "{staticPackage}"')
-            else :
-                staticPackageList = site.getsitepackages()
-                self.log(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
-                staticPackage = str(staticPackageList[0])
-            staticPackage = staticPackage.replace(f'{c.BACK_SLASH}{c.BACK_SLASH}',Globals.OS_SEPARATOR)
-            staticPackage = staticPackage.replace(c.BACK_SLASH,Globals.OS_SEPARATOR)
-            staticPackage = staticPackage.replace(f'{c.SLASH}{c.SLASH}',Globals.OS_SEPARATOR)
-            staticPackage = staticPackage.replace(c.SLASH,Globals.OS_SEPARATOR)
-            if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
-                staticPackage = staticPackage[:-1]
-            herokuPythonLibPath = Globals.HEROKU_PYTHON.replace(Globals.TOKEN_PYTHON_VERSION, str(self.getSetting(AttributeKey.PYTHON_VERSION)))
-            if staticPackage.endswith(herokuPythonLibPath) :
-                staticPackage = staticPackage.replace(herokuPythonLibPath,c.NOTHING)
-            staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
-            self.setting(f'Static package (after handlings): "{staticPackage}"')
-        else :
-            self.setting(f'Static package (taken from application-env.yml): "{staticPackage}"')
+            staticPackage = f'{EnvironmentHelper.OS_SEPARATOR}api{EnvironmentHelper.OS_SEPARATOR}src{EnvironmentHelper.OS_SEPARATOR}resource'
+        self.setting(f'Static package: "{staticPackage}"')
         return staticPackage
+
+        # staticPackage = self.getSetting(AttributeKey.PYTHON_STATIC_PACKAGE)
+        # if ObjectHelper.isNone(staticPackage) :
+        #     if EnvironmentHelper.isLinux() :
+        #         staticPackage = str(site.getusersitepackages())
+        #         self.log(f'Static package (before handlings): "{staticPackage}"')
+        #     else :
+        #         staticPackageList = site.getsitepackages()
+        #         self.log(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
+        #         staticPackage = str(staticPackageList[0])
+        #     staticPackage = staticPackage.replace(f'{c.BACK_SLASH}{c.BACK_SLASH}',Globals.OS_SEPARATOR)
+        #     staticPackage = staticPackage.replace(c.BACK_SLASH,Globals.OS_SEPARATOR)
+        #     staticPackage = staticPackage.replace(f'{c.SLASH}{c.SLASH}',Globals.OS_SEPARATOR)
+        #     staticPackage = staticPackage.replace(c.SLASH,Globals.OS_SEPARATOR)
+        #     if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
+        #         staticPackage = staticPackage[:-1]
+        #     herokuPythonLibPath = Globals.HEROKU_PYTHON.replace(Globals.TOKEN_PYTHON_VERSION, str(self.getSetting(AttributeKey.PYTHON_VERSION)))
+        #     if staticPackage.endswith(herokuPythonLibPath) :
+        #         staticPackage = staticPackage.replace(herokuPythonLibPath,c.NOTHING)
+        #     staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
+        #     self.setting(f'Static package (after handlings): "{staticPackage}"')
+        # else :
+        #     self.setting(f'Static package (taken from application-env.yml): "{staticPackage}"')
+        # return staticPackage
 
     def log(self,message,exception=None):
         if c.TRUE == self.logStatus :
@@ -520,9 +529,9 @@ class Globals:
         if c.TRUE == self.successStatus :
             log.success(self.__class__,message)
 
-    def failure(self,message,exception):
+    def failure(self,message,exception, muteStackTrace=False):
         if c.TRUE == self.failureStatus :
-            log.failure(self.__class__,message,exception)
+            log.failure(self.__class__, message, exception, muteStackTrace=muteStackTrace)
 
     def setting(self,message):
         if c.TRUE == self.settingStatus :
