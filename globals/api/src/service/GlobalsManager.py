@@ -32,13 +32,13 @@ class Globals:
     EXTENSION = 'yml'
     LOCAL_CONFIGURATION_FILE_NAME = f'local-config{c.DOT}{EXTENSION}'
 
-    API_BACK_SLASH = f'api{OS_SEPARATOR}'
-    SRC_BACK_SLASH = f'src{OS_SEPARATOR}'
+    API_BACK_SLASH = f'api{EnvironmentHelper.OS_SEPARATOR}'
+    SRC_BACK_SLASH = f'src{EnvironmentHelper.OS_SEPARATOR}'
     BASE_API_PATH = f'{API_BACK_SLASH}{SRC_BACK_SLASH}'
 
-    RESOURCE_BACK_SLASH = f'resource{OS_SEPARATOR}'
-    REPOSITORY_BACK_SLASH = f'repository{OS_SEPARATOR}'
-    DEPENDENCY_BACK_SLASH = f'dependency{OS_SEPARATOR}'
+    RESOURCE_BACK_SLASH = f'resource{EnvironmentHelper.OS_SEPARATOR}'
+    REPOSITORY_BACK_SLASH = f'repository{EnvironmentHelper.OS_SEPARATOR}'
+    DEPENDENCY_BACK_SLASH = f'dependency{EnvironmentHelper.OS_SEPARATOR}'
 
     TOKEN_PIP_USER = '__TOKEN_PIP_USER__'
     SPACE_PIP_USER = f'{c.SPACE}--user'
@@ -78,9 +78,8 @@ class Globals:
     SAFE_AMOUNT_OF_TRIPLE_SINGLE_OR_DOUBLE_QUOTES_PLUS_ONE = 4
 
     LIB = 'lib'
-    STATIC_PACKAGE_PATH = f'{OS_SEPARATOR}statics'
-    TOKEN_PYTHON_VERSION = '__TOKEN_PYTHON_VERSION__'
-    HEROKU_PYTHON = f'{OS_SEPARATOR}lib{OS_SEPARATOR}python{TOKEN_PYTHON_VERSION}{OS_SEPARATOR}site-packages'
+
+    STATIC_PACKAGE_PATH = f'{EnvironmentHelper.OS_SEPARATOR}api{EnvironmentHelper.OS_SEPARATOR}resource'
 
     def __init__(self, filePath,
         loadLocalConfig = True,
@@ -194,26 +193,26 @@ class Globals:
 
     def buildApplicationPath(self):
         if ObjectHelper.isNotEmpty(self.filePath) :
-            self.currentPath = f'{str(Path(self.filePath).parent.absolute())}{self.OS_SEPARATOR}'
+            self.currentPath = f'{str(Path(self.filePath).parent.absolute())}{EnvironmentHelper.OS_SEPARATOR}'
         else :
-            self.currentPath = f'{str(Path(__file__).parent.absolute())}{self.OS_SEPARATOR}'
+            self.currentPath = f'{str(Path(__file__).parent.absolute())}{EnvironmentHelper.OS_SEPARATOR}'
         self.log(f'{self.__class__.__name__}{c.DOT}filePath: {self.filePath}')
         self.log(f'{self.__class__.__name__}{c.DOT}currentPath: {self.currentPath}')
 
         self.localPath = str(Path.home())
-        if not self.localPath[-1] == str(self.OS_SEPARATOR) :
-            self.localPath = f'{self.localPath}{self.OS_SEPARATOR}'
+        if not self.localPath[-1] == str(EnvironmentHelper.OS_SEPARATOR) :
+            self.localPath = f'{self.localPath}{EnvironmentHelper.OS_SEPARATOR}'
         self.log(f'{self.__class__.__name__}{c.DOT}localPath: {self.localPath}')
 
         self.baseApiPath = Globals.BASE_API_PATH
         self.apiPath = self.currentPath.split(self.baseApiPath)[0]
         self.log(f'{self.__class__.__name__}{c.DOT}apiPath: {self.apiPath}')
 
-        lastLocalPathPackage = self.localPath.split(self.OS_SEPARATOR)[-2]
-        firstBaseApiPath = self.baseApiPath.split(self.OS_SEPARATOR)[0]
+        lastLocalPathPackage = self.localPath.split(EnvironmentHelper.OS_SEPARATOR)[-2]
+        firstBaseApiPath = self.baseApiPath.split(EnvironmentHelper.OS_SEPARATOR)[0]
         lastLocalPathPackageNotFound = True
         self.apiPackage = c.NOTHING
-        for currentPackage in self.currentPath.split(self.OS_SEPARATOR) :
+        for currentPackage in self.currentPath.split(EnvironmentHelper.OS_SEPARATOR) :
             if lastLocalPathPackageNotFound :
                 if currentPackage == lastLocalPathPackage :
                     lastLocalPathPackageNotFound = False
@@ -235,12 +234,12 @@ class Globals:
 
     def getApiPath(self,apiPackageName):
         if not apiPackageName == c.NOTHING :
-             return f'{self.localPath}{self.apisRoot}{apiPackageName}{self.OS_SEPARATOR}'###-'{self.baseApiPath}'
+             return f'{self.localPath}{self.apisRoot}{apiPackageName}{EnvironmentHelper.OS_SEPARATOR}'###-'{self.baseApiPath}'
         if self.apisPath :
             return self.apisPath
         if self.localPath :
             return self.localPath
-        return f'{self.OS_SEPARATOR}'
+        return f'{EnvironmentHelper.OS_SEPARATOR}'
 
     def update(self) :
         self.updateDependencies()
@@ -299,7 +298,7 @@ class Globals:
         nodeSons = EnvironmentHelper.listDirectoryContent(path)
         for nodeSon in nodeSons :
             if self.nodeIsValid(nodeSon) :
-                nodeSonPath = f'{path}{self.OS_SEPARATOR}{nodeSon}'
+                nodeSonPath = f'{path}{EnvironmentHelper.OS_SEPARATOR}{nodeSon}'
                 try :
                     node[nodeSon] = self.makePathTreeVisible(nodeSonPath)
                 except :
@@ -312,7 +311,7 @@ class Globals:
         try :
             nodeSons = EnvironmentHelper.listDirectoryContent(nodePath)
             for nodeSon in nodeSons :
-                nodeSonPath = f'{nodePath}{self.OS_SEPARATOR}{nodeSon}'
+                nodeSonPath = f'{nodePath}{EnvironmentHelper.OS_SEPARATOR}{nodeSon}'
                 try :
                     node[nodeSon] = self.addNode(nodeSonPath)
                 except :
@@ -335,7 +334,7 @@ class Globals:
         nodeSons = EnvironmentHelper.listDirectoryContent(path)
         for nodeSon in nodeSons :
             if self.nodeIsValid(nodeSon) :
-                nodeSonPath = f'{path}{self.OS_SEPARATOR}{nodeSon}'
+                nodeSonPath = f'{path}{EnvironmentHelper.OS_SEPARATOR}{nodeSon}'
                 try :
                     node[nodeSon] = self.getPathTreeFromPath(nodeSonPath)
                 except : pass
@@ -343,9 +342,9 @@ class Globals:
 
     def overrideApiTree(self,apiName,package=None):
         if package :
-            actualPackage = package + self.OS_SEPARATOR
+            actualPackage = package + EnvironmentHelper.OS_SEPARATOR
         else :
-            actualPackage = apiName + self.OS_SEPARATOR
+            actualPackage = apiName + EnvironmentHelper.OS_SEPARATOR
         self.apiName = apiName
         self.apiPackage = package
         self.apiPath = f'{self.apisPath}{actualPackage}'
@@ -481,10 +480,9 @@ class Globals:
         self.log(f'Static package list: {StringHelper.prettyJson(site.getsitepackages())}')
         self.log(f'Static package (taken from application.yml): "{staticPackage}"')
         if ObjectHelper.isNone(staticPackage) :
-            staticPackage = f'{EnvironmentHelper.OS_SEPARATOR}api{EnvironmentHelper.OS_SEPARATOR}src{EnvironmentHelper.OS_SEPARATOR}resource'
+            staticPackage = str(self.STATIC_PACKAGE_PATH)
         self.setting(f'Static package: "{staticPackage}"')
         return staticPackage
-
         # staticPackage = self.getSetting(AttributeKey.PYTHON_STATIC_PACKAGE)
         # if ObjectHelper.isNone(staticPackage) :
         #     if EnvironmentHelper.isLinux() :
@@ -494,11 +492,11 @@ class Globals:
         #         staticPackageList = site.getsitepackages()
         #         self.log(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
         #         staticPackage = str(staticPackageList[0])
-        #     staticPackage = staticPackage.replace(f'{c.BACK_SLASH}{c.BACK_SLASH}',Globals.OS_SEPARATOR)
-        #     staticPackage = staticPackage.replace(c.BACK_SLASH,Globals.OS_SEPARATOR)
-        #     staticPackage = staticPackage.replace(f'{c.SLASH}{c.SLASH}',Globals.OS_SEPARATOR)
-        #     staticPackage = staticPackage.replace(c.SLASH,Globals.OS_SEPARATOR)
-        #     if staticPackage[-1] == str(Globals.OS_SEPARATOR) :
+        #     staticPackage = staticPackage.replace(f'{c.BACK_SLASH}{c.BACK_SLASH}',EnvironmentHelper.OS_SEPARATOR)
+        #     staticPackage = staticPackage.replace(c.BACK_SLASH,EnvironmentHelper.OS_SEPARATOR)
+        #     staticPackage = staticPackage.replace(f'{c.SLASH}{c.SLASH}',EnvironmentHelper.OS_SEPARATOR)
+        #     staticPackage = staticPackage.replace(c.SLASH,EnvironmentHelper.OS_SEPARATOR)
+        #     if staticPackage[-1] == str(EnvironmentHelper.OS_SEPARATOR) :
         #         staticPackage = staticPackage[:-1]
         #     herokuPythonLibPath = Globals.HEROKU_PYTHON.replace(Globals.TOKEN_PYTHON_VERSION, str(self.getSetting(AttributeKey.PYTHON_VERSION)))
         #     if staticPackage.endswith(herokuPythonLibPath) :
