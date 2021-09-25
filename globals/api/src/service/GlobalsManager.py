@@ -7,6 +7,7 @@ global GLOBALS
 GLOBALS = None
 
 DEFAULT_LOG_STATUS = False
+DEFAULT_INFO_STATUS = False
 DEFAULT_SUCCESS_STATUS = False
 DEFAULT_SETTING_STATUS = False
 DEFAULT_DEBUG_STATUS = False
@@ -85,6 +86,7 @@ class Globals:
         loadLocalConfig = True,
         settingsFileName = APPLICATION,
         logStatus = DEFAULT_LOG_STATUS,
+        infoStatus = DEFAULT_INFO_STATUS,
         successStatus = DEFAULT_SUCCESS_STATUS,
         settingStatus = DEFAULT_SETTING_STATUS,
         debugStatus = DEFAULT_DEBUG_STATUS,
@@ -101,6 +103,7 @@ class Globals:
         if globalsInstanceIsNone() :
 
             self.logStatus = EnvironmentHelper.update(log.LOG, logStatus, default=DEFAULT_LOG_STATUS)
+            self.infoStatus = EnvironmentHelper.update(log.LOG, infoStatus, default=DEFAULT_INFO_STATUS)
             self.successStatus = EnvironmentHelper.update(log.SUCCESS, successStatus, default=DEFAULT_SUCCESS_STATUS)
             self.settingStatus = EnvironmentHelper.update(log.SETTING, settingStatus, default=DEFAULT_SETTING_STATUS)
             self.debugStatus = EnvironmentHelper.update(log.DEBUG, debugStatus, default=DEFAULT_DEBUG_STATUS)
@@ -178,6 +181,8 @@ class Globals:
                 'warningStatus' : self.warningStatus,
                 'failureStatus' : self.failureStatus,
                 'errorStatus' : self.errorStatus,
+                'wrapperStatus': self.wrapperStatus,
+                'infoStatus' : self.infoStatus,
                 'logStatus' : self.logStatus,
                 'globalsEverything' : self.globalsEverything,
                 'printRootPathStatus' : self.printRootPathStatus
@@ -510,6 +515,10 @@ class Globals:
     def log(self,message,exception=None):
         if c.TRUE == self.logStatus :
             log.log(self.__class__,message,exception=exception)
+
+    def info(self,message,exception=None):
+        if c.TRUE == self.infoStatus :
+            log.info(self.__class__,message,exception=exception)
 
     def debug(self,message):
         if c.TRUE == self.debugStatus :

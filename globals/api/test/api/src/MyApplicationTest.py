@@ -4,6 +4,7 @@ from python_helper import Constant as c
 
 LOG_HELPER_SETTINGS = {
     log.LOG : False,
+    log.INFO : False,
     log.SUCCESS : False,
     log.SETTING : False,
     log.DEBUG : False,
@@ -36,6 +37,7 @@ def startMyApplicationTest() :
     globals.newGlobalsInstance(__file__
         , loadLocalConfig = False
         , logStatus = False
+        , infoStatus = False
         , debugStatus = True
         , warningStatus = True
         , errorStatus = True
@@ -66,6 +68,7 @@ def myConfigurationTests_basicVariableDefinitions() :
         , failureStatus = True
         , settingStatus = True
         , logStatus = False
+        , infoStatus = True
         , encoding = 'utf-8'
         , printRootPathStatus = False
         , globalsEverything = False
