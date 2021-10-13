@@ -103,7 +103,7 @@ class Globals:
         if globalsInstanceIsNone() :
 
             self.logStatus = EnvironmentHelper.update(log.LOG, logStatus, default=DEFAULT_LOG_STATUS)
-            self.infoStatus = EnvironmentHelper.update(log.LOG, infoStatus, default=DEFAULT_INFO_STATUS)
+            self.infoStatus = EnvironmentHelper.update(log.INFO, infoStatus, default=DEFAULT_INFO_STATUS)
             self.successStatus = EnvironmentHelper.update(log.SUCCESS, successStatus, default=DEFAULT_SUCCESS_STATUS)
             self.settingStatus = EnvironmentHelper.update(log.SETTING, settingStatus, default=DEFAULT_SETTING_STATUS)
             self.debugStatus = EnvironmentHelper.update(log.DEBUG, debugStatus, default=DEFAULT_DEBUG_STATUS)
