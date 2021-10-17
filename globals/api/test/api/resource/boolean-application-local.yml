@@ -1,0 +1,10 @@
+boolean:
+    value:
+        true: True
+        environment-injection:
+            this-is-true: ${THIS_VALUE_OF_ENVIRONMENT_VARIABLE_IS_NONE:True}
+            true: ${ENVIRONMENT_BOOLEAN_VALUE:False}
+            is-true: ${THIS_VALUE_OF_ENVIRONMENT_VARIABLE_IS_NONE:True}
+            is-false: ${THIS_VALUE_OF_ENVIRONMENT_VARIABLE_IS_NONE:${boolean.value.environment-injection.this-is-false}}
+            this-is-also-true: ${THIS_VALUE_OF_ENVIRONMENT_VARIABLE_IS_NONE:${ENVIRONMENT_BOOLEAN_VALUE:boolean.value.environment-injection.this-is-false}}
+            this-is-also-false: ${THIS_VALUE_OF_ENVIRONMENT_VARIABLE_IS_NONE:${:${boolean.value.environment-injection.this-is-false}}}

@@ -393,8 +393,8 @@ class Globals:
     def getSetting(self,nodeKey,settingTree=None) :
         if not settingTree :
             settingTree = self.settingTree
-        settingValue = SettingHelper.getSetting(nodeKey,self.settingTree)
-        if ObjectHelper.isEmpty(settingValue) or {} == settingValue :
+        settingValue = SettingHelper.getSetting(nodeKey,settingTree)
+        if ObjectHelper.isEmpty(settingValue):
             return SettingHelper.getSetting(nodeKey,self.defaultSettingTree)
         return settingValue
 

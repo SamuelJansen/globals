@@ -655,3 +655,52 @@ def mustLoadLocalConfiguration_correctly() :
 
     # Assert
     assert ObjectHelper.equals(expected, globalsInstance.settingTree)
+
+
+@Test(environmentVariables={
+        'ENVIRONMENT_BOOLEAN_VALUE': True,
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **LOG_HELPER_SETTINGS
+    }
+)
+def getBooleanSetting():
+    #arrange
+    globalsInstance = globals.newGlobalsInstance(__file__, debugStatus=True, settingsFileName='boolean-application')
+
+    #act
+    falseValue = globalsInstance.getApiSetting('boolean.value.false')
+    trueValue = globalsInstance.getApiSetting('boolean.value.true')
+    environmentInjectionTrueValue = globalsInstance.getApiSetting('boolean.value.environment-injection.true')
+    environmentInjectionFalseValue = globalsInstance.getApiSetting('boolean.value.environment-injection.false')
+    isTrue = globalsInstance.getApiSetting('boolean.value.environment-injection.is-true')
+    isFalse = globalsInstance.getApiSetting('boolean.value.environment-injection.is-false')
+    shouldBeFalse = globalsInstance.getApiSetting('boolean.value.environment-injection.this-is-false')
+    shouldBeTrue = globalsInstance.getApiSetting('boolean.value.environment-injection.this-is-true')
+    thisIsAlsoTrue = globalsInstance.getApiSetting('boolean.value.environment-injection.this-is-also-true')
+    thisIsAlsoFalse = globalsInstance.getApiSetting('boolean.value.environment-injection.this-is-also-false')
+
+    #assert
+    assert trueValue, f'trueValue should be True with type bool, but is {trueValue} with type {type(trueValue)}'
+    assert bool == type(trueValue), f'trueValue should be True with type bool, but is {trueValue} with type {type(trueValue)}'
+    assert not falseValue, f'falseValue should be False with type bool, but is {falseValue} with type {type(falseValue)}'
+    assert bool == type(falseValue), f'falseValue should be False with type bool, but is {falseValue} with type {type(falseValue)}'
+
+    assert environmentInjectionTrueValue, f'environmentInjectionTrueValue should be True with type bool, but is {environmentInjectionTrueValue} with type {type(environmentInjectionTrueValue)}'
+    assert bool == type(environmentInjectionTrueValue), f'environmentInjectionTrueValue should be True with type bool, but is {environmentInjectionTrueValue} with type {type(environmentInjectionTrueValue)}'
+    assert not environmentInjectionFalseValue, f'environmentInjectionFalseValue should be False with type bool, but is {environmentInjectionFalseValue} with type {type(environmentInjectionFalseValue)}'
+    assert bool == type(environmentInjectionFalseValue), f'environmentInjectionFalseValue should be False with type bool, but is {environmentInjectionFalseValue} with type {type(environmentInjectionFalseValue)}'
+
+    assert isTrue, f'isTrue with type bool, but is {isTrue} with type {type(isTrue)}'
+    assert bool == type(isTrue), f'isTrue with type bool, but is {isTrue} with type {type(isTrue)}'
+    assert not isFalse, f'isFalse with type bool, but is {isFalse} with type {type(isFalse)}'
+    assert bool == type(isFalse), f'isFalse with type bool, but is {isFalse} with type {type(isFalse)}'
+
+    assert shouldBeTrue, f'shouldBeTrue with type bool, but is {shouldBeTrue} with type {type(shouldBeTrue)}'
+    assert bool == type(shouldBeTrue), f'shouldBeTrue with type bool, but is {shouldBeTrue} with type {type(shouldBeTrue)}'
+    assert not shouldBeFalse, f'shouldBeFalse with type bool, but is {shouldBeFalse} with type {type(shouldBeFalse)}'
+    assert bool == type(shouldBeFalse), f'shouldBeFalse with type bool, but is {shouldBeFalse} with type {type(shouldBeFalse)}'
+
+    assert thisIsAlsoTrue, f'thisIsAlsoTrue with type bool, but is {thisIsAlsoTrue} with type {type(thisIsAlsoTrue)}'
+    assert bool == type(thisIsAlsoTrue), f'thisIsAlsoTrue with type bool, but is {thisIsAlsoTrue} with type {type(thisIsAlsoTrue)}'
+    assert not thisIsAlsoFalse, f'thisIsAlsoFalse with type bool, but is {thisIsAlsoFalse} with type {type(thisIsAlsoFalse)}'
+    assert bool == type(thisIsAlsoFalse), f'thisIsAlsoFalse with type bool, but is {thisIsAlsoFalse} with type {type(thisIsAlsoFalse)}'

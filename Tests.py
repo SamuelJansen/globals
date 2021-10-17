@@ -12,7 +12,7 @@ TestHelper.run(__file__, inspectGlobals=False)
 #     __file__,
 #     times = 10,
 #     runOnly = [
-#         'MyApplicationTest.startMyApplicationTest'
+#         'MyApplicationTest.getBooleanSetting'
 #         ],
 #     testStatus = False,
 #     logStatus = False,
