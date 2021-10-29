@@ -1,7 +1,7 @@
 from distutils.core import setup
 import os
 
-version = '0.3.6'
+version = '0.3.7'
 name = 'globals'
 url = f'https://github.com/SamuelJansen/{name}/'
 
@@ -24,13 +24,14 @@ setup(
     download_url = f'{url}archive/v{version}.tar.gz',
     keywords = ['global', 'python global package', 'python package manager', 'global package manager'],
     install_requires = [
-        'python_helper>=0.3.10'
+        'python_helper>=0.3.11'
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.9'
-    ]
+        'Programming Language :: Python :: 3.7'
+    ],
+    python_requires='>=3.7'
 )

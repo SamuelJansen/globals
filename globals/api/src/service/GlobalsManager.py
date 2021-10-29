@@ -8,6 +8,7 @@ GLOBALS = None
 
 DEFAULT_LOG_STATUS = False
 DEFAULT_INFO_STATUS = False
+DEFAULT_STATUS_STATUS = False
 DEFAULT_SUCCESS_STATUS = False
 DEFAULT_SETTING_STATUS = False
 DEFAULT_DEBUG_STATUS = False
@@ -87,6 +88,7 @@ class Globals:
         settingsFileName = APPLICATION,
         logStatus = DEFAULT_LOG_STATUS,
         infoStatus = DEFAULT_INFO_STATUS,
+        statusStatus = DEFAULT_STATUS_STATUS,
         successStatus = DEFAULT_SUCCESS_STATUS,
         settingStatus = DEFAULT_SETTING_STATUS,
         debugStatus = DEFAULT_DEBUG_STATUS,
@@ -104,6 +106,7 @@ class Globals:
 
             self.logStatus = EnvironmentHelper.update(log.LOG, logStatus, default=DEFAULT_LOG_STATUS)
             self.infoStatus = EnvironmentHelper.update(log.INFO, infoStatus, default=DEFAULT_INFO_STATUS)
+            self.statusStatus = EnvironmentHelper.update(log.STATUS, statusStatus, default=DEFAULT_STATUS_STATUS)
             self.successStatus = EnvironmentHelper.update(log.SUCCESS, successStatus, default=DEFAULT_SUCCESS_STATUS)
             self.settingStatus = EnvironmentHelper.update(log.SETTING, settingStatus, default=DEFAULT_SETTING_STATUS)
             self.debugStatus = EnvironmentHelper.update(log.DEBUG, debugStatus, default=DEFAULT_DEBUG_STATUS)
@@ -183,6 +186,7 @@ class Globals:
                 'errorStatus' : self.errorStatus,
                 'wrapperStatus': self.wrapperStatus,
                 'infoStatus' : self.infoStatus,
+                'statusStatus' : self.statusStatus,
                 'logStatus' : self.logStatus,
                 'globalsEverything' : self.globalsEverything,
                 'printRootPathStatus' : self.printRootPathStatus
@@ -520,6 +524,10 @@ class Globals:
         if c.TRUE == self.infoStatus :
             log.info(self.__class__,message,exception=exception)
 
+    def status(self,message,exception=None):
+        if c.TRUE == self.statusStatus :
+            log.status(self.__class__,message,exception=exception)
+
     def debug(self,message):
         if c.TRUE == self.debugStatus :
             log.debug(self.__class__,message)
@@ -669,9 +677,9 @@ def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IG
                 log.log(importResource, f'Not possible to import "{resourceModuleName}" module. Going for a second attempt', exception=exception)
             try :
                 module = __import__(resourceModuleName)
-            except :
+            except Exception as innerException :
                 if not muteLogs :
-                    log.warning(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Returning "{module}" by default', exception=exception)
+                    log.warning(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Original cause: {str(exception)}. Returning "{module}" by default', exception=innerException)
         return module
 
 def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload=False, ignoreList=IGNORE_REOURCE_LIST) :
