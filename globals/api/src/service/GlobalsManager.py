@@ -18,6 +18,8 @@ DEFAULT_WRAPPER_STATUS = False
 DEFAULT_ERROR_STATUS = False
 DEFAULT_TEST_STATUS = False
 
+DEFAULT_LOGS_WITH_COLORS = False
+
 APPLICATION = 'application'
 
 IGNORE_MODULE_LIST = []
@@ -97,12 +99,15 @@ class Globals:
         wrapperStatus = DEFAULT_WRAPPER_STATUS,
         errorStatus = DEFAULT_ERROR_STATUS,
         testStatus = DEFAULT_TEST_STATUS,
+        logsWithColors = DEFAULT_LOGS_WITH_COLORS,
         encoding = c.ENCODING,
         printRootPathStatus = False,
         globalsEverything = False
     ):
 
         if globalsInstanceIsNone() :
+            
+            self.logsWithColors = EnvironmentHelper.update(log.ENABLE_LOGS_WITH_COLORS, logsWithColors or SettingHelper.activeEnvironmentIsLocal())
 
             self.logStatus = EnvironmentHelper.update(log.LOG, logStatus, default=DEFAULT_LOG_STATUS)
             self.infoStatus = EnvironmentHelper.update(log.INFO, infoStatus, default=DEFAULT_INFO_STATUS)
