@@ -106,8 +106,8 @@ class Globals:
     ):
 
         if globalsInstanceIsNone() :
-            
-            self.logsWithColors = EnvironmentHelper.update(log.ENABLE_LOGS_WITH_COLORS, logsWithColors or SettingHelper.activeEnvironmentIsLocal())
+
+            self.logsWithColors = EnvironmentHelper.update(log.ENABLE_LOGS_WITH_COLORS, logsWithColors or log.colorsEnabled(), default=DEFAULT_LOGS_WITH_COLORS)
 
             self.logStatus = EnvironmentHelper.update(log.LOG, logStatus, default=DEFAULT_LOG_STATUS)
             self.infoStatus = EnvironmentHelper.update(log.INFO, infoStatus, default=DEFAULT_INFO_STATUS)
