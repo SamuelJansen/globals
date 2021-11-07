@@ -242,7 +242,7 @@ def importResourceAndModule_withSuccess() :
     myServiceClass = globals.importResource('MyService', muteLogs=False)
     myOtherServiceClass = globals.importResource('MyOtherService', resourceModuleName='MyService', muteLogs=False)
     myServiceModule = globals.importModule('MyService', muteLogs=False)
-    globalsInstance.ignoreResourceList += ['MyIgnorableService']
+    globalsInstance.ignoreResources += ['MyIgnorableService']
     myIgnorableServiceClass = globals.importResource('MyIgnorableService', muteLogs=False)
     myOtherIgnorableServiceClass = globals.importResource('MyOtherIgnorableService', resourceModuleName='MyIgnorableService', muteLogs=False)
     myOtherServiceModule = globals.importModule('MyIgnorableService', muteLogs=False)

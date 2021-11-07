@@ -22,8 +22,8 @@ DEFAULT_LOGS_WITH_COLORS = False
 
 APPLICATION = 'application'
 
-IGNORE_MODULE_LIST = []
-IGNORE_REOURCE_LIST = []
+IGNORE_MODULES = list()
+IGNORE_REOURCES = list()
 
 class Globals:
 
@@ -176,8 +176,8 @@ class Globals:
         log.loadSettings()
         self.printRootPathStatus = printRootPathStatus
         self.globalsEverything = globalsEverything
-        self.ignoreModuleList = IGNORE_MODULE_LIST
-        self.ignoreResourceList = IGNORE_REOURCE_LIST
+        self.ignoreModules = IGNORE_MODULES
+        self.ignoreResources = IGNORE_REOURCES
         self.activeEnvironment = SettingHelper.getActiveEnvironment()
         if ObjectHelper.isNotEmpty(self.localConfiguration) and SettingHelper.getSetting('print-status', self.localConfiguration) :
             SettingHelper.printSettings(self.localConfiguration,"Local Configuration")
@@ -669,7 +669,7 @@ def getInnerResourceNameList(resourceName, resourceModuleName) :
         return [resourceNameList[0]] if 1 == len(resourceNameList) or resourceNameList[1] is None else resourceNameList
     return [resourceName]
 
-def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IGNORE_MODULE_LIST) :
+def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IGNORE_MODULES) :
     if resourceModuleName not in ignoreList :
         module = None
         try :
@@ -687,7 +687,7 @@ def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IG
                     log.warning(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Original cause: {str(exception)}. Returning "{module}" by default', exception=innerException)
         return module
 
-def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload=False, ignoreList=IGNORE_REOURCE_LIST) :
+def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload=False, ignoreList=IGNORE_REOURCES) :
     innerResourceName = getResourceName(resourceName)
     if innerResourceName not in ignoreList :
         if ObjectHelper.isNone(resourceModuleName) :
