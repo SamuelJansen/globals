@@ -705,7 +705,7 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload
                 if not muteLogs :
                     log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
         if equired and ObjectHelper.isNone(resource):
-            raise Exception(f'Not possible to import resource: {resourceName}. Check warning logs for more information')
+            raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module. Resource not found. Check warning logs for more information')
         return resource
 
 def runBeforeTest(instanceList, logLevel=log.LOG, muteLogs=True):
