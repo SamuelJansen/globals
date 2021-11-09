@@ -338,8 +338,8 @@ class Globals:
         return self.nodeIsValidByFilter(node) and (node not in self.nodeIgnoreList)
 
     def nodeIsValidByFilter(self,node):
-        for charactere in self.charactereFilterList :
-            if not len(node.split(charactere)) == 1 :
+        for character in self.charactereFilterList :
+            if not len(node.split(character)) == 1 :
                 return False
         return True
 
