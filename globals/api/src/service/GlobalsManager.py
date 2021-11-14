@@ -684,7 +684,7 @@ def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IG
                 module = __import__(resourceModuleName)
             except Exception as innerException :
                 if not muteLogs :
-                    log.warning(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Original cause: {str(exception)}. Returning "{module}" by default', exception=innerException)
+                    log.log(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Original cause: {str(exception)}. Returning "{module}" by default', exception=innerException)
         if required and ObjectHelper.isNone(module):
             raise Exception(f'Not possible to import module: {resourceModuleName}. Check warning logs for more information')
         return module
@@ -703,7 +703,7 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload
                     resource = ReflectionHelper.getAttributeOrMethod(resource, name)
             except Exception as exception :
                 if not muteLogs :
-                    log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
+                    log.log(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
         if required and ObjectHelper.isNone(resource):
             raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module. Resource not found. Check warning logs for more information')
         return resource
