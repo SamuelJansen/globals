@@ -267,7 +267,7 @@ def importResourceAndModule_withSuccess() :
         **LOG_HELPER_SETTINGS
     }
 )
-def shouldNotHandleMissingEnvironmentSettings() :
+def shouldHandleMissingEnvironmentSettings() :
     # Arrange
     exception = None
     globalsInstance = None
@@ -279,12 +279,12 @@ def shouldNotHandleMissingEnvironmentSettings() :
         exception = ext
 
     # Assert
-    assert ObjectHelper.isNone(globalsInstance)
-    assert ObjectHelper.isNotNone(exception)
+    assert ObjectHelper.isNotNone(globalsInstance)
+    assert ObjectHelper.isNone(exception)
     assert 'missing_setting_file' == EnvironmentHelper.get(SettingHelper.ACTIVE_ENVIRONMENT)
     assert 'missing_setting_file' == SettingHelper.getActiveEnvironment()
-    assert str(exception).startswith('The "')
-    assert str(exception).endswith('globals\\globals\\api\\test\\api\\resource\\application-missing_setting_file.yml" setting file path was not found')
+    # assert str(exception).startswith('The "')
+    # assert str(exception).endswith('globals\\globals\\api\\test\\api\\resource\\application-missing_setting_file.yml" setting file path was not found')
 
 @Test(environmentVariables={
         'MY_COMPLEX_ENV' : ' -- my complex value -- ',

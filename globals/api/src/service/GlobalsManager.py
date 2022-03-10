@@ -49,7 +49,7 @@ class Globals:
     PIP_INSTALL = f'python -m pip install --upgrade{TOKEN_PIP_USER} --force-reinstall'
     UPDATE_PIP_INSTALL = f'python -m pip install --upgrade{TOKEN_PIP_USER} pip'
 
-    CHARACTERE_FILTER = [
+    CHARACTER_FILTER = [
         '__'
     ]
 
@@ -123,7 +123,7 @@ class Globals:
             log.loadSettings()
 
             self.filePath = filePath
-            self.charactereFilterList = Globals.CHARACTERE_FILTER
+            self.characterFilterList = Globals.CHARACTER_FILTER
             self.nodeIgnoreList = Globals.NODE_IGNORE_LIST
             self.encoding = encoding
 
@@ -338,7 +338,7 @@ class Globals:
         return self.nodeIsValidByFilter(node) and (node not in self.nodeIgnoreList)
 
     def nodeIsValidByFilter(self,node):
-        for character in self.charactereFilterList :
+        for character in self.characterFilterList :
             if not len(node.split(character)) == 1 :
                 return False
         return True
@@ -374,10 +374,12 @@ class Globals:
         return self.getSettingTree(settingFilePath=self.settingFilePath, defaultSettingFilePath=defaultSettingFilePath, settingTree=settingTree)
 
     def getSettingTree(self, settingFilePath=None, defaultSettingFilePath=None, settingTree=None):
-        if ObjectHelper.isNone(settingFilePath) or StringHelper.isBlank(settingFilePath) or not EnvironmentHelper.OS.path.isfile(settingFilePath):
-            raise Exception(f'The "{settingFilePath}" setting file path was not found')
+        if ObjectHelper.isEmpty(settingTree):
+            settingTree = {}
         fallbackSettingFilePath = defaultSettingFilePath if not settingFilePath == defaultSettingFilePath else None
-        settingTree = {}
+        if ObjectHelper.isNone(settingFilePath) or StringHelper.isBlank(settingFilePath) or not EnvironmentHelper.OS.path.isfile(settingFilePath):
+            self.failure(f'The "{settingFilePath}" setting file path was not found', None)
+            return self.getSettingTree(settingFilePath=fallbackSettingFilePath, settingTree=settingTree)
         try :
             settingTree = SettingHelper.getSettingTree(settingFilePath, fallbackSettingFilePath=fallbackSettingFilePath, fallbackSettingTree=settingTree, keepDepthInLongString=True)
         except Exception as exception :
