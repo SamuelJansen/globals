@@ -1,5 +1,5 @@
 from python_helper import TestHelper
-TestHelper.run(__file__, inspectGlobals=False)
+TestHelper.run(__file__, inspectGlobals=False, logResult=True)
 # TestHelper.run(
 #     __file__,
 #     times = 2,

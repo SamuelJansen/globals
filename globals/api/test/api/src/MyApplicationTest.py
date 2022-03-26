@@ -1,4 +1,4 @@
-import globals
+import GlobalsManager, globals
 from python_helper import Test, SettingHelper, log, ObjectHelper, EnvironmentHelper
 from python_helper import Constant as c
 
@@ -16,7 +16,7 @@ LOG_HELPER_SETTINGS = {
 }
 
 # LOG_HELPER_SETTINGS = {
-#     log.LOG : False,
+#     log.LOG : True,
 #     log.SUCCESS : True,
 #     log.SETTING : True,
 #     log.DEBUG : True,
@@ -210,27 +210,32 @@ def myConfigurationTests_musHandleSettingsWithNoSelfOrCircularReference() :
         **LOG_HELPER_SETTINGS
     }
 )
-def importResourceAndModule_withSuccess() :
+def importResourceAndModule_withSuccess():
     # Arrange
     SOME_VALUE = 'some value'
-    globalsInstance = globals.newGlobalsInstance(__file__
+    globalsInstance = GlobalsManager.newGlobalsInstance(__file__
         , debugStatus = True
         , warningStatus = True
         , errorStatus = True
         , successStatus = True
         , wrapperStatus = False
         , failureStatus = False
+        , statusStatus = True
         , settingStatus = True
         , logStatus = False
+        , testStatus = False
 
         # , debugStatus = True
         # , warningStatus = True
         # , errorStatus = True
         # , successStatus = True
         # , failureStatus = True
+        # , statusStatus = True
         # , settingStatus = True
+        # , infoStatus = True
         # , wrapperStatus = True
         # , logStatus = True
+        # , testStatus = True
 
         , loadLocalConfig = False
         , encoding = 'utf-8'
@@ -239,16 +244,16 @@ def importResourceAndModule_withSuccess() :
     )
 
     # Act
-    myServiceClass = globals.importResource('MyService', muteLogs=False)
-    myOtherServiceClass = globals.importResource('MyOtherService', resourceModuleName='MyService', muteLogs=False)
-    myServiceModule = globals.importModule('MyService', muteLogs=False)
+    myServiceClass = GlobalsManager.importResource('MyService', muteLogs=False)
+    myOtherServiceClass = GlobalsManager.importResource('MyOtherService', resourceModuleName='MyService', muteLogs=False)
+    myServiceModule = GlobalsManager.importModule('MyService', muteLogs=False)
     globalsInstance.ignoreResources += ['MyIgnorableService']
-    myIgnorableServiceClass = globals.importResource('MyIgnorableService', muteLogs=False)
-    myOtherIgnorableServiceClass = globals.importResource('MyOtherIgnorableService', resourceModuleName='MyIgnorableService', muteLogs=False)
-    myOtherServiceModule = globals.importModule('MyIgnorableService', muteLogs=False)
-    pythonHelperLogModule = globals.importResource('log', resourceModuleName='python_helper', muteLogs=False)
-    pythonHelperLogModuleLOGValue = globals.importResource('log.LOG', resourceModuleName='python_helper', muteLogs=False)
-    myDomainValue = globals.importResource('MyDomain.myDomainValue', muteLogs=False)
+    myIgnorableServiceClass = GlobalsManager.importResource('MyIgnorableService', muteLogs=False)
+    myOtherIgnorableServiceClass = GlobalsManager.importResource('MyOtherIgnorableService', resourceModuleName='MyIgnorableService', muteLogs=False)
+    myOtherServiceModule = GlobalsManager.importModule('MyIgnorableService', muteLogs=False)
+    pythonHelperLogModule = GlobalsManager.importResource('log', resourceModuleName='python_helper', muteLogs=False)
+    pythonHelperLogModuleLOGValue = GlobalsManager.importResource('log.LOG', resourceModuleName='python_helper', muteLogs=False)
+    myDomainValue = GlobalsManager.importResource('MyDomain.myDomainValue', muteLogs=False)
 
     # Assert
     assert f'service value: {SOME_VALUE}' == myServiceClass().getServiceValue(SOME_VALUE)
@@ -260,6 +265,8 @@ def importResourceAndModule_withSuccess() :
     assert log == pythonHelperLogModule
     assert ObjectHelper.equals(log.LOG, pythonHelperLogModuleLOGValue)
     assert ObjectHelper.equals('my value', myDomainValue)
+    assert ObjectHelper.isNotNone(GlobalsManager.getCachedImports())
+    assert ObjectHelper.isNone(GlobalsManager.clearCachedImports())
 
 
 @Test(environmentVariables={

@@ -671,25 +671,38 @@ def getInnerResourceNameList(resourceName, resourceModuleName):
         return [resourceNameList[0]] if 1 == len(resourceNameList) or resourceNameList[1] is None else resourceNameList
     return [resourceName]
 
+
+IMPORT_CASHE = {}
+
+
+def getCachedImports():
+    return {*IMPORT_CASHE}
+
+
+def clearCachedImports():
+    IMPORT_CASHE = {}
+
+
 def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IGNORE_MODULES, required=False):
     if resourceModuleName not in ignoreList :
-        module = None
         try :
             if reload :
-                module = importlib.reload(resourceModuleName)
-            else :
-                module = importlib.import_module(resourceModuleName)
+                IMPORT_CASHE[resourceModuleName] = importlib.reload(resourceModuleName)
+            elif resourceModuleName not in IMPORT_CASHE:
+                IMPORT_CASHE[resourceModuleName] = importlib.import_module(resourceModuleName)
         except Exception as exception:
             if not muteLogs :
-                log.log(importResource, f'Not possible to import "{resourceModuleName}" module. Going for a second attempt', exception=exception)
+                log.log(importModule, f'Not possible to import "{resourceModuleName}" module. Going for a second attempt', exception=exception)
             try :
-                module = __import__(resourceModuleName)
+                IMPORT_CASHE[resourceModuleName] = __import__(resourceModuleName)
             except Exception as innerException :
+                IMPORT_CASHE[resourceModuleName] = None
                 if not muteLogs :
-                    log.log(importResource, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Original cause: {str(exception)}. Returning "{module}" by default', exception=innerException)
-        if required and ObjectHelper.isNone(module):
-            raise Exception(f'Not possible to import module: {resourceModuleName}. Check warning logs for more information')
-        return module
+                    log.log(importModule, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Original cause: {str(exception)}. Returning "{IMPORT_CASHE.get(resourceModuleName)}" by default', exception=innerException)
+        if required and ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName)):
+            raise Exception(f'Not possible to import module: {resourceModuleName}. Check {log.LOG} level logs for more information')
+        return IMPORT_CASHE.get(resourceModuleName)
+
 
 def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload=False, ignoreList=IGNORE_REOURCES, required=False):
     innerResourceName = getResourceName(resourceName)
@@ -697,18 +710,35 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload
         resource = None
         if ObjectHelper.isNone(resourceModuleName):
             resourceModuleName = innerResourceName
-        module = importModule(resourceModuleName, muteLogs=muteLogs, reload=reload, required=required)
-        if module :
-            try :
-                resource = module
-                for name in getInnerResourceNameList(resourceName, resourceModuleName):
-                    resource = ReflectionHelper.getAttributeOrMethod(resource, name)
-            except Exception as exception :
-                if not muteLogs :
-                    log.log(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
-        if required and ObjectHelper.isNone(resource):
+        if resourceModuleName not in IMPORT_CASHE:
+            IMPORT_CASHE[resourceModuleName] = importModule(resourceModuleName, muteLogs=muteLogs, reload=reload, required=required)
+        if ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName)):
+            return
+        nameList = []
+        try :
+            accumulatedResourceModule = IMPORT_CASHE.get(resourceModuleName)
+            for name in getInnerResourceNameList(resourceName, resourceModuleName):
+                nameList.append(name)
+                if reload:
+                    accumulatedResourceModule = ReflectionHelper.getAttributeOrMethod(accumulatedResourceModule, name)
+                    IMPORT_CASHE[getCompositeModuleName(resourceModuleName, nameList)] = accumulatedResourceModule
+                elif getCompositeModuleName(resourceModuleName, nameList) in IMPORT_CASHE:
+                    accumulatedResourceModule = IMPORT_CASHE.get(getCompositeModuleName(resourceModuleName, nameList))
+                elif ReflectionHelper.hasAttributeOrMethod(accumulatedResourceModule, name):
+                    accumulatedResourceModule = ReflectionHelper.getAttributeOrMethod(accumulatedResourceModule, name)
+                    IMPORT_CASHE[getCompositeModuleName(resourceModuleName, nameList)] = accumulatedResourceModule
+        except Exception as exception:
+            IMPORT_CASHE[getCompositeModuleName(resourceModuleName, nameList)] = None
+            if not muteLogs :
+                log.log(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
+        if required and ObjectHelper.isNone(accumulatedResourceModule):
             raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module. Resource not found. Check warning logs for more information')
-        return resource
+        return IMPORT_CASHE.get(getCompositeModuleName(resourceModuleName, nameList))
+
+
+def getCompositeModuleName(resourceModuleName, resourceNameList):
+    return StringHelper.join([resourceModuleName, *resourceNameList], character=c.DOT)
+
 
 def runBeforeTest(instanceList, logLevel=log.LOG, muteLogs=True):
     log.prettyPython(runBeforeTest, f'{getGlobalsInstance(muteLogs=muteLogs)} in comparrison to globals instance list', instanceList, condition=not muteLogs, logLevel=logLevel)
