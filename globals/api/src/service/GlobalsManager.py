@@ -713,9 +713,15 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload
         importException = None
         if ObjectHelper.isNone(resourceModuleName):
             resourceModuleName = innerResourceName
-        if resourceModuleName not in IMPORT_CASHE:
+        if (
+            reload or
+            resourceModuleName not in IMPORT_CASHE.keys() or
+            required and ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName))
+        ):
             IMPORT_CASHE[resourceModuleName] = importModule(resourceModuleName, muteLogs=muteLogs, reload=reload, required=required)
         if ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName)):
+            if required:
+                raise Exception(f'Could not import module "{resourceModuleName}"')
             return
         nameList = []
         try :
