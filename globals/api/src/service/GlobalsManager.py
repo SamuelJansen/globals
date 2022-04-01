@@ -685,6 +685,7 @@ def clearCachedImports():
 
 def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IGNORE_MODULES, required=False):
     if resourceModuleName not in ignoreList :
+        importException = None
         try :
             if reload :
                 IMPORT_CASHE[resourceModuleName] = importlib.reload(resourceModuleName)
@@ -696,11 +697,12 @@ def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IG
             try :
                 IMPORT_CASHE[resourceModuleName] = __import__(resourceModuleName)
             except Exception as innerException :
+                importException = innerException
                 IMPORT_CASHE[resourceModuleName] = None
                 if not muteLogs :
                     log.log(importModule, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Original cause: {str(exception)}. Returning "{IMPORT_CASHE.get(resourceModuleName)}" by default', exception=innerException)
         if required and ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName)):
-            raise Exception(f'Not possible to import module: {resourceModuleName}. Check {log.LOG} level logs for more information')
+            raise Exception(f'Not possible to import module: {resourceModuleName}. Cause: {str(importException)}. Check {log.LOG} level logs for more information')
         return IMPORT_CASHE.get(resourceModuleName)
 
 
@@ -708,6 +710,7 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload
     innerResourceName = getResourceName(resourceName)
     if innerResourceName not in ignoreList :
         resource = None
+        importException = None
         if ObjectHelper.isNone(resourceModuleName):
             resourceModuleName = innerResourceName
         if resourceModuleName not in IMPORT_CASHE:
@@ -728,11 +731,12 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload
                     accumulatedResourceModule = ReflectionHelper.getAttributeOrMethod(accumulatedResourceModule, name)
                     IMPORT_CASHE[getCompositeModuleName(resourceModuleName, nameList)] = accumulatedResourceModule
         except Exception as exception:
+            importException = exception
             IMPORT_CASHE[getCompositeModuleName(resourceModuleName, nameList)] = None
             if not muteLogs :
                 log.log(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
         if required and ObjectHelper.isNone(accumulatedResourceModule):
-            raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module. Resource not found. Check warning logs for more information')
+            raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module. Cause: {str(importException)}. Check {log.LOG} level logs for more information.')
         return IMPORT_CASHE.get(getCompositeModuleName(resourceModuleName, nameList))
 
 
