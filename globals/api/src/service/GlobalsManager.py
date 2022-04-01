@@ -702,7 +702,7 @@ def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IG
                 if not muteLogs :
                     log.log(importModule, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Original cause: {str(exception)}. Returning "{IMPORT_CASHE.get(resourceModuleName)}" by default', exception=innerException)
         if required and ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName)):
-            raise Exception(f'Not possible to import module: {resourceModuleName}. Cause: {str(importException)}. Check {log.LOG} level logs for more information')
+            raise Exception(f'Not possible to import module "{resourceModuleName}"{c.DOT_SPACE_CAUSE}{getExceptionTextWithoutDotAtTheEnd(importException)}. Check {log.LOG} level logs for more information')
         return IMPORT_CASHE.get(resourceModuleName)
 
 
@@ -736,12 +736,19 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload
             if not muteLogs :
                 log.log(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
         if required and ObjectHelper.isNone(accumulatedResourceModule):
-            raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module. Cause: {str(importException)}. Check {log.LOG} level logs for more information.')
+            raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module{c.DOT_SPACE_CAUSE}{getExceptionTextWithoutDotAtTheEnd(importException)}. Check {log.LOG} level logs for more information')
         return IMPORT_CASHE.get(getCompositeModuleName(resourceModuleName, nameList))
 
 
 def getCompositeModuleName(resourceModuleName, resourceNameList):
     return StringHelper.join([resourceModuleName, *resourceNameList], character=c.DOT)
+
+
+def getExceptionTextWithoutDotAtTheEnd(exception):
+    exceptionText = str(exception)
+    while ObjectHelper.isNeitherNoneNorBlank(exceptionText) and c.DOT == exceptionText[-1]:
+        exceptionText = exceptionText[:-1]
+    return exceptionText
 
 
 def runBeforeTest(instanceList, logLevel=log.LOG, muteLogs=True):

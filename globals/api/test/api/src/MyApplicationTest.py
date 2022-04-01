@@ -711,3 +711,23 @@ def getBooleanSetting():
     assert bool == type(thisIsAlsoTrue), f'thisIsAlsoTrue with type bool, but is {thisIsAlsoTrue} with type {type(thisIsAlsoTrue)}'
     assert not thisIsAlsoFalse, f'thisIsAlsoFalse with type bool, but is {thisIsAlsoFalse} with type {type(thisIsAlsoFalse)}'
     assert bool == type(thisIsAlsoFalse), f'thisIsAlsoFalse with type bool, but is {thisIsAlsoFalse} with type {type(thisIsAlsoFalse)}'
+
+
+@Test(environmentVariables={
+        'ENVIRONMENT_BOOLEAN_VALUE': True,
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **LOG_HELPER_SETTINGS
+    }
+)
+def getExceptionTextWithoutDotAtTheEnd():
+    #arrange
+    exceptionWithDot = Exception('.e.')
+    exceptionWithTripleDot = Exception('.e...')
+    exceptionWithouthDot = Exception('.e')
+    blankException = Exception('')
+
+    #act and assert
+    assert '.e' == GlobalsManager.getExceptionTextWithoutDotAtTheEnd(exceptionWithDot)
+    assert '.e' == GlobalsManager.getExceptionTextWithoutDotAtTheEnd(exceptionWithTripleDot)
+    assert '.e' == GlobalsManager.getExceptionTextWithoutDotAtTheEnd(exceptionWithouthDot)
+    assert '' == GlobalsManager.getExceptionTextWithoutDotAtTheEnd(blankException)
