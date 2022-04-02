@@ -714,7 +714,7 @@ def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IG
                     return IMPORT_CASHE.get(resourceModuleName)
                 except Exception as exception:
                     importException = exception
-                    dotSpaceCause = f'{c.DOT_SPACE_CAUSE}{getExceptionTextWithoutDotAtTheEnd(importException)}'
+            dotSpaceCause = f'{c.DOT_SPACE_CAUSE}{getExceptionTextWithoutDotAtTheEnd(importException)}'
             raise Exception(f'Not possible to import module "{resourceModuleName}"{dotSpaceCause}{c.BLANK if dotSpaceCause.endswith(DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION) else DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION}')
         return IMPORT_CASHE.get(resourceModuleName)
 
