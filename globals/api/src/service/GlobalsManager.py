@@ -22,6 +22,8 @@ DEFAULT_LOGS_WITH_COLORS = False
 
 APPLICATION = 'application'
 
+DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION = f'{c.DOT_SPACE}Check {log.LOG} level logs for more information'
+
 IGNORE_MODULES = list()
 IGNORE_REOURCES = list()
 
@@ -712,7 +714,7 @@ def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IG
                     return IMPORT_CASHE.get(resourceModuleName)
                 except Exception as exception:
                     importException = exception
-            raise Exception(f'Not possible to import module "{resourceModuleName}"{c.DOT_SPACE_CAUSE}{getExceptionTextWithoutDotAtTheEnd(importException)}. Check {log.LOG} level logs for more information')
+            raise Exception(f'Not possible to import module "{resourceModuleName}"{c.DOT_SPACE_CAUSE}{getExceptionTextWithoutDotAtTheEnd(importException)}{DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION}')
         return IMPORT_CASHE.get(resourceModuleName)
 
 
@@ -752,7 +754,8 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload
             if not muteLogs :
                 log.log(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
         if required and ObjectHelper.isNone(accumulatedResourceModule):
-            raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module{c.DOT_SPACE_CAUSE}{getExceptionTextWithoutDotAtTheEnd(importException)}. Check {log.LOG} level logs for more information')
+            cause = getExceptionTextWithoutDotAtTheEnd(importException)
+            raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module{c.DOT_SPACE_CAUSE}{cause}{c.BLANK if cause.endswith(DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION) else DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION}')
         return IMPORT_CASHE.get(getCompositeModuleName(resourceModuleName, nameList))
 
 

@@ -214,28 +214,28 @@ def importResourceAndModule_withSuccess():
     # Arrange
     SOME_VALUE = 'some value'
     globalsInstance = GlobalsManager.newGlobalsInstance(__file__
-        # , debugStatus = True
-        # , warningStatus = True
-        # , errorStatus = True
-        # , successStatus = True
-        # , wrapperStatus = False
-        # , failureStatus = False
-        # , statusStatus = True
-        # , settingStatus = True
-        # , logStatus = False
-        # , testStatus = False
-
         , debugStatus = True
         , warningStatus = True
         , errorStatus = True
         , successStatus = True
-        , failureStatus = True
+        , wrapperStatus = False
+        , failureStatus = False
         , statusStatus = True
         , settingStatus = True
-        , infoStatus = True
-        , wrapperStatus = True
-        , logStatus = True
-        , testStatus = True
+        , logStatus = False
+        , testStatus = False
+
+        # , debugStatus = True
+        # , warningStatus = True
+        # , errorStatus = True
+        # , successStatus = True
+        # , failureStatus = True
+        # , statusStatus = True
+        # , settingStatus = True
+        # , infoStatus = True
+        # , wrapperStatus = True
+        # , logStatus = True
+        # , testStatus = True
 
         , loadLocalConfig = False
         , encoding = 'utf-8'
