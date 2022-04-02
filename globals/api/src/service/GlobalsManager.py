@@ -755,7 +755,7 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload
                 log.log(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
         if required and ObjectHelper.isNone(accumulatedResourceModule):
             cause = getExceptionTextWithoutDotAtTheEnd(importException)
-            raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module{c.DOT_SPACE_CAUSE}{cause}{c.BLANK if cause.endswith(DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION) else DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION}')
+            raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module{c.DOT_SPACE_CAUSE}{cause}{c.BLANK if f"{c.DOT_SPACE_CAUSE}{cause}".endswith(DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION) else DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION}')
         return IMPORT_CASHE.get(getCompositeModuleName(resourceModuleName, nameList))
 
 
