@@ -689,7 +689,10 @@ def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IG
         try :
             if reload :
                 IMPORT_CASHE[resourceModuleName] = importlib.reload(resourceModuleName)
-            elif resourceModuleName not in IMPORT_CASHE:
+            elif (
+                resourceModuleName not in IMPORT_CASHE or
+                required and ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName))
+            ):
                 IMPORT_CASHE[resourceModuleName] = importlib.import_module(resourceModuleName)
         except Exception as exception:
             importException = exception
@@ -703,6 +706,12 @@ def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IG
                 if not muteLogs :
                     log.log(importModule, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Original cause: {str(exception)}. Returning "{IMPORT_CASHE.get(resourceModuleName)}" by default', exception=innerException)
         if required and ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName)):
+            if not importException:
+                try:
+                    IMPORT_CASHE[resourceModuleName] = __import__(resourceModuleName)
+                    return IMPORT_CASHE.get(resourceModuleName)
+                except Exception as exception:
+                    importException = exception
             raise Exception(f'Not possible to import module "{resourceModuleName}"{c.DOT_SPACE_CAUSE}{getExceptionTextWithoutDotAtTheEnd(importException)}. Check {log.LOG} level logs for more information')
         return IMPORT_CASHE.get(resourceModuleName)
 
