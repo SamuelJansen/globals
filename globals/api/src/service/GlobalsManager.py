@@ -692,11 +692,12 @@ def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IG
             elif resourceModuleName not in IMPORT_CASHE:
                 IMPORT_CASHE[resourceModuleName] = importlib.import_module(resourceModuleName)
         except Exception as exception:
+            importException = exception
             if not muteLogs :
                 log.log(importModule, f'Not possible to import "{resourceModuleName}" module. Going for a second attempt', exception=exception)
             try :
                 IMPORT_CASHE[resourceModuleName] = __import__(resourceModuleName)
-            except Exception as innerException :
+            except Exception as innerException:
                 importException = innerException
                 IMPORT_CASHE[resourceModuleName] = None
                 if not muteLogs :
@@ -715,7 +716,7 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload
             resourceModuleName = innerResourceName
         if (
             reload or
-            resourceModuleName not in IMPORT_CASHE.keys() or
+            resourceModuleName not in IMPORT_CASHE or
             required and ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName))
         ):
             IMPORT_CASHE[resourceModuleName] = importModule(resourceModuleName, muteLogs=muteLogs, reload=reload, required=required)
@@ -751,6 +752,8 @@ def getCompositeModuleName(resourceModuleName, resourceNameList):
 
 
 def getExceptionTextWithoutDotAtTheEnd(exception):
+    if ObjectHelper.isNone(exception):
+        return "Unknown"
     exceptionText = str(exception)
     while ObjectHelper.isNeitherNoneNorBlank(exceptionText) and c.DOT == exceptionText[-1]:
         exceptionText = exceptionText[:-1]
