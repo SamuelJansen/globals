@@ -27,6 +27,10 @@ DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION = f'{c.DOT_SPACE}Check {log.
 IGNORE_MODULES = list()
 IGNORE_REOURCES = list()
 
+
+globals = globals
+
+
 class Globals:
 
     OS_SEPARATOR = EnvironmentHelper.OS_SEPARATOR
@@ -62,7 +66,6 @@ class Globals:
         '__pycache__',
         '__init__',
         '__main__',
-        '.heroku',
         '.profile.d'
     ]
 
@@ -501,29 +504,6 @@ class Globals:
             staticPackage = str(self.STATIC_PACKAGE_PATH)
         self.setting(f'Static package: "{staticPackage}"')
         return staticPackage
-        # staticPackage = self.getSetting(AttributeKey.PYTHON_STATIC_PACKAGE)
-        # if ObjectHelper.isNone(staticPackage):
-        #     if EnvironmentHelper.isLinux():
-        #         staticPackage = str(site.getusersitepackages())
-        #         self.log(f'Static package (before handlings): "{staticPackage}"')
-        #     else :
-        #         staticPackageList = site.getsitepackages()
-        #         self.log(f'Static packages list: {StringHelper.prettyJson(staticPackageList)}. Picking the first one')
-        #         staticPackage = str(staticPackageList[0])
-        #     staticPackage = staticPackage.replace(f'{c.BACK_SLASH}{c.BACK_SLASH}',EnvironmentHelper.OS_SEPARATOR)
-        #     staticPackage = staticPackage.replace(c.BACK_SLASH,EnvironmentHelper.OS_SEPARATOR)
-        #     staticPackage = staticPackage.replace(f'{c.SLASH}{c.SLASH}',EnvironmentHelper.OS_SEPARATOR)
-        #     staticPackage = staticPackage.replace(c.SLASH,EnvironmentHelper.OS_SEPARATOR)
-        #     if staticPackage[-1] == str(EnvironmentHelper.OS_SEPARATOR):
-        #         staticPackage = staticPackage[:-1]
-        #     herokuPythonLibPath = Globals.HEROKU_PYTHON.replace(Globals.TOKEN_PYTHON_VERSION, str(self.getSetting(AttributeKey.PYTHON_VERSION)))
-        #     if staticPackage.endswith(herokuPythonLibPath):
-        #         staticPackage = staticPackage.replace(herokuPythonLibPath,c.NOTHING)
-        #     staticPackage = f'{staticPackage}{Globals.STATIC_PACKAGE_PATH}'
-        #     self.setting(f'Static package (after handlings): "{staticPackage}"')
-        # else :
-        #     self.setting(f'Static package (taken from application-env.yml): "{staticPackage}"')
-        # return staticPackage
 
     def log(self,message,exception=None):
         if c.TRUE == self.logStatus :

@@ -120,7 +120,7 @@ def myConfigurationTests_basicVariableDefinitions() :
     assert 'ABCDEFGEFG-- my complex value --HIJKLMNOP' == globalsInstance.getSetting('it.contains.one-inside-of-the-other-setting-injection-with-environment-variable')
     assert 'abcdefghijklm' == globalsInstance.getSetting('it.contains.two-consecutive-setting-injection-with-missing-environment-variable')
     assert 'abcd-- late value ----abcd---- late value ----abcd--efg' == globalsInstance.getSetting('it.contains.some-composed-key.pointing-to.a-late-value')
-    assert 'abcd-- late environment value ----abcd--it.contains.late-value--abcd--efg' == globalsInstance.getSetting('it.contains.some-composed-key.pointing-to.a-late-value-with-an-environment-variable-in-between')
+    assert 'abcd-- late environment value ----abcd---- late value ----abcd--efg' == globalsInstance.getSetting('it.contains.some-composed-key.pointing-to.a-late-value-with-an-environment-variable-in-between'), globalsInstance.getSetting('it.contains.some-composed-key.pointing-to.a-late-value-with-an-environment-variable-in-between')
     assert '-- late value --' == globalsInstance.getSetting('it.contains.late-value')
     assert 'only environment variable value' == globalsInstance.getSetting('it.contains.environment-variable.only')
     assert 'ABCD -- only environment variable value -- EFGH' == globalsInstance.getSetting('it.contains.environment-variable.surrounded-by-default-values')
@@ -515,7 +515,7 @@ def mustLoadLocalConfiguration() :
                 'some-composed-key': {
                     'pointing-to': {
                         'a-late-value': 'abcd-- late value ----abcd---- late value ----abcd--efg',
-                        'a-late-value-with-an-environment-variable-in-between': 'abcd-- late environment value ----abcd--it.contains.late-value--abcd--efg'
+                        'a-late-value-with-an-environment-variable-in-between': 'abcd-- late environment value ----abcd---- late value ----abcd--efg'
                     }
                 },
                 'late-value': '-- late value --',
@@ -584,7 +584,7 @@ def mustLoadLocalConfiguration() :
     assert expected['deepest']['long']['string']['ever']['long']['string'] == globalsInstance.settingTree['deepest']['long']['string']['ever']['long']['string']
     assert expected['not']['idented']['long']['string'] == globalsInstance.settingTree['not']['idented']['long']['string']
     assert ObjectHelper.equals(expected['some']['dictionary'], globalsInstance.settingTree['some']['dictionary'])
-    assert ObjectHelper.equals(expected, globalsInstance.settingTree, ignoreKeyList = [])
+    assert ObjectHelper.equals(expected, globalsInstance.settingTree, ignoreKeyList = []), f'{ObjectHelper.sortIt(expected)}\n\n --x-- \n\n{ObjectHelper.sortIt(globalsInstance.settingTree)}'
 
 @Test(environmentVariables={
         **LOG_HELPER_SETTINGS
