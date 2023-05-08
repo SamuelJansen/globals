@@ -287,11 +287,37 @@ def shouldHandleMissingEnvironmentSettings() :
 
     # Assert
     assert ObjectHelper.isNotNone(globalsInstance)
-    assert ObjectHelper.isNone(exception)
-    assert 'missing_setting_file' == EnvironmentHelper.get(SettingHelper.ACTIVE_ENVIRONMENT)
-    assert 'missing_setting_file' == SettingHelper.getActiveEnvironment()
-    # assert str(exception).startswith('The "')
-    # assert str(exception).endswith('globals\\globals\\api\\test\\api\\resource\\application-missing_setting_file.yml" setting file path was not found')
+    assert ObjectHelper.isNone(exception), exception
+    assert 'missing_setting_file' == EnvironmentHelper.get(SettingHelper.ACTIVE_ENVIRONMENT), EnvironmentHelper.get(SettingHelper.ACTIVE_ENVIRONMENT)
+    assert 'missing_setting_file' == SettingHelper.getActiveEnvironment(), SettingHelper.getActiveEnvironment()
+    ###- assert str(exception).startswith('The "')
+    ###- assert str(exception).endswith('globals\\globals\\api\\test\\api\\resource\\application-missing_setting_file.yml" setting file path was not found')
+
+
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : 'missing_setting_file',
+        **LOG_HELPER_SETTINGS
+    }
+)
+def shouldHandleMissingEnvironmentSettingsWithoutException() :
+    # Arrange
+    exception = None
+    globalsInstance = None
+
+    # Act
+    try :
+        globalsInstance = globals.newGlobalsInstance(__file__, loadLocalConfig = True)
+    except Exception as ext :
+        exception = ext
+
+    # Assert
+    assert ObjectHelper.isNotNone(globalsInstance)
+    assert ObjectHelper.isNone(exception), exception
+    assert 'local' == EnvironmentHelper.get(SettingHelper.ACTIVE_ENVIRONMENT), EnvironmentHelper.get(SettingHelper.ACTIVE_ENVIRONMENT)
+    assert 'local' == SettingHelper.getActiveEnvironment(), SettingHelper.getActiveEnvironment()
+    ###- assert str(exception).startswith('The "'), exception
+    ###- assert str(exception).endswith('globals\\globals\\api\\test\\api\\resource\\application-missing_setting_file.yml" setting file path was not found')
+
 
 @Test(environmentVariables={
         'MY_COMPLEX_ENV' : ' -- my complex value -- ',

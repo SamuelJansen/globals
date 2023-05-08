@@ -368,7 +368,7 @@ class Globals:
         self.apiPackage = package
         self.apiPath = f'{self.apisPath}{actualPackage}'
         self.defaultSettingTree = self.getDefaultSettingTree()
-        self.settingTree = self.getEnvironmentSettingTree(defaultSettingFilePath=self.defaultSettingFilePath, settingTree=self.settingTree)
+        self.settingTree = self.getEnvironmentSettingTree(defaultSettingFilePath=self.defaultSettingFilePath, settingTree=self.getSettings())
 
     def getDefaultSettingTree(self):
         self.defaultSettingFilePath = f'{self.apiPath}{Globals.API_BACK_SLASH}{Globals.RESOURCE_BACK_SLASH}{self.defaultSettingFileName}{c.DOT}{Globals.EXTENSION}'
@@ -382,37 +382,49 @@ class Globals:
         if ObjectHelper.isEmpty(settingTree):
             settingTree = {}
         fallbackSettingFilePath = defaultSettingFilePath if not settingFilePath == defaultSettingFilePath else None
-        if ObjectHelper.isNone(settingFilePath) or StringHelper.isBlank(settingFilePath) or not EnvironmentHelper.OS.path.isfile(settingFilePath):
-            self.failure(f'The "{settingFilePath}" setting file path was not found', None)
+        if (
+            ObjectHelper.isNeitherNoneNorBlank(fallbackSettingFilePath) and (
+                ObjectHelper.isNoneOrBlank(settingFilePath) or
+                not EnvironmentHelper.OS.path.isfile(settingFilePath)
+            )
+        ):
+            self.log(f'The "{settingFilePath}" setting file path was not found. Trying to get it from fallback setting tree', exception=None)
             return self.getSettingTree(settingFilePath=fallbackSettingFilePath, settingTree=settingTree)
         try :
             settingTree = SettingHelper.getSettingTree(settingFilePath, fallbackSettingFilePath=fallbackSettingFilePath, fallbackSettingTree=settingTree, keepDepthInLongString=True)
         except Exception as exception :
             if ObjectHelper.isNone(fallbackSettingFilePath):
-                self.error(f'Failed to load setting tree from "{settingFilePath}" setting file path. Returning {settingTree} by default', exception)
+                ###- self.error(f'Failed to load setting tree from "{settingFilePath}" setting file path. Returning {settingTree} by default', exception)
+                self.log(f'Failed to load setting tree from "{settingFilePath}" setting file path. Returning current setting tree by default', exception=exception)
             else :
-                self.failure(f'Failed to load setting tree from "{settingFilePath}" setting file path and "{fallbackSettingFilePath}" default setting file path. Only setting file path will be loadded now', exception)
+                self.log(f'Failed to load setting tree from "{settingFilePath}" setting file path and "{fallbackSettingFilePath}" default setting file path. Only setting file path will be loadded now', exception=exception)
                 try :
                     settingTree = SettingHelper.getSettingTree(settingFilePath, keepDepthInLongString=True)
-                except Exception as exception :
-                    self.failure(f'Failed to load setting tree from "{settingFilePath}" setting file path as well. Returning {settingTree} by default', exception)
+                except Exception as innerException :
+                    # self.failure(f'Failed to load setting tree from "{settingFilePath}" setting file path as well. Returning {settingTree} by default', exception)
+                    self.failure(f'Failed to load setting tree from "{settingFilePath}" setting file path as well. Returning current setting tree by default', exception=exception)
         return settingTree
 
     def addTree(self,settingFilePath):
         newSetting = self.getSettingTree(settingFilePath=settingFilePath)
         for settingKey,settingValue in newSetting.items():
-            self.settingTree[settingKey] = settingValue
+            self.getSettings()[settingKey] = settingValue
 
     def getApiSetting(self,nodeKey):
         return self.getSetting(nodeKey)
 
     def getSetting(self,nodeKey,settingTree=None):
-        if not settingTree :
-            settingTree = self.settingTree
-        settingValue = SettingHelper.getSetting(nodeKey,settingTree)
+        resolvedSettingTree = self.getSettingsOrDefault(settingTree)
+        settingValue = SettingHelper.getSetting(nodeKey, resolvedSettingTree)
         if ObjectHelper.isEmpty(settingValue):
-            return SettingHelper.getSetting(nodeKey,self.defaultSettingTree)
+            return SettingHelper.getSetting(nodeKey, self.defaultSettingTree)
         return settingValue
+
+    def getSettings(self):
+        return self.settingTree
+
+    def getSettingsOrDefault(self, settingTree):
+        return settingTree if ObjectHelper.isNotNone(settingTree) else self.getSettings()
 
     def accessTree(self,nodeKey,tree):
         return SettingHelper.getSetting(nodeKey,tree)
@@ -556,7 +568,7 @@ class Globals:
             {self.__class__.__name__}.extension: -------------- {self.extension}
             {self.__class__.__name__}.settingFilePath: -------- {self.settingFilePath}
             {self.__class__.__name__}.defaultSettingFilePath: - {self.defaultSettingFilePath}\n''')
-            self.printTree(self.settingTree,f'{self.__class__.__name__} settings tree')
+            self.printTree(self.getSettings(),f'{self.__class__.__name__} settings tree')
 
 def newGlobalsInstance(*args, muteLogs=False, **kwargs):
     global GLOBALS
@@ -654,15 +666,15 @@ def getInnerResourceNameList(resourceName, resourceModuleName):
     return [resourceName]
 
 
-IMPORT_CASHE = {}
+IMPORT_CACHE = {}
 
 
 def getCachedImports():
-    return {*IMPORT_CASHE}
+    return {*IMPORT_CACHE}
 
 
 def clearCachedImports():
-    IMPORT_CASHE = {}
+    IMPORT_CACHE = {}
 
 
 def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IGNORE_MODULES, required=False):
@@ -670,33 +682,33 @@ def importModule(resourceModuleName, muteLogs=False, reload=False, ignoreList=IG
         importException = None
         try :
             if reload :
-                IMPORT_CASHE[resourceModuleName] = importlib.reload(resourceModuleName)
+                IMPORT_CACHE[resourceModuleName] = importlib.reload(resourceModuleName)
             elif (
-                resourceModuleName not in IMPORT_CASHE or
-                required and ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName))
+                resourceModuleName not in IMPORT_CACHE or
+                required and ObjectHelper.isNone(IMPORT_CACHE.get(resourceModuleName))
             ):
-                IMPORT_CASHE[resourceModuleName] = importlib.import_module(resourceModuleName)
+                IMPORT_CACHE[resourceModuleName] = importlib.import_module(resourceModuleName)
         except Exception as exception:
             importException = exception
             if not muteLogs :
                 log.log(importModule, f'Not possible to import "{resourceModuleName}" module. Going for a second attempt', exception=exception)
             try :
-                IMPORT_CASHE[resourceModuleName] = __import__(resourceModuleName)
+                IMPORT_CACHE[resourceModuleName] = __import__(resourceModuleName)
             except Exception as innerException:
                 importException = innerException
-                IMPORT_CASHE[resourceModuleName] = None
+                IMPORT_CACHE[resourceModuleName] = None
                 if not muteLogs :
-                    log.log(importModule, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Original cause: {str(exception)}. Returning "{IMPORT_CASHE.get(resourceModuleName)}" by default', exception=innerException)
-        if required and ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName)):
+                    log.log(importModule, f'Not possible to import "{resourceModuleName}" module in the second attempt either. Original cause: {str(exception)}. Returning "{IMPORT_CACHE.get(resourceModuleName)}" by default', exception=innerException)
+        if required and ObjectHelper.isNone(IMPORT_CACHE.get(resourceModuleName)):
             if not importException:
                 try:
-                    IMPORT_CASHE[resourceModuleName] = __import__(resourceModuleName)
-                    return IMPORT_CASHE.get(resourceModuleName)
+                    IMPORT_CACHE[resourceModuleName] = __import__(resourceModuleName)
+                    return IMPORT_CACHE.get(resourceModuleName)
                 except Exception as exception:
                     importException = exception
             dotSpaceCause = f'{c.DOT_SPACE_CAUSE}{getExceptionTextWithoutDotAtTheEnd(importException)}'
             raise Exception(f'Not possible to import module "{resourceModuleName}"{dotSpaceCause}{c.BLANK if dotSpaceCause.endswith(DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION) else DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION}')
-        return IMPORT_CASHE.get(resourceModuleName)
+        return IMPORT_CACHE.get(resourceModuleName)
 
 
 def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload=False, ignoreList=IGNORE_REOURCES, required=False):
@@ -708,36 +720,36 @@ def importResource(resourceName, resourceModuleName=None, muteLogs=False, reload
             resourceModuleName = innerResourceName
         if (
             reload or
-            resourceModuleName not in IMPORT_CASHE or
-            required and ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName))
+            resourceModuleName not in IMPORT_CACHE or
+            required and ObjectHelper.isNone(IMPORT_CACHE.get(resourceModuleName))
         ):
-            IMPORT_CASHE[resourceModuleName] = importModule(resourceModuleName, muteLogs=muteLogs, reload=reload, required=required)
-        if ObjectHelper.isNone(IMPORT_CASHE.get(resourceModuleName)):
+            IMPORT_CACHE[resourceModuleName] = importModule(resourceModuleName, muteLogs=muteLogs, reload=reload, required=required)
+        if ObjectHelper.isNone(IMPORT_CACHE.get(resourceModuleName)):
             if required:
                 raise Exception(f'Could not import module "{resourceModuleName}"')
             return
         nameList = []
         try :
-            accumulatedResourceModule = IMPORT_CASHE.get(resourceModuleName)
+            accumulatedResourceModule = IMPORT_CACHE.get(resourceModuleName)
             for name in getInnerResourceNameList(resourceName, resourceModuleName):
                 nameList.append(name)
                 if reload:
                     accumulatedResourceModule = ReflectionHelper.getAttributeOrMethod(accumulatedResourceModule, name)
-                    IMPORT_CASHE[getCompositeModuleName(resourceModuleName, nameList)] = accumulatedResourceModule
-                elif getCompositeModuleName(resourceModuleName, nameList) in IMPORT_CASHE:
-                    accumulatedResourceModule = IMPORT_CASHE.get(getCompositeModuleName(resourceModuleName, nameList))
+                    IMPORT_CACHE[getCompositeModuleName(resourceModuleName, nameList)] = accumulatedResourceModule
+                elif getCompositeModuleName(resourceModuleName, nameList) in IMPORT_CACHE:
+                    accumulatedResourceModule = IMPORT_CACHE.get(getCompositeModuleName(resourceModuleName, nameList))
                 elif ReflectionHelper.hasAttributeOrMethod(accumulatedResourceModule, name):
                     accumulatedResourceModule = ReflectionHelper.getAttributeOrMethod(accumulatedResourceModule, name)
-                    IMPORT_CASHE[getCompositeModuleName(resourceModuleName, nameList)] = accumulatedResourceModule
+                    IMPORT_CACHE[getCompositeModuleName(resourceModuleName, nameList)] = accumulatedResourceModule
         except Exception as exception:
             importException = exception
-            IMPORT_CASHE[getCompositeModuleName(resourceModuleName, nameList)] = None
+            IMPORT_CACHE[getCompositeModuleName(resourceModuleName, nameList)] = None
             if not muteLogs :
                 log.log(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module', exception=exception)
         if required and ObjectHelper.isNone(accumulatedResourceModule):
             dotSpaceCause = f'{c.DOT_SPACE_CAUSE}{getExceptionTextWithoutDotAtTheEnd(importException)}'
             raise Exception(f'Error while importing {innerResourceName} resource from {resourceModuleName} module{dotSpaceCause}{c.BLANK if dotSpaceCause.endswith(DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION) else DOT_SPACE_CHECK_LOG_LEVEL_LOGS_FOR_MORE_INFORMATION}')
-        return IMPORT_CASHE.get(getCompositeModuleName(resourceModuleName, nameList))
+        return IMPORT_CACHE.get(getCompositeModuleName(resourceModuleName, nameList))
 
 
 def getCompositeModuleName(resourceModuleName, resourceNameList):
